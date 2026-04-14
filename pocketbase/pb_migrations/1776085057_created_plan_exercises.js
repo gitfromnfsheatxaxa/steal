@@ -19,126 +19,127 @@ migrate((app) => {
         "type": "text"
       },
       {
-        "cascadeDelete": false,
-        "collectionId": "pbc_2585384460",
         "hidden": false,
-        "id": "relation4264702100",
-        "maxSelect": 1,
-        "minSelect": 0,
-        "name": "plan_days",
+        "id": "planexs_planDay",
+        "name": "planDay",
+        "type": "relation",
+        "required": true,
         "presentable": false,
-        "required": false,
-        "system": false,
-        "type": "relation"
-      },
-      {
-        "cascadeDelete": false,
-        "collectionId": "pbc_1804250889",
-        "hidden": false,
-        "id": "relation262228369",
+        "cascadeDelete": true,
+        "collectionId": "plandays01",
         "maxSelect": 1,
-        "minSelect": 0,
-        "name": "exercises",
-        "presentable": false,
-        "required": false,
-        "system": false,
-        "type": "relation"
+        "minSelect": null,
+        "displayFields": ["label"]
       },
       {
         "hidden": false,
-        "id": "number4113142680",
-        "max": null,
+        "id": "planexs_exercise",
+        "name": "exercise",
+        "type": "relation",
+        "required": true,
+        "presentable": false,
+        "cascadeDelete": false,
+        "collectionId": "exercises01",
+        "maxSelect": 1,
+        "minSelect": null,
+        "displayFields": ["name"]
+      },
+      {
+        "hidden": false,
+        "id": "planexs_name",
+        "name": "name",
+        "type": "text",
+        "required": false,
+        "presentable": true,
         "min": null,
+        "max": 200,
+        "pattern": ""
+      },
+      {
+        "hidden": false,
+        "id": "planexs_order",
         "name": "order",
-        "onlyInt": false,
-        "presentable": false,
+        "type": "number",
         "required": false,
-        "system": false,
-        "type": "number"
+        "presentable": false,
+        "onlyInt": true,
+        "min": 1,
+        "max": 100
       },
       {
         "hidden": false,
-        "id": "number2492286417",
-        "max": null,
-        "min": null,
+        "id": "planexs_sets",
         "name": "sets",
-        "onlyInt": false,
-        "presentable": false,
+        "type": "number",
         "required": false,
-        "system": false,
-        "type": "number"
+        "presentable": false,
+        "onlyInt": true,
+        "min": 1,
+        "max": 20
       },
       {
         "hidden": false,
-        "id": "number1485696266",
-        "max": null,
-        "min": null,
+        "id": "planexs_repsMin",
         "name": "repsMin",
-        "onlyInt": false,
-        "presentable": false,
+        "type": "number",
         "required": false,
-        "system": false,
-        "type": "number"
+        "presentable": false,
+        "onlyInt": true,
+        "min": 1,
+        "max": 100
       },
       {
         "hidden": false,
-        "id": "number1686164051",
-        "max": null,
-        "min": null,
+        "id": "planexs_repsMax",
         "name": "repsMax",
-        "onlyInt": false,
-        "presentable": false,
+        "type": "number",
         "required": false,
-        "system": false,
-        "type": "number"
+        "presentable": false,
+        "onlyInt": true,
+        "min": 1,
+        "max": 100
       },
       {
         "hidden": false,
-        "id": "number3179513414",
-        "max": null,
-        "min": null,
+        "id": "planexs_rpeTarget",
         "name": "rpeTarget",
-        "onlyInt": false,
-        "presentable": false,
+        "type": "number",
         "required": false,
-        "system": false,
-        "type": "number"
+        "presentable": false,
+        "onlyInt": false,
+        "min": 1,
+        "max": 10
       },
       {
         "hidden": false,
-        "id": "number1714690708",
-        "max": null,
-        "min": null,
+        "id": "planexs_restSeconds",
         "name": "restSeconds",
-        "onlyInt": false,
-        "presentable": false,
+        "type": "number",
         "required": false,
-        "system": false,
-        "type": "number"
+        "presentable": false,
+        "onlyInt": true,
+        "min": 15,
+        "max": 600
       },
       {
-        "autogeneratePattern": "",
         "hidden": false,
-        "id": "text18589324",
-        "max": 0,
-        "min": 0,
+        "id": "planexs_notes",
         "name": "notes",
-        "pattern": "",
-        "presentable": false,
-        "primaryKey": false,
+        "type": "text",
         "required": false,
-        "system": false,
-        "type": "text"
+        "presentable": false,
+        "min": null,
+        "max": 1000,
+        "pattern": ""
       },
       {
         "hidden": false,
-        "id": "json211912553",
-        "maxSize": 0,
-        "name": "subsitutions",
-        "presentable": false,
+        "id": "planexs_substitutions",
+        "name": "substitutions",
+        "type": "json",
         "required": false,
-        "system": false,
-        "type": "json"
+        "presentable": false,
+        "maxSize": 2000000
       },
       {
         "hidden": false,
@@ -161,19 +162,20 @@ migrate((app) => {
         "type": "autodate"
       }
     ],
-    "id": "pbc_2559885587",
+    "id": "planexs001",
     "indexes": [],
-    "listRule": null,
+    "listRule": "@request.auth.id != \"\"",
     "name": "plan_exercises",
     "system": false,
     "type": "base",
-    "updateRule": null,
-    "viewRule": null
+    "updateRule": "@request.auth.id != \"\"",
+    "viewRule": "@request.auth.id != \"\"",
+    "deleteRule": "@request.auth.id != \"\""
   });
 
   return app.save(collection);
 }, (app) => {
-  const collection = app.findCollectionByNameOrId("pbc_2559885587");
+  const collection = app.findCollectionByNameOrId("planexs001");
 
   return app.delete(collection);
 })

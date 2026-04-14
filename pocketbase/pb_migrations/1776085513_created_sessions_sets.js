@@ -19,88 +19,92 @@ migrate((app) => {
         "type": "text"
       },
       {
-        "cascadeDelete": false,
-        "collectionId": "pbc_1804250889",
         "hidden": false,
-        "id": "relation4264702100",
+        "id": "relation2375276105",
+        "name": "session",
+        "type": "relation",
+        "required": true,
+        "presentable": false,
+        "cascadeDelete": true,
+        "collectionId": "wrksess01",
         "maxSelect": 1,
-        "minSelect": 0,
-        "name": "plan_days",
-        "presentable": false,
-        "required": false,
-        "system": false,
-        "type": "relation"
+        "minSelect": null
       },
       {
         "hidden": false,
-        "id": "number2415200920",
-        "max": null,
-        "min": null,
+        "id": "sesssets_exercise",
+        "name": "exercise",
+        "type": "relation",
+        "required": false,
+        "presentable": false,
+        "cascadeDelete": false,
+        "collectionId": "exercises01",
+        "maxSelect": 1,
+        "minSelect": null,
+        "displayFields": ["name"]
+      },
+      {
+        "hidden": false,
+        "id": "sesssets_setNumber",
         "name": "setNumber",
-        "onlyInt": false,
-        "presentable": false,
+        "type": "number",
         "required": false,
-        "system": false,
-        "type": "number"
+        "presentable": false,
+        "onlyInt": true,
+        "min": 1,
+        "max": 100
       },
       {
         "hidden": false,
-        "id": "number1214113712",
-        "max": null,
-        "min": null,
+        "id": "sesssets_reps",
         "name": "reps",
-        "onlyInt": false,
-        "presentable": false,
+        "type": "number",
         "required": false,
-        "system": false,
-        "type": "number"
-      },
-      {
-        "hidden": false,
-        "id": "number130897217",
-        "max": null,
-        "min": null,
-        "name": "weight",
-        "onlyInt": false,
         "presentable": false,
-        "required": false,
-        "system": false,
-        "type": "number"
-      },
-      {
-        "hidden": false,
-        "id": "number3134425357",
-        "max": null,
-        "min": null,
-        "name": "rpe",
-        "onlyInt": false,
-        "presentable": false,
-        "required": false,
-        "system": false,
-        "type": "number"
-      },
-      {
-        "hidden": false,
-        "id": "bool989355118",
-        "name": "completed",
-        "presentable": false,
-        "required": false,
-        "system": false,
-        "type": "bool"
-      },
-      {
-        "autogeneratePattern": "",
-        "hidden": false,
-        "id": "text18589324",
-        "max": 0,
+        "onlyInt": true,
         "min": 0,
-        "name": "notes",
-        "pattern": "",
-        "presentable": false,
-        "primaryKey": false,
+        "max": 10000
+      },
+      {
+        "hidden": false,
+        "id": "sesssets_weight",
+        "name": "weight",
+        "type": "number",
         "required": false,
-        "system": false,
-        "type": "text"
+        "presentable": false,
+        "onlyInt": false,
+        "min": 0,
+        "max": 10000
+      },
+      {
+        "hidden": false,
+        "id": "sesssets_rpe",
+        "name": "rpe",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "onlyInt": false,
+        "min": 1,
+        "max": 10
+      },
+      {
+        "hidden": false,
+        "id": "sesssets_completed",
+        "name": "completed",
+        "type": "bool",
+        "required": false,
+        "presentable": false
+      },
+      {
+        "hidden": false,
+        "id": "sesssets_notes",
+        "name": "notes",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "min": null,
+        "max": 500,
+        "pattern": ""
       },
       {
         "hidden": false,
@@ -123,19 +127,20 @@ migrate((app) => {
         "type": "autodate"
       }
     ],
-    "id": "pbc_2341434656",
+    "id": "sesssets01",
     "indexes": [],
-    "listRule": null,
-    "name": "sessions_sets",
+    "listRule": "@request.auth.id != \"\"",
+    "name": "session_sets",
     "system": false,
     "type": "base",
-    "updateRule": null,
-    "viewRule": null
+    "updateRule": "@request.auth.id != \"\"",
+    "viewRule": "@request.auth.id != \"\"",
+    "deleteRule": "@request.auth.id != \"\""
   });
 
   return app.save(collection);
 }, (app) => {
-  const collection = app.findCollectionByNameOrId("pbc_2341434656");
+  const collection = app.findCollectionByNameOrId("sesssets01");
 
   return app.delete(collection);
 })

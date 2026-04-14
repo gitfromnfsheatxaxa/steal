@@ -19,85 +19,77 @@ migrate((app) => {
         "type": "text"
       },
       {
-        "cascadeDelete": false,
-        "collectionId": "_pb_users_auth_",
         "hidden": false,
-        "id": "relation1653163849",
+        "id": "plandays_plan",
+        "name": "plan",
+        "type": "relation",
+        "required": true,
+        "presentable": false,
+        "cascadeDelete": true,
+        "collectionId": "wrkplans01",
         "maxSelect": 1,
-        "minSelect": 0,
-        "name": "relation",
-        "presentable": false,
-        "required": false,
-        "system": false,
-        "type": "relation"
+        "minSelect": null,
+        "displayFields": ["title"]
       },
       {
         "hidden": false,
-        "id": "number1532651968",
-        "max": null,
-        "min": null,
+        "id": "plandays_week",
         "name": "week",
-        "onlyInt": false,
+        "type": "number",
+        "required": true,
         "presentable": false,
-        "required": false,
-        "system": false,
-        "type": "number"
+        "onlyInt": true,
+        "min": 1,
+        "max": 52
       },
       {
         "hidden": false,
-        "id": "number2959594093",
-        "max": null,
-        "min": null,
+        "id": "plandays_dayOfWeek",
         "name": "dayOfWeek",
-        "onlyInt": false,
+        "type": "number",
+        "required": true,
         "presentable": false,
-        "required": false,
-        "system": false,
-        "type": "number"
+        "onlyInt": true,
+        "min": 1,
+        "max": 7
       },
       {
-        "autogeneratePattern": "",
         "hidden": false,
-        "id": "text245846248",
-        "max": 0,
-        "min": 0,
+        "id": "plandays_label",
         "name": "label",
-        "pattern": "",
-        "presentable": false,
-        "primaryKey": false,
+        "type": "text",
         "required": false,
-        "system": false,
-        "type": "text"
+        "presentable": true,
+        "min": null,
+        "max": 200,
+        "pattern": ""
       },
       {
         "hidden": false,
-        "id": "json1656769257",
-        "maxSize": 0,
+        "id": "plandays_focus",
         "name": "focus",
-        "presentable": false,
+        "type": "json",
         "required": false,
-        "system": false,
-        "type": "json"
+        "presentable": false,
+        "maxSize": 2000000
       },
       {
         "hidden": false,
-        "id": "json2160266956",
-        "maxSize": 0,
+        "id": "plandays_warmup",
         "name": "warmup",
-        "presentable": false,
+        "type": "json",
         "required": false,
-        "system": false,
-        "type": "json"
+        "presentable": false,
+        "maxSize": 2000000
       },
       {
         "hidden": false,
-        "id": "json3731041497",
-        "maxSize": 0,
+        "id": "plandays_cooldown",
         "name": "cooldown",
-        "presentable": false,
+        "type": "json",
         "required": false,
-        "system": false,
-        "type": "json"
+        "presentable": false,
+        "maxSize": 2000000
       },
       {
         "hidden": false,
@@ -120,19 +112,20 @@ migrate((app) => {
         "type": "autodate"
       }
     ],
-    "id": "pbc_2585384460",
+    "id": "plandays01",
     "indexes": [],
-    "listRule": null,
+    "listRule": "@request.auth.id != \"\"",
     "name": "plan_days",
     "system": false,
     "type": "base",
-    "updateRule": null,
-    "viewRule": null
+    "updateRule": "@request.auth.id != \"\"",
+    "viewRule": "@request.auth.id != \"\"",
+    "deleteRule": "@request.auth.id != \"\""
   });
 
   return app.save(collection);
 }, (app) => {
-  const collection = app.findCollectionByNameOrId("pbc_2585384460");
+  const collection = app.findCollectionByNameOrId("plandays01");
 
   return app.delete(collection);
 })

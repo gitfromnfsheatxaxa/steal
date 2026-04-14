@@ -19,42 +19,35 @@ migrate((app) => {
         "type": "text"
       },
       {
-        "autogeneratePattern": "",
         "hidden": false,
-        "id": "text724990059",
-        "max": 0,
-        "min": 0,
+        "id": "pltmpls_title",
         "name": "title",
-        "pattern": "",
-        "presentable": false,
-        "primaryKey": false,
-        "required": false,
-        "system": false,
-        "type": "text"
+        "type": "text",
+        "required": true,
+        "presentable": true,
+        "min": 2,
+        "max": 300,
+        "pattern": ""
       },
       {
-        "autogeneratePattern": "",
         "hidden": false,
-        "id": "text1843675174",
-        "max": 0,
-        "min": 0,
+        "id": "pltmpls_description",
         "name": "description",
-        "pattern": "",
-        "presentable": false,
-        "primaryKey": false,
+        "type": "text",
         "required": false,
-        "system": false,
-        "type": "text"
+        "presentable": false,
+        "min": null,
+        "max": 2000,
+        "pattern": ""
       },
       {
         "hidden": false,
-        "id": "select1345334143",
-        "maxSelect": 1,
+        "id": "pltmpls_goalType",
         "name": "goalType",
-        "presentable": false,
-        "required": false,
-        "system": false,
         "type": "select",
+        "required": false,
+        "presentable": false,
+        "maxSelect": 1,
         "values": [
           "muscle_building",
           "strength",
@@ -63,6 +56,66 @@ migrate((app) => {
           "rehabilitation",
           "general_fitness"
         ]
+      },
+      {
+        "hidden": false,
+        "id": "pltmpls_environment",
+        "name": "environment",
+        "type": "select",
+        "required": false,
+        "presentable": false,
+        "maxSelect": 1,
+        "values": [
+          "gym",
+          "home",
+          "outdoor",
+          "mixed"
+        ]
+      },
+      {
+        "hidden": false,
+        "id": "pltmpls_difficulty",
+        "name": "difficulty",
+        "type": "select",
+        "required": false,
+        "presentable": false,
+        "maxSelect": 1,
+        "values": [
+          "beginner",
+          "intermediate",
+          "advanced"
+        ]
+      },
+      {
+        "hidden": false,
+        "id": "pltmpls_durationWeeks",
+        "name": "durationWeeks",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "onlyInt": true,
+        "min": 1,
+        "max": 52
+      },
+      {
+        "hidden": false,
+        "id": "pltmpls_structure",
+        "name": "structure",
+        "type": "json",
+        "required": false,
+        "presentable": false,
+        "maxSize": 5000000
+      },
+      {
+        "hidden": false,
+        "id": "pltmpls_popularity",
+        "name": "popularity",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "onlyInt": true,
+        "min": 0,
+        "max": 999999
       },
       {
         "hidden": false,
@@ -85,19 +138,20 @@ migrate((app) => {
         "type": "autodate"
       }
     ],
-    "id": "pbc_4162712844",
+    "id": "pltmpls01",
     "indexes": [],
-    "listRule": null,
+    "listRule": "@request.auth.id != \"\"",
     "name": "plan_templates",
     "system": false,
     "type": "base",
     "updateRule": null,
-    "viewRule": null
+    "viewRule": "@request.auth.id != \"\"",
+    "deleteRule": null
   });
 
   return app.save(collection);
 }, (app) => {
-  const collection = app.findCollectionByNameOrId("pbc_4162712844");
+  const collection = app.findCollectionByNameOrId("pltmpls01");
 
   return app.delete(collection);
 })

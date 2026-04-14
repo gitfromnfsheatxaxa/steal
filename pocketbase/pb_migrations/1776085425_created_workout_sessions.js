@@ -19,62 +19,72 @@ migrate((app) => {
         "type": "text"
       },
       {
-        "cascadeDelete": false,
-        "collectionId": "_pb_users_auth_",
         "hidden": false,
-        "id": "relation2375276105",
-        "maxSelect": 1,
-        "minSelect": 0,
+        "id": "wrksess_user",
         "name": "user",
+        "type": "relation",
+        "required": true,
         "presentable": false,
-        "required": false,
-        "system": false,
-        "type": "relation"
+        "cascadeDelete": true,
+        "collectionId": "_pb_users_auth_",
+        "maxSelect": 1,
+        "minSelect": null,
+        "displayFields": ["email"]
       },
       {
+        "hidden": false,
+        "id": "wrksess_planDay",
+        "name": "planDay",
+        "type": "relation",
+        "required": false,
+        "presentable": false,
         "cascadeDelete": false,
-        "collectionId": "pbc_2241337012",
-        "hidden": false,
-        "id": "relation4264702100",
+        "collectionId": "plandays01",
         "maxSelect": 1,
-        "minSelect": 0,
-        "name": "plan_days",
-        "presentable": false,
-        "required": false,
-        "system": false,
-        "type": "relation"
+        "minSelect": null,
+        "displayFields": ["label"]
       },
       {
         "hidden": false,
-        "id": "date2640869100",
-        "max": "",
-        "min": "",
+        "id": "wrksess_plan",
+        "name": "plan",
+        "type": "relation",
+        "required": false,
+        "presentable": false,
+        "cascadeDelete": false,
+        "collectionId": "wrkplans01",
+        "maxSelect": 1,
+        "minSelect": null,
+        "displayFields": ["title"]
+      },
+      {
+        "hidden": false,
+        "id": "wrksess_startedAt",
         "name": "startedAt",
-        "presentable": false,
+        "type": "date",
         "required": false,
-        "system": false,
-        "type": "date"
-      },
-      {
-        "hidden": false,
-        "id": "date3773577031",
-        "max": "",
+        "presentable": false,
         "min": "",
-        "name": "CompletedAt",
-        "presentable": false,
-        "required": false,
-        "system": false,
-        "type": "date"
+        "max": ""
       },
       {
         "hidden": false,
-        "id": "select2063623452",
-        "maxSelect": 1,
-        "name": "status",
-        "presentable": false,
+        "id": "wrksess_completedAt",
+        "name": "completedAt",
+        "type": "date",
         "required": false,
-        "system": false,
+        "presentable": false,
+        "min": "",
+        "max": ""
+      },
+      {
+        "hidden": false,
+        "id": "wrksess_status",
+        "name": "status",
         "type": "select",
+        "required": false,
+        "presentable": false,
+        "maxSelect": 1,
         "values": [
           "in_progress",
           "completed",
@@ -83,13 +93,12 @@ migrate((app) => {
       },
       {
         "hidden": false,
-        "id": "select54111990",
-        "maxSelect": 1,
+        "id": "wrksess_mood",
         "name": "mood",
-        "presentable": false,
-        "required": false,
-        "system": false,
         "type": "select",
+        "required": false,
+        "presentable": false,
+        "maxSelect": 1,
         "values": [
           "great",
           "good",
@@ -100,43 +109,36 @@ migrate((app) => {
       },
       {
         "hidden": false,
-        "id": "number2191447867",
-        "max": null,
-        "min": null,
+        "id": "wrksess_energyLevel",
         "name": "energyLevel",
-        "onlyInt": false,
-        "presentable": false,
+        "type": "number",
         "required": false,
-        "system": false,
-        "type": "number"
+        "presentable": false,
+        "onlyInt": true,
+        "min": 1,
+        "max": 5
       },
       {
-        "autogeneratePattern": "",
         "hidden": false,
-        "id": "text1808397331",
-        "max": 0,
-        "min": 0,
-        "name": "sessionsNotes",
-        "pattern": "",
-        "presentable": false,
-        "primaryKey": false,
+        "id": "wrksess_sessionNotes",
+        "name": "sessionNotes",
+        "type": "text",
         "required": false,
-        "system": false,
-        "type": "text"
+        "presentable": false,
+        "min": null,
+        "max": 2000,
+        "pattern": ""
       },
       {
-        "autogeneratePattern": "",
         "hidden": false,
-        "id": "text14752260",
-        "max": 0,
-        "min": 0,
+        "id": "wrksess_therapyReflection",
         "name": "therapyReflection",
-        "pattern": "",
-        "presentable": false,
-        "primaryKey": false,
+        "type": "text",
         "required": false,
-        "system": false,
-        "type": "text"
+        "presentable": false,
+        "min": null,
+        "max": 3000,
+        "pattern": ""
       },
       {
         "hidden": false,
@@ -159,19 +161,20 @@ migrate((app) => {
         "type": "autodate"
       }
     ],
-    "id": "pbc_1551814176",
+    "id": "wrksess01",
     "indexes": [],
-    "listRule": null,
+    "listRule": "@request.auth.id != \"\"",
     "name": "workout_sessions",
     "system": false,
     "type": "base",
-    "updateRule": null,
-    "viewRule": null
+    "updateRule": "user = @request.auth.id",
+    "viewRule": "@request.auth.id != \"\"",
+    "deleteRule": "user = @request.auth.id"
   });
 
   return app.save(collection);
 }, (app) => {
-  const collection = app.findCollectionByNameOrId("pbc_1551814176");
+  const collection = app.findCollectionByNameOrId("wrksess01");
 
   return app.delete(collection);
 })

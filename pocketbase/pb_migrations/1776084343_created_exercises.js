@@ -19,62 +19,54 @@ migrate((app) => {
         "type": "text"
       },
       {
-        "autogeneratePattern": "",
         "hidden": false,
-        "id": "text1579384326",
-        "max": 0,
-        "min": 0,
+        "id": "exercises_name",
         "name": "name",
-        "pattern": "",
-        "presentable": false,
-        "primaryKey": false,
-        "required": false,
-        "system": false,
-        "type": "text"
+        "type": "text",
+        "required": true,
+        "presentable": true,
+        "min": 2,
+        "max": 200,
+        "pattern": ""
       },
       {
-        "autogeneratePattern": "",
         "hidden": false,
-        "id": "text2560465762",
-        "max": 0,
-        "min": 0,
+        "id": "exercises_slug",
         "name": "slug",
-        "pattern": "",
+        "type": "text",
+        "required": true,
         "presentable": false,
-        "primaryKey": false,
-        "required": false,
-        "system": false,
-        "type": "text"
+        "unique": true,
+        "min": 2,
+        "max": 200,
+        "pattern": "^[a-z0-9-]+$"
       },
       {
         "hidden": false,
-        "id": "json883217651",
-        "maxSize": 0,
-        "name": "muslce_group",
-        "presentable": false,
+        "id": "exercises_muscleGroups",
+        "name": "muscleGroups",
+        "type": "json",
         "required": false,
-        "system": false,
-        "type": "json"
+        "presentable": false,
+        "maxSize": 2000000
       },
       {
         "hidden": false,
-        "id": "json3543717251",
-        "maxSize": 0,
+        "id": "exercises_equipment",
         "name": "equipment",
-        "presentable": false,
+        "type": "json",
         "required": false,
-        "system": false,
-        "type": "json"
+        "presentable": false,
+        "maxSize": 2000000
       },
       {
         "hidden": false,
-        "id": "select105650625",
-        "maxSelect": 1,
+        "id": "exercises_category",
         "name": "category",
-        "presentable": false,
-        "required": false,
-        "system": false,
         "type": "select",
+        "required": false,
+        "presentable": false,
+        "maxSelect": 1,
         "values": [
           "compound",
           "isolation",
@@ -86,13 +78,12 @@ migrate((app) => {
       },
       {
         "hidden": false,
-        "id": "select3144380399",
-        "maxSelect": 1,
+        "id": "exercises_difficulty",
         "name": "difficulty",
-        "presentable": false,
-        "required": false,
-        "system": false,
         "type": "select",
+        "required": false,
+        "presentable": false,
+        "maxSelect": 1,
         "values": [
           "beginner",
           "intermediate",
@@ -100,29 +91,25 @@ migrate((app) => {
         ]
       },
       {
-        "autogeneratePattern": "",
         "hidden": false,
-        "id": "text2575139115",
-        "max": 0,
-        "min": 0,
+        "id": "exercises_instructions",
         "name": "instructions",
-        "pattern": "",
-        "presentable": false,
-        "primaryKey": false,
+        "type": "text",
         "required": false,
-        "system": false,
-        "type": "text"
+        "presentable": false,
+        "min": null,
+        "max": 5000,
+        "pattern": ""
       },
       {
-        "exceptDomains": null,
         "hidden": false,
-        "id": "url2210121264",
+        "id": "exercises_videoUrl",
         "name": "videoUrl",
-        "onlyDomains": null,
-        "presentable": false,
+        "type": "url",
         "required": false,
-        "system": false,
-        "type": "url"
+        "presentable": false,
+        "exceptDomains": null,
+        "onlyDomains": null
       },
       {
         "hidden": false,
@@ -145,19 +132,22 @@ migrate((app) => {
         "type": "autodate"
       }
     ],
-    "id": "pbc_1804250889",
-    "indexes": [],
-    "listRule": null,
+    "id": "exercises01",
+    "indexes": [
+      "CREATE UNIQUE INDEX idx_exercises_slug ON exercises (slug)"
+    ],
+    "listRule": "@request.auth.id != \"\"",
     "name": "exercises",
     "system": false,
     "type": "base",
     "updateRule": null,
-    "viewRule": null
+    "viewRule": "@request.auth.id != \"\"",
+    "deleteRule": null
   });
 
   return app.save(collection);
 }, (app) => {
-  const collection = app.findCollectionByNameOrId("pbc_1804250889");
+  const collection = app.findCollectionByNameOrId("exercises01");
 
   return app.delete(collection);
 })

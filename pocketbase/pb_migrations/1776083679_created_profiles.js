@@ -20,67 +20,106 @@ migrate((app) => {
       },
       {
         "hidden": false,
-        "id": "number2704281778",
-        "max": null,
-        "min": null,
+        "id": "profiles_user",
+        "name": "user",
+        "type": "relation",
+        "required": true,
+        "presentable": false,
+        "cascadeDelete": true,
+        "collectionId": "_pb_users_auth_",
+        "maxSelect": 1,
+        "minSelect": null,
+        "displayFields": ["email"]
+      },
+      {
+        "hidden": false,
+        "id": "profiles_age",
         "name": "age",
-        "onlyInt": false,
-        "presentable": false,
+        "type": "number",
         "required": false,
-        "system": false,
-        "type": "number"
+        "presentable": false,
+        "onlyInt": true,
+        "min": 13,
+        "max": 120
       },
       {
         "hidden": false,
-        "id": "number4115522831",
-        "max": null,
-        "min": null,
+        "id": "profiles_height",
         "name": "height",
-        "onlyInt": false,
-        "presentable": false,
+        "type": "number",
         "required": false,
-        "system": false,
-        "type": "number"
+        "presentable": false,
+        "onlyInt": true,
+        "min": 50,
+        "max": 300
       },
       {
         "hidden": false,
-        "id": "number130897217",
-        "max": null,
-        "min": null,
+        "id": "profiles_weight",
         "name": "weight",
+        "type": "number",
+        "required": false,
+        "presentable": false,
         "onlyInt": false,
-        "presentable": false,
-        "required": false,
-        "system": false,
-        "type": "number"
+        "min": 20,
+        "max": 500
       },
       {
-        "autogeneratePattern": "",
         "hidden": false,
-        "id": "text3723958568",
-        "max": 0,
-        "min": 0,
-        "name": "fitness_level",
-        "pattern": "",
-        "presentable": false,
-        "primaryKey": false,
+        "id": "profiles_gender",
+        "name": "gender",
+        "type": "select",
         "required": false,
-        "system": false,
-        "type": "text"
+        "presentable": false,
+        "maxSelect": 1,
+        "values": [
+          "male",
+          "female",
+          "other",
+          "prefer_not_to_say"
+        ]
       },
       {
-        "autogeneratePattern": "",
         "hidden": false,
-        "id": "text2654567225",
-        "max": 0,
-        "min": 0,
+        "id": "profiles_fitnessLevel",
+        "name": "fitnessLevel",
+        "type": "select",
+        "required": false,
+        "presentable": false,
+        "maxSelect": 1,
+        "values": [
+          "beginner",
+          "intermediate",
+          "advanced"
+        ]
+      },
+      {
+        "hidden": false,
+        "id": "profiles_limitations",
         "name": "limitations",
-        "pattern": "",
-        "presentable": false,
-        "primaryKey": false,
+        "type": "json",
         "required": false,
-        "system": false,
-        "type": "text"
+        "presentable": false,
+        "maxSize": 2000000
+      },
+      {
+        "hidden": false,
+        "id": "profiles_injuryHistory",
+        "name": "injuryHistory",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "min": null,
+        "max": 2000,
+        "pattern": ""
+      },
+      {
+        "hidden": false,
+        "id": "profiles_onboardingComplete",
+        "name": "onboardingComplete",
+        "type": "bool",
+        "required": false,
+        "presentable": false
       },
       {
         "hidden": false,
@@ -103,19 +142,22 @@ migrate((app) => {
         "type": "autodate"
       }
     ],
-    "id": "pbc_3414089001",
-    "indexes": [],
-    "listRule": null,
+    "id": "profiles001",
+    "indexes": [
+      "CREATE UNIQUE INDEX idx_profiles_user ON profiles (user)"
+    ],
+    "listRule": "@request.auth.id != \"\"",
     "name": "profiles",
     "system": false,
     "type": "base",
-    "updateRule": null,
-    "viewRule": null
+    "updateRule": "user = @request.auth.id",
+    "viewRule": "@request.auth.id != \"\"",
+    "deleteRule": "user = @request.auth.id"
   });
 
   return app.save(collection);
 }, (app) => {
-  const collection = app.findCollectionByNameOrId("pbc_3414089001");
+  const collection = app.findCollectionByNameOrId("profiles001");
 
   return app.delete(collection);
 })
