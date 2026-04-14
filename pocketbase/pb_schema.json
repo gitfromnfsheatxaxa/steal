@@ -1,0 +1,1354 @@
+[
+  {
+    "id": "_pb_users_auth_",
+    "name": "users",
+    "type": "auth",
+    "system": false,
+    "listRule": "",
+    "viewRule": "@request.auth.id != \"\"",
+    "createRule": "",
+    "updateRule": "@request.auth.id = id",
+    "deleteRule": "@request.auth.id = id",
+    "fields": [
+      {
+        "id": "users_name",
+        "name": "name",
+        "type": "text",
+        "required": false,
+        "presentable": true,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": 100,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "users_avatar",
+        "name": "avatar",
+        "type": "file",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "mimeTypes": [
+            "image/jpeg",
+            "image/png",
+            "image/webp"
+          ],
+          "thumbs": [
+            "100x100"
+          ],
+          "maxSelect": 1,
+          "maxSize": 5242880,
+          "protected": false
+        }
+      }
+    ],
+    "indexes": [],
+    "authRule": "",
+    "manageRule": null,
+    "authAlert": {
+      "enabled": true,
+      "emailTemplate": {
+        "subject": "Login from a new location",
+        "body": ""
+      }
+    },
+    "oauth2": {
+      "mappedFields": {
+        "id": "",
+        "name": "name",
+        "username": "username",
+        "avatarURL": "avatar"
+      },
+      "providers": []
+    },
+    "passwordAuth": {
+      "enabled": true,
+      "identityFields": [
+        "email"
+      ]
+    },
+    "mfa": {
+      "enabled": false,
+      "duration": 1800,
+      "rule": ""
+    },
+    "otp": {
+      "enabled": false,
+      "duration": 180,
+      "length": 8
+    },
+    "authToken": {
+      "duration": 604800
+    },
+    "passwordResetToken": {
+      "duration": 1800
+    },
+    "emailChangeToken": {
+      "duration": 1800
+    },
+    "verificationToken": {
+      "duration": 604800
+    },
+    "fileToken": {
+      "duration": 120
+    },
+    "verificationTemplate": {
+      "subject": "Verify your email",
+      "body": ""
+    },
+    "resetPasswordTemplate": {
+      "subject": "Reset your password",
+      "body": ""
+    },
+    "confirmEmailChangeTemplate": {
+      "subject": "Confirm your email change",
+      "body": ""
+    }
+  },
+  {
+    "id": "profiles001",
+    "name": "profiles",
+    "type": "base",
+    "system": false,
+    "listRule": "@request.auth.id != \"\"",
+    "viewRule": "@request.auth.id != \"\"",
+    "createRule": "@request.auth.id != \"\"",
+    "updateRule": "user = @request.auth.id",
+    "deleteRule": "user = @request.auth.id",
+    "fields": [
+      {
+        "id": "profiles_user",
+        "name": "user",
+        "type": "relation",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "collectionId": "_pb_users_auth_",
+          "cascadeDelete": true,
+          "minSelect": null,
+          "maxSelect": 1,
+          "displayFields": [
+            "email"
+          ]
+        }
+      },
+      {
+        "id": "profiles_age",
+        "name": "age",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 13,
+          "max": 120,
+          "noDecimal": true
+        }
+      },
+      {
+        "id": "profiles_height",
+        "name": "height",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 50,
+          "max": 300,
+          "noDecimal": true
+        }
+      },
+      {
+        "id": "profiles_weight",
+        "name": "weight",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 20,
+          "max": 500,
+          "noDecimal": false
+        }
+      },
+      {
+        "id": "profiles_gender",
+        "name": "gender",
+        "type": "select",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "male",
+            "female",
+            "other",
+            "prefer_not_to_say"
+          ]
+        }
+      },
+      {
+        "id": "profiles_fitnessLevel",
+        "name": "fitnessLevel",
+        "type": "select",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "beginner",
+            "intermediate",
+            "advanced"
+          ]
+        }
+      },
+      {
+        "id": "profiles_limitations",
+        "name": "limitations",
+        "type": "json",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSize": 2000000
+        }
+      },
+      {
+        "id": "profiles_injuryHistory",
+        "name": "injuryHistory",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": 2000,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "profiles_onboardingComplete",
+        "name": "onboardingComplete",
+        "type": "bool",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {}
+      }
+    ],
+    "indexes": [
+      "CREATE UNIQUE INDEX idx_profiles_user ON profiles (user)"
+    ]
+  },
+  {
+    "id": "goals0001",
+    "name": "goals",
+    "type": "base",
+    "system": false,
+    "listRule": "@request.auth.id != \"\"",
+    "viewRule": "@request.auth.id != \"\"",
+    "createRule": "@request.auth.id != \"\"",
+    "updateRule": "user = @request.auth.id",
+    "deleteRule": "user = @request.auth.id",
+    "fields": [
+      {
+        "id": "goals_user",
+        "name": "user",
+        "type": "relation",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "collectionId": "_pb_users_auth_",
+          "cascadeDelete": true,
+          "minSelect": null,
+          "maxSelect": 1,
+          "displayFields": [
+            "email"
+          ]
+        }
+      },
+      {
+        "id": "goals_type",
+        "name": "type",
+        "type": "select",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "muscle_building",
+            "strength",
+            "fat_loss",
+            "endurance",
+            "rehabilitation",
+            "general_fitness"
+          ]
+        }
+      },
+      {
+        "id": "goals_environment",
+        "name": "environment",
+        "type": "select",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "gym",
+            "home",
+            "outdoor",
+            "mixed"
+          ]
+        }
+      },
+      {
+        "id": "goals_equipment",
+        "name": "equipment",
+        "type": "json",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSize": 2000000
+        }
+      },
+      {
+        "id": "goals_daysPerWeek",
+        "name": "daysPerWeek",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 7,
+          "noDecimal": true
+        }
+      },
+      {
+        "id": "goals_sessionMinutes",
+        "name": "sessionMinutes",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 15,
+          "max": 180,
+          "noDecimal": true
+        }
+      },
+      {
+        "id": "goals_priority",
+        "name": "priority",
+        "type": "select",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "primary",
+            "secondary"
+          ]
+        }
+      }
+    ],
+    "indexes": []
+  },
+  {
+    "id": "exercises01",
+    "name": "exercises",
+    "type": "base",
+    "system": false,
+    "listRule": "@request.auth.id != \"\"",
+    "viewRule": "@request.auth.id != \"\"",
+    "createRule": null,
+    "updateRule": null,
+    "deleteRule": null,
+    "fields": [
+      {
+        "id": "exercises_name",
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "presentable": true,
+        "unique": false,
+        "options": {
+          "min": 2,
+          "max": 200,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "exercises_slug",
+        "name": "slug",
+        "type": "text",
+        "required": true,
+        "presentable": false,
+        "unique": true,
+        "options": {
+          "min": 2,
+          "max": 200,
+          "pattern": "^[a-z0-9-]+$"
+        }
+      },
+      {
+        "id": "exercises_muscleGroups",
+        "name": "muscleGroups",
+        "type": "json",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSize": 2000000
+        }
+      },
+      {
+        "id": "exercises_equipment",
+        "name": "equipment",
+        "type": "json",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSize": 2000000
+        }
+      },
+      {
+        "id": "exercises_category",
+        "name": "category",
+        "type": "select",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "compound",
+            "isolation",
+            "cardio",
+            "mobility",
+            "warmup",
+            "cooldown"
+          ]
+        }
+      },
+      {
+        "id": "exercises_difficulty",
+        "name": "difficulty",
+        "type": "select",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "beginner",
+            "intermediate",
+            "advanced"
+          ]
+        }
+      },
+      {
+        "id": "exercises_instructions",
+        "name": "instructions",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": 5000,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "exercises_videoUrl",
+        "name": "videoUrl",
+        "type": "url",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "exceptDomains": null,
+          "onlyDomains": null
+        }
+      }
+    ],
+    "indexes": [
+      "CREATE UNIQUE INDEX idx_exercises_slug ON exercises (slug)"
+    ]
+  },
+  {
+    "id": "wrkplans01",
+    "name": "workout_plans",
+    "type": "base",
+    "system": false,
+    "listRule": "@request.auth.id != \"\"",
+    "viewRule": "@request.auth.id != \"\"",
+    "createRule": "@request.auth.id != \"\"",
+    "updateRule": "user = @request.auth.id",
+    "deleteRule": "user = @request.auth.id",
+    "fields": [
+      {
+        "id": "wrkplans_user",
+        "name": "user",
+        "type": "relation",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "collectionId": "_pb_users_auth_",
+          "cascadeDelete": true,
+          "minSelect": null,
+          "maxSelect": 1,
+          "displayFields": [
+            "email"
+          ]
+        }
+      },
+      {
+        "id": "wrkplans_title",
+        "name": "title",
+        "type": "text",
+        "required": true,
+        "presentable": true,
+        "unique": false,
+        "options": {
+          "min": 2,
+          "max": 300,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "wrkplans_description",
+        "name": "description",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": 2000,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "wrkplans_source",
+        "name": "source",
+        "type": "select",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "ai_generated",
+            "template",
+            "custom"
+          ]
+        }
+      },
+      {
+        "id": "wrkplans_goalType",
+        "name": "goalType",
+        "type": "select",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "muscle_building",
+            "strength",
+            "fat_loss",
+            "endurance",
+            "rehabilitation",
+            "general_fitness"
+          ]
+        }
+      },
+      {
+        "id": "wrkplans_environment",
+        "name": "environment",
+        "type": "select",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "gym",
+            "home",
+            "outdoor",
+            "mixed"
+          ]
+        }
+      },
+      {
+        "id": "wrkplans_durationWeeks",
+        "name": "durationWeeks",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 52,
+          "noDecimal": true
+        }
+      },
+      {
+        "id": "wrkplans_currentWeek",
+        "name": "currentWeek",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 52,
+          "noDecimal": true
+        }
+      },
+      {
+        "id": "wrkplans_status",
+        "name": "status",
+        "type": "select",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "active",
+            "completed",
+            "paused",
+            "archived"
+          ]
+        }
+      },
+      {
+        "id": "wrkplans_therapyNotes",
+        "name": "therapyNotes",
+        "type": "json",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSize": 2000000
+        }
+      },
+      {
+        "id": "wrkplans_progressionRules",
+        "name": "progressionRules",
+        "type": "json",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSize": 2000000
+        }
+      },
+      {
+        "id": "wrkplans_aiPromptSnapshot",
+        "name": "aiPromptSnapshot",
+        "type": "json",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSize": 2000000
+        }
+      }
+    ],
+    "indexes": []
+  },
+  {
+    "id": "plandays01",
+    "name": "plan_days",
+    "type": "base",
+    "system": false,
+    "listRule": "@request.auth.id != \"\"",
+    "viewRule": "@request.auth.id != \"\"",
+    "createRule": "@request.auth.id != \"\"",
+    "updateRule": "@request.auth.id != \"\"",
+    "deleteRule": "@request.auth.id != \"\"",
+    "fields": [
+      {
+        "id": "plandays_plan",
+        "name": "plan",
+        "type": "relation",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "collectionId": "wrkplans01",
+          "cascadeDelete": true,
+          "minSelect": null,
+          "maxSelect": 1,
+          "displayFields": [
+            "title"
+          ]
+        }
+      },
+      {
+        "id": "plandays_week",
+        "name": "week",
+        "type": "number",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 52,
+          "noDecimal": true
+        }
+      },
+      {
+        "id": "plandays_dayOfWeek",
+        "name": "dayOfWeek",
+        "type": "number",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 7,
+          "noDecimal": true
+        }
+      },
+      {
+        "id": "plandays_label",
+        "name": "label",
+        "type": "text",
+        "required": false,
+        "presentable": true,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": 200,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "plandays_focus",
+        "name": "focus",
+        "type": "json",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSize": 2000000
+        }
+      },
+      {
+        "id": "plandays_warmup",
+        "name": "warmup",
+        "type": "json",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSize": 2000000
+        }
+      },
+      {
+        "id": "plandays_cooldown",
+        "name": "cooldown",
+        "type": "json",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSize": 2000000
+        }
+      }
+    ],
+    "indexes": []
+  },
+  {
+    "id": "planexs001",
+    "name": "plan_exercises",
+    "type": "base",
+    "system": false,
+    "listRule": "@request.auth.id != \"\"",
+    "viewRule": "@request.auth.id != \"\"",
+    "createRule": "@request.auth.id != \"\"",
+    "updateRule": "@request.auth.id != \"\"",
+    "deleteRule": "@request.auth.id != \"\"",
+    "fields": [
+      {
+        "id": "planexs_planDay",
+        "name": "planDay",
+        "type": "relation",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "collectionId": "plandays01",
+          "cascadeDelete": true,
+          "minSelect": null,
+          "maxSelect": 1,
+          "displayFields": [
+            "label"
+          ]
+        }
+      },
+      {
+        "id": "planexs_exercise",
+        "name": "exercise",
+        "type": "relation",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "collectionId": "exercises01",
+          "cascadeDelete": false,
+          "minSelect": null,
+          "maxSelect": 1,
+          "displayFields": [
+            "name"
+          ]
+        }
+      },
+      {
+        "id": "planexs_name",
+        "name": "name",
+        "type": "text",
+        "required": false,
+        "presentable": true,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": 200,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "planexs_order",
+        "name": "order",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 100,
+          "noDecimal": true
+        }
+      },
+      {
+        "id": "planexs_sets",
+        "name": "sets",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 20,
+          "noDecimal": true
+        }
+      },
+      {
+        "id": "planexs_repsMin",
+        "name": "repsMin",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 100,
+          "noDecimal": true
+        }
+      },
+      {
+        "id": "planexs_repsMax",
+        "name": "repsMax",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 100,
+          "noDecimal": true
+        }
+      },
+      {
+        "id": "planexs_rpeTarget",
+        "name": "rpeTarget",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 10,
+          "noDecimal": false
+        }
+      },
+      {
+        "id": "planexs_restSeconds",
+        "name": "restSeconds",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 15,
+          "max": 600,
+          "noDecimal": true
+        }
+      },
+      {
+        "id": "planexs_notes",
+        "name": "notes",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": 1000,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "planexs_substitutions",
+        "name": "substitutions",
+        "type": "json",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSize": 2000000
+        }
+      }
+    ],
+    "indexes": []
+  },
+  {
+    "id": "pltmpls01",
+    "name": "plan_templates",
+    "type": "base",
+    "system": false,
+    "listRule": "@request.auth.id != \"\"",
+    "viewRule": "@request.auth.id != \"\"",
+    "createRule": null,
+    "updateRule": null,
+    "deleteRule": null,
+    "fields": [
+      {
+        "id": "pltmpls_title",
+        "name": "title",
+        "type": "text",
+        "required": true,
+        "presentable": true,
+        "unique": false,
+        "options": {
+          "min": 2,
+          "max": 300,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "pltmpls_description",
+        "name": "description",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": 2000,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "pltmpls_goalType",
+        "name": "goalType",
+        "type": "select",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "muscle_building",
+            "strength",
+            "fat_loss",
+            "endurance",
+            "rehabilitation",
+            "general_fitness"
+          ]
+        }
+      },
+      {
+        "id": "pltmpls_environment",
+        "name": "environment",
+        "type": "select",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "gym",
+            "home",
+            "outdoor",
+            "mixed"
+          ]
+        }
+      },
+      {
+        "id": "pltmpls_difficulty",
+        "name": "difficulty",
+        "type": "select",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "beginner",
+            "intermediate",
+            "advanced"
+          ]
+        }
+      },
+      {
+        "id": "pltmpls_durationWeeks",
+        "name": "durationWeeks",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 52,
+          "noDecimal": true
+        }
+      },
+      {
+        "id": "pltmpls_structure",
+        "name": "structure",
+        "type": "json",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSize": 5000000
+        }
+      },
+      {
+        "id": "pltmpls_popularity",
+        "name": "popularity",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 0,
+          "max": 999999,
+          "noDecimal": true
+        }
+      }
+    ],
+    "indexes": []
+  },
+  {
+    "id": "wrksess01",
+    "name": "workout_sessions",
+    "type": "base",
+    "system": false,
+    "listRule": "@request.auth.id != \"\"",
+    "viewRule": "@request.auth.id != \"\"",
+    "createRule": "@request.auth.id != \"\"",
+    "updateRule": "user = @request.auth.id",
+    "deleteRule": "user = @request.auth.id",
+    "fields": [
+      {
+        "id": "wrksess_user",
+        "name": "user",
+        "type": "relation",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "collectionId": "_pb_users_auth_",
+          "cascadeDelete": true,
+          "minSelect": null,
+          "maxSelect": 1,
+          "displayFields": [
+            "email"
+          ]
+        }
+      },
+      {
+        "id": "wrksess_planDay",
+        "name": "planDay",
+        "type": "relation",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "collectionId": "plandays01",
+          "cascadeDelete": false,
+          "minSelect": null,
+          "maxSelect": 1,
+          "displayFields": [
+            "label"
+          ]
+        }
+      },
+      {
+        "id": "wrksess_plan",
+        "name": "plan",
+        "type": "relation",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "collectionId": "wrkplans01",
+          "cascadeDelete": false,
+          "minSelect": null,
+          "maxSelect": 1,
+          "displayFields": [
+            "title"
+          ]
+        }
+      },
+      {
+        "id": "wrksess_startedAt",
+        "name": "startedAt",
+        "type": "date",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": "",
+          "max": ""
+        }
+      },
+      {
+        "id": "wrksess_completedAt",
+        "name": "completedAt",
+        "type": "date",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": "",
+          "max": ""
+        }
+      },
+      {
+        "id": "wrksess_status",
+        "name": "status",
+        "type": "select",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "in_progress",
+            "completed",
+            "skipped"
+          ]
+        }
+      },
+      {
+        "id": "wrksess_mood",
+        "name": "mood",
+        "type": "select",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "maxSelect": 1,
+          "values": [
+            "great",
+            "good",
+            "okay",
+            "rough",
+            "terrible"
+          ]
+        }
+      },
+      {
+        "id": "wrksess_energyLevel",
+        "name": "energyLevel",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 5,
+          "noDecimal": true
+        }
+      },
+      {
+        "id": "wrksess_sessionNotes",
+        "name": "sessionNotes",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": 2000,
+          "pattern": ""
+        }
+      },
+      {
+        "id": "wrksess_therapyReflection",
+        "name": "therapyReflection",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": 3000,
+          "pattern": ""
+        }
+      }
+    ],
+    "indexes": []
+  },
+  {
+    "id": "sesssets01",
+    "name": "session_sets",
+    "type": "base",
+    "system": false,
+    "listRule": "@request.auth.id != \"\"",
+    "viewRule": "@request.auth.id != \"\"",
+    "createRule": "@request.auth.id != \"\"",
+    "updateRule": "@request.auth.id != \"\"",
+    "deleteRule": "@request.auth.id != \"\"",
+    "fields": [
+      {
+        "id": "sesssets_session",
+        "name": "session",
+        "type": "relation",
+        "required": true,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "collectionId": "wrksess01",
+          "cascadeDelete": true,
+          "minSelect": null,
+          "maxSelect": 1,
+          "displayFields": []
+        }
+      },
+      {
+        "id": "sesssets_exercise",
+        "name": "exercise",
+        "type": "relation",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "collectionId": "exercises01",
+          "cascadeDelete": false,
+          "minSelect": null,
+          "maxSelect": 1,
+          "displayFields": [
+            "name"
+          ]
+        }
+      },
+      {
+        "id": "sesssets_setNumber",
+        "name": "setNumber",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 100,
+          "noDecimal": true
+        }
+      },
+      {
+        "id": "sesssets_reps",
+        "name": "reps",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 0,
+          "max": 10000,
+          "noDecimal": true
+        }
+      },
+      {
+        "id": "sesssets_weight",
+        "name": "weight",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 0,
+          "max": 10000,
+          "noDecimal": false
+        }
+      },
+      {
+        "id": "sesssets_rpe",
+        "name": "rpe",
+        "type": "number",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": 1,
+          "max": 10,
+          "noDecimal": false
+        }
+      },
+      {
+        "id": "sesssets_completed",
+        "name": "completed",
+        "type": "bool",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {}
+      },
+      {
+        "id": "sesssets_notes",
+        "name": "notes",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {
+          "min": null,
+          "max": 500,
+          "pattern": ""
+        }
+      }
+    ],
+    "indexes": []
+  }
+]

@@ -1,0 +1,108 @@
+"use client";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Trophy, Clock, Dumbbell, TrendingUp } from "lucide-react";
+import { formatDuration, formatWeight } from "@/lib/utils";
+import type { ActiveSetInput } from "@/types/session";
+import Link from "next/link";
+
+interface WorkoutSummaryProps {
+  duration: number; // seconds
+  exercises: Array<{
+    name: string;
+    completedSets: ActiveSetInput[];
+  }>;
+}
+
+export function WorkoutSummary({ duration, exercises }: WorkoutSummaryProps) {
+  const totalSets = exercises.reduce(
+    (sum, ex) => sum + ex.completedSets.length,
+    0,
+  );
+  const totalVolume = exercises.reduce(
+    (sum, ex) =>
+      sum +
+      ex.completedSets.reduce((s, set) => s + set.weight * set.reps, 0),
+    0,
+  );
+  const totalReps = exercises.reduce(
+    (sum, ex) =>
+      sum + ex.completedSets.reduce((s, set) => s + set.reps, 0),
+    0,
+  );
+
+  return (
+    <div className="mx-auto max-w-md space-y-6 py-8 text-center">
+      <div className="space-y-2">
+        <Trophy className="mx-auto h-12 w-12 text-warning" />
+        <h2 className="text-2xl font-bold">Workout Complete</h2>
+        <p className="text-sm text-muted-foreground">
+          You showed up and put in the work. That&apos;s what builds lasting
+          change.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <Card>
+          <CardContent className="flex flex-col items-center py-4">
+            <Clock className="mb-1 h-5 w-5 text-muted-foreground" />
+            <span className="text-lg font-bold">{formatDuration(duration)}</span>
+            <span className="text-xs text-muted-foreground">Duration</span>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex flex-col items-center py-4">
+            <Dumbbell className="mb-1 h-5 w-5 text-muted-foreground" />
+            <span className="text-lg font-bold">{totalSets}</span>
+            <span className="text-xs text-muted-foreground">Sets</span>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex flex-col items-center py-4">
+            <TrendingUp className="mb-1 h-5 w-5 text-muted-foreground" />
+            <span className="text-lg font-bold">{formatWeight(totalVolume)}</span>
+            <span className="text-xs text-muted-foreground">Total volume</span>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex flex-col items-center py-4">
+            <span className="mb-1 text-lg">💪</span>
+            <span className="text-lg font-bold">{totalReps}</span>
+            <span className="text-xs text-muted-foreground">Total reps</span>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Exercise breakdown */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm">Exercise Breakdown</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {exercises.map((ex, i) => (
+            <div
+              key={i}
+              className="flex items-center justify-between text-sm"
+            >
+              <span className="text-muted-foreground">{ex.name}</span>
+              <Badge variant="secondary">
+                {ex.completedSets.length} sets
+              </Badge>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      <div className="flex gap-3">
+        <Button asChild className="flex-1">
+          <Link href="/dashboard">Back to Dashboard</Link>
+        </Button>
+        <Button asChild variant="outline" className="flex-1">
+          <Link href="/progress">View Progress</Link>
+        </Button>
+      </div>
+    </div>
+  );
+}

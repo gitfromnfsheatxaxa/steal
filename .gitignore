@@ -3,3 +3,7 @@
 .env*.local
 .vercel
 dist
+
+# PocketBase — binary and data (download with pocketbase/download.ps1)
+pocketbase/pocketbase.exe
+pocketbase/pb_data/
