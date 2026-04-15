@@ -3,12 +3,45 @@
 import Link from "next/link";
 import { useActivePlan } from "@/hooks/usePlans";
 import { usePlanDays } from "@/hooks/usePlans";
+import { usePlanDaySession } from "@/hooks/usePlans";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Dumbbell, Calendar, ArrowRight } from "lucide-react";
+import { Dumbbell, Calendar, ArrowRight, CheckCircle2 } from "lucide-react";
 import { DAYS_OF_WEEK } from "@/lib/constants";
+
+function PlanDayAction({ dayId, dayLabel }: { dayId: string; dayLabel: string }) {
+  const { data: session, isLoading } = usePlanDaySession(dayId);
+
+  if (isLoading) {
+    return <Skeleton className="h-10 w-full" />;
+  }
+
+  if (session) {
+    return (
+      <div className="flex items-center justify-between">
+        <span className="font-data text-xs font-semibold uppercase tracking-widest text-[#10B981]">
+          COMPLETED
+        </span>
+        <CheckCircle2 className="h-4 w-4 text-[#10B981]" />
+      </div>
+    );
+  }
+
+  return (
+    <Button
+      asChild
+      className="w-full rounded-none bg-[#e53e00] font-data text-xs font-bold uppercase tracking-widest text-white hover:bg-[#ff4500]"
+    >
+      <Link href={`/workout/${dayId}`}>
+        <Dumbbell className="mr-2 h-4 w-4" />
+        START WORKOUT
+        <ArrowRight className="ml-2 h-4 w-4" />
+      </Link>
+    </Button>
+  );
+}
 
 export default function WorkoutIndexPage() {
   const { data: plan, isLoading: planLoading } = useActivePlan();
@@ -74,16 +107,7 @@ export default function WorkoutIndexPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <Button
-                      asChild
-                      className="w-full rounded-none bg-[#e53e00] font-data text-xs font-bold uppercase tracking-widest text-white hover:bg-[#ff4500]"
-                    >
-                      <Link href={`/workout/${day.id}`}>
-                        <Dumbbell className="mr-2 h-4 w-4" />
-                        START WORKOUT
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
+                    <PlanDayAction dayId={day.id} dayLabel={day.label} />
                   </CardContent>
                 </Card>
               ))

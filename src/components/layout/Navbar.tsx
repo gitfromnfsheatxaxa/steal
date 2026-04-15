@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { Button } from "@/components/ui/button";
@@ -12,119 +14,235 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  LayoutDashboard,
-  Dumbbell,
-  TrendingUp,
-  ClipboardList,
-  Settings,
-  LogOut,
-  Sun,
-  Moon,
-  User,
-} from "lucide-react";
+import { Sun, Moon, User, LogOut, Settings, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { href: "/dashboard", label: "DASHBOARD", icon: LayoutDashboard },
-  { href: "/programs", label: "PROGRAMS", icon: ClipboardList },
-  { href: "/progress", label: "PROGRESS", icon: TrendingUp },
+  { href: "/dashboard", label: "DASHBOARD" },
+  { href: "/programs", label: "PROGRAMS" },
+  { href: "/progress", label: "PROGRESS" },
 ] as const;
+
+/** UTC clock — updates every second, tabular-nums mono */
+function LiveClock() {
+  const [time, setTime] = useState<string>("");
+
+  useEffect(() => {
+    function tick() {
+      const now = new Date();
+      const hh = now.getUTCHours().toString().padStart(2, "0");
+      const mm = now.getUTCMinutes().toString().padStart(2, "0");
+      const ss = now.getUTCSeconds().toString().padStart(2, "0");
+      setTime(`${hh}:${mm}:${ss}`);
+    }
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  if (!time) return null;
+
+  return (
+    <span
+      className="font-data text-[11px] tabular-nums text-ink-mid select-none"
+      aria-label="Current time in UTC"
+    >
+      {time}
+      <span className="ml-1 text-ink-low">UTC</span>
+    </span>
+  );
+}
+
+/** Tactical-green status dot with slow pulse */
+function StatusIndicator() {
+  return (
+    <span className="flex items-center gap-1.5" aria-label="System online">
+      <span className="relative flex h-2 w-2">
+        <span
+          className="absolute inline-flex h-full w-full rounded-full bg-tactical opacity-75"
+          style={{ animation: "st-pulse 2s ease-in-out infinite" }}
+        />
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-tactical" />
+      </span>
+      <span className="stamp text-tactical hidden lg:inline">ONLINE</span>
+    </span>
+  );
+}
 
 export function Navbar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
+  const displayName: string =
+    (typeof user?.name === "string" && user.name.length > 0
+      ? user.name
+      : typeof user?.email === "string" && user.email.length > 0
+        ? user.email
+        : "OPERATOR") as string;
+
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background">
-      <div className="container-app flex h-14 items-center justify-between">
+    <header
+      className="sticky top-0 z-40 h-14 bg-surface-1"
+      style={{ borderBottom: "1px solid rgba(185,28,28,0.4)" }}
+    >
+      <div className="container-app flex h-full items-center justify-between">
+
+        {/* ── LEFT: wordmark ── */}
         <div className="flex items-center gap-8">
           <Link
             href="/dashboard"
-            className="flex items-center gap-2"
-            style={{ fontFamily: "var(--font-heading, system-ui)" }}
+            className="flex flex-col leading-none select-none"
+            aria-label="Steal — go to dashboard"
           >
-            <Dumbbell className="h-5 w-5 text-[#e53e00]" />
-            <span className="hidden text-xl font-extrabold uppercase tracking-widest text-foreground sm:inline">
+            <span
+              className="text-ink-high font-black tracking-tight leading-none"
+              style={{
+                fontFamily: "'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif",
+                fontSize: "22px",
+                fontWeight: 800,
+                letterSpacing: "-0.02em",
+              }}
+            >
               STEAL
+            </span>
+            <span className="stamp text-ink-low" style={{ letterSpacing: "0.3em" }}>
+              STEEL
             </span>
           </Link>
 
-          {/* Desktop nav links */}
-          <nav className="hidden items-center gap-0 md:flex" role="navigation">
+          {/* ── CENTER: nav links with animated underline ── */}
+          <nav
+            className="hidden items-center md:flex"
+            role="navigation"
+            aria-label="Primary navigation"
+          >
             {navLinks.map((link) => {
-              const active = pathname.startsWith(link.href);
+              const active =
+                pathname === link.href || pathname.startsWith(link.href + "/");
               return (
                 <Link
                   key={link.href}
                   href={link.href}
+                  aria-current={active ? "page" : undefined}
                   className={cn(
-                    "relative flex items-center gap-1.5 px-4 py-4 font-data text-xs font-semibold uppercase tracking-widest transition-colors",
+                    "relative flex items-center px-4 py-4 font-data text-[11px] font-semibold uppercase tracking-widest transition-colors duration-100",
                     active
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground",
+                      ? "text-rust"
+                      : "text-ink-mid hover:text-ink-high",
                   )}
                 >
-                  {active && (
-                    <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#e53e00]" />
-                  )}
                   {link.label}
+                  {active && (
+                    <motion.span
+                      layoutId="nav-underline"
+                      className="absolute bottom-0 left-0 right-0 h-[2px] bg-rust"
+                      style={{ originX: 0 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                    />
+                  )}
                 </Link>
               );
             })}
           </nav>
         </div>
 
-        <div className="flex items-center gap-1">
+        {/* ── RIGHT: clock / status / theme / avatar ── */}
+        <div className="flex items-center gap-3">
+          {/* Clock */}
+          <div className="hidden items-center gap-2 lg:flex">
+            <LiveClock />
+          </div>
+
+          {/* Status dot */}
+          <div className="hidden items-center sm:flex">
+            <StatusIndicator />
+          </div>
+
+          {/* Hairline divider */}
+          <span
+            className="hidden h-5 w-px bg-surface-4 sm:block"
+            aria-hidden="true"
+          />
+
+          {/* Theme toggle */}
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleTheme}
             aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-            className="text-muted-foreground hover:text-foreground"
+            className="h-8 w-8 rounded-none text-ink-mid hover:bg-surface-3 hover:text-ink-high"
           >
             {theme === "dark" ? (
-              <Sun className="h-4 w-4" />
+              <Sun className="h-3.5 w-3.5" />
             ) : (
-              <Moon className="h-4 w-4" />
+              <Moon className="h-3.5 w-3.5" />
             )}
           </Button>
 
+          {/* User avatar dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
                 aria-label="User menu"
-                className="text-muted-foreground hover:text-foreground"
+                className="h-8 w-8 rounded-none border border-surface-4 text-ink-mid hover:border-rust hover:bg-surface-3 hover:text-ink-high"
               >
-                <User className="h-4 w-4" />
+                <User className="h-3.5 w-3.5" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 border-border bg-card">
-              <div className="px-2 py-1.5 font-data text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                {user?.name || user?.email || "User"}
+            <DropdownMenuContent
+              align="end"
+              className="w-52 rounded-none border-surface-3 bg-surface-1 p-0"
+              style={{ borderColor: "rgba(185,28,28,0.3)" }}
+            >
+              {/* User identity header */}
+              <div className="border-b border-surface-3 px-3 py-2.5">
+                <p className="stamp text-ink-low">OPERATOR</p>
+                <p className="font-data mt-0.5 truncate text-[11px] font-semibold uppercase tracking-wider text-ink-high">
+                  {displayName}
+                </p>
               </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/settings" className="font-data text-xs uppercase tracking-widest">
-                  <Settings className="mr-2 h-4 w-4" />
-                  SETTINGS
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={logout}
-                className="font-data text-xs uppercase tracking-widest text-destructive focus:text-destructive"
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                SIGN OUT
-              </DropdownMenuItem>
+
+              <div className="py-1">
+                <DropdownMenuItem asChild className="rounded-none px-3 py-2 focus:bg-surface-3">
+                  <Link href="/dashboard" className="flex items-center gap-2 font-data text-[11px] uppercase tracking-widest text-ink-mid hover:text-ink-high">
+                    <LayoutDashboard className="h-3.5 w-3.5" />
+                    DASHBOARD
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="rounded-none px-3 py-2 focus:bg-surface-3">
+                  <Link href="/settings" className="flex items-center gap-2 font-data text-[11px] uppercase tracking-widest text-ink-mid hover:text-ink-high">
+                    <Settings className="h-3.5 w-3.5" />
+                    SETTINGS
+                  </Link>
+                </DropdownMenuItem>
+              </div>
+
+              <DropdownMenuSeparator className="bg-surface-3" />
+
+              <div className="py-1">
+                <DropdownMenuItem
+                  onClick={logout}
+                  className="rounded-none px-3 py-2 font-data text-[11px] uppercase tracking-widest text-rust focus:bg-surface-3 focus:text-rust cursor-pointer"
+                >
+                  <LogOut className="mr-2 h-3.5 w-3.5" />
+                  SIGN OUT
+                </DropdownMenuItem>
+              </div>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
+
+      {/* Tactical pulse keyframe — injected inline to avoid globals.css modification */}
+      <style>{`
+        @keyframes st-pulse {
+          0%, 100% { transform: scale(1); opacity: 0.75; }
+          50%       { transform: scale(2); opacity: 0;    }
+        }
+      `}</style>
     </header>
   );
 }

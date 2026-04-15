@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getPocketBase } from "@/lib/pocketbase";
 import type { WorkoutPlan, PlanDay, PlanExercise, PlanTemplate } from "@/types/plan";
+import type { WorkoutSession } from "@/types/session";
 
 export function usePlans() {
   const pb = getPocketBase();
@@ -21,6 +22,30 @@ export function usePlans() {
       return records.items;
     },
     enabled: !!userId,
+  });
+}
+
+export function usePlanDaySession(planDayId: string | undefined) {
+  const pb = getPocketBase();
+  const userId = pb.authStore.record?.id;
+
+  return useQuery<WorkoutSession | null>({
+    queryKey: ["planDaySession", planDayId, userId],
+    queryFn: async () => {
+      if (!planDayId || !userId) return null;
+      try {
+        const records = await pb
+          .collection("workout_sessions")
+          .getList<WorkoutSession>(1, 1, {
+            filter: `planDay="${planDayId}" && user="${userId}" && status="completed"`,
+            sort: "-completedAt",
+          });
+        return records.items[0] ?? null;
+      } catch {
+        return null;
+      }
+    },
+    enabled: !!planDayId && !!userId,
   });
 }
 
@@ -114,6 +139,40 @@ export function useUpdatePlanStatus() {
       status: WorkoutPlan["status"];
     }) => {
       return pb.collection("workout_plans").update(planId, { status });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["plans"] });
+      queryClient.invalidateQueries({ queryKey: ["activePlan"] });
+    },
+  });
+}
+
+export function useDeletePlan() {
+  const pb = getPocketBase();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (planId: string) => {
+      // First, get all plan days for this plan
+      const planDays = await pb
+        .collection("plan_days")
+        .getFullList({ filter: `plan="${planId}"` });
+
+      // Delete all plan exercises for each plan day
+      for (const planDay of planDays) {
+        await pb
+          .collection("plan_exercises")
+          .getFullList({ filter: `planDay="${planDay.id}"` })
+          .then((exercises) =>
+            Promise.all(exercises.map((ex: any) => pb.collection("plan_exercises").delete(ex.id)))
+          );
+        
+        // Delete the plan day
+        await pb.collection("plan_days").delete(planDay.id);
+      }
+
+      // Finally, delete the workout plan
+      return pb.collection("workout_plans").delete(planId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["plans"] });

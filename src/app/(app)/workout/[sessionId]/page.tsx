@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useState, useEffect, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getPocketBase } from "@/lib/pocketbase";
 import { useRestTimer } from "@/hooks/useRestTimer";
 import { useWorkoutStore } from "@/stores/workout-store";
@@ -33,6 +33,11 @@ export default function WorkoutSessionPage({
   const [notes, setNotes] = useState("");
   const [isFinishing, setIsFinishing] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
+  const [summaryData, setSummaryData] = useState<{
+    exercises: Array<{ name: string; completedSets: ActiveSetInput[] }>;
+    duration: number;
+  } | null>(null);
+  const queryClient = useQueryClient();
 
   // Initialise from persisted startedAt so timer survives page reloads
   const [elapsedSeconds, setElapsedSeconds] = useState(() => {
@@ -62,25 +67,33 @@ export default function WorkoutSessionPage({
     enabled: !!sessionId,
   });
 
-  // Start a fresh session in the store only if none is active
+  // Initialise the store for this session ONCE. Using getState() + a sessionId
+  // guard so logging a set (which mutates the store) does not retrigger this
+  // effect and wipe all completedSets.
   useEffect(() => {
-    if (planExercises && planExercises.length > 0 && !store.sessionId) {
-      store.startSession(
-        sessionId,
-        sessionId,
-        planExercises.map((ex, i) => ({
-          exerciseId: ex.expand?.exercise?.id ?? "",
-          exerciseName:
-            ex.name?.trim() ||
-            ex.expand?.exercise?.name ||
-            ex.notes?.trim() ||
-            `Exercise ${i + 1}`,
-          targetSets: ex.sets,
-          completedSets: [],
-        })),
-      );
+    if (!planExercises || planExercises.length === 0) return;
+    const current = useWorkoutStore.getState();
+    if (
+      current.sessionId === sessionId &&
+      current.exercises.length === planExercises.length
+    ) {
+      return;
     }
-  }, [planExercises, sessionId, store]);
+    current.startSession(
+      sessionId,
+      sessionId,
+      planExercises.map((ex, i) => ({
+        exerciseId: ex.expand?.exercise?.id ?? "",
+        exerciseName:
+          ex.name?.trim() ||
+          ex.expand?.exercise?.name ||
+          ex.notes?.trim() ||
+          `Exercise ${i + 1}`,
+        targetSets: ex.sets,
+        completedSets: [],
+      })),
+    );
+  }, [planExercises, sessionId]);
 
   // Tick every second
   useEffect(() => {
@@ -107,10 +120,13 @@ export default function WorkoutSessionPage({
     setIsFinishing(true);
     try {
       const pb = getPocketBase();
-      const userId = pb.authStore.record?.id;
+      const currentUserId = pb.authStore.record?.id;
 
+      console.log("[FINISH SESSION] Starting save - exercises:", store.exercises.length, "total sets:", store.exercises.reduce((sum, ex) => sum + ex.completedSets.length, 0));
+
+      // Create the session record
       const session = await pb.collection("workout_sessions").create({
-        user: userId,
+        user: currentUserId,
         planDay: sessionId,
         plan: planDay?.plan || "",
         startedAt: store.startedAt ?? new Date(Date.now() - elapsedSeconds * 1000).toISOString(),
@@ -122,6 +138,10 @@ export default function WorkoutSessionPage({
         sessionNotes: notes,
       });
 
+      console.log("[FINISH SESSION] Session created:", session.id);
+
+      // Save all sets
+      let totalSetsSaved = 0;
       for (let i = 0; i < store.exercises.length; i++) {
         const ex = store.exercises[i];
         // Only send exercise relation if it came from a verified exercises-collection expand
@@ -139,29 +159,49 @@ export default function WorkoutSessionPage({
             completed: true,
             notes: set.notes || "",
           });
+          totalSetsSaved++;
         }
       }
 
+      console.log("[FINISH SESSION] Sets saved:", totalSetsSaved);
+
+      // Save summary data BEFORE clearing the store
+      const exercisesSummary = store.exercises.map((ex, i) => ({
+        name: ex.exerciseName || getExerciseName(planExercises?.[i] ?? ({} as PlanExercise), i),
+        completedSets: ex.completedSets,
+      }));
+      
       store.endSession();
+      
+      // Set summary data before showing summary
+      setSummaryData({
+        exercises: exercisesSummary,
+        duration: elapsedSeconds,
+      });
+      
+      // Invalidate all relevant queries to refresh UI
+      await queryClient.invalidateQueries({ queryKey: ["sessions", currentUserId] });
+      await queryClient.invalidateQueries({ queryKey: ["allSets", currentUserId] });
+      await queryClient.invalidateQueries({ queryKey: ["activePlan", currentUserId] });
+      await queryClient.invalidateQueries({ queryKey: ["plans", currentUserId] });
+      await queryClient.invalidateQueries({ queryKey: ["streakData"] });
+      
       setShowSummary(true);
       toast.success("Session saved.");
     } catch (err) {
       const pbErr = err as { status?: number; response?: unknown; data?: unknown; message?: string };
-      console.error("[FINISH SESSION]", pbErr.status, JSON.stringify(pbErr.response ?? pbErr.data));
+      console.error("[FINISH SESSION] Error:", pbErr.status, pbErr.message, JSON.stringify(pbErr.response ?? pbErr.data));
       toast.error("Failed to save. Check your connection and try again.");
     } finally {
       setIsFinishing(false);
     }
   }
 
-  if (showSummary) {
+  if (showSummary && summaryData) {
     return (
       <WorkoutSummary
-        duration={elapsedSeconds}
-        exercises={store.exercises.map((ex, i) => ({
-          name: ex.exerciseName || getExerciseName(planExercises?.[i] ?? ({} as PlanExercise), i),
-          completedSets: ex.completedSets,
-        }))}
+        duration={summaryData.duration}
+        exercises={summaryData.exercises}
       />
     );
   }

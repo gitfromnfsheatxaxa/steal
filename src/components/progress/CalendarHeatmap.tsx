@@ -1,0 +1,256 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { cn } from "@/lib/utils";
+
+interface HeatmapSession {
+  completedAt: string;
+  startedAt: string;
+  volume?: number;
+}
+
+interface CalendarHeatmapProps {
+  sessions: HeatmapSession[];
+}
+
+interface TooltipState {
+  visible: boolean;
+  x: number;
+  y: number;
+  label: string;
+}
+
+const WEEKS = 26;
+const DAYS = 7;
+const CELL_SIZE = 10;
+const GAP = 2;
+const DAY_INITIALS = ["S", "M", "T", "W", "T", "F", "S"];
+
+function getIntensityColor(volume: number, maxVolume: number, count: number): string {
+  if (count === 0) return "var(--surface-2)";
+  if (maxVolume > 0) {
+    const ratio = volume / maxVolume;
+    if (ratio < 0.25) return "#14532d"; // var(--tactical-dim)
+    if (ratio < 0.6) return "var(--tactical)";
+    return "#22c55e";
+  }
+  // fallback: count-based
+  if (count === 1) return "#14532d";
+  if (count >= 2) return "#22c55e";
+  return "#166534";
+}
+
+function formatMonthLabel(date: Date): string {
+  return date.toLocaleString("en-US", { month: "short" }).toUpperCase();
+}
+
+export function CalendarHeatmap({ sessions }: CalendarHeatmapProps) {
+  const [tooltip, setTooltip] = useState<TooltipState>({
+    visible: false,
+    x: 0,
+    y: 0,
+    label: "",
+  });
+
+  const { grid, monthLabels, maxVolume } = useMemo(() => {
+    // Build a map of date-string -> { volume, count }
+    const dayMap = new Map<string, { volume: number; count: number }>();
+
+    for (const s of sessions) {
+      const dateStr = s.completedAt
+        ? s.completedAt.slice(0, 10)
+        : s.startedAt.slice(0, 10);
+      const existing = dayMap.get(dateStr) ?? { volume: 0, count: 0 };
+      dayMap.set(dateStr, {
+        volume: existing.volume + (s.volume ?? 0),
+        count: existing.count + 1,
+      });
+    }
+
+    // Determine the grid start: go back 26 weeks from today,
+    // aligned to the same day-of-week as today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayDow = today.getDay(); // 0=Sun
+
+    // Start of grid: 26 weeks back, beginning of that week (Sunday)
+    const gridStart = new Date(today);
+    gridStart.setDate(today.getDate() - WEEKS * 7 - todayDow);
+
+    let maxVol = 0;
+    const cells: { date: Date; volume: number; count: number }[][] = [];
+
+    for (let w = 0; w < WEEKS; w++) {
+      const week: { date: Date; volume: number; count: number }[] = [];
+      for (let d = 0; d < DAYS; d++) {
+        const date = new Date(gridStart);
+        date.setDate(gridStart.getDate() + w * 7 + d);
+        const dateStr = date.toISOString().slice(0, 10);
+        const data = dayMap.get(dateStr) ?? { volume: 0, count: 0 };
+        if (data.volume > maxVol) maxVol = data.volume;
+        week.push({ date, volume: data.volume, count: data.count });
+      }
+      cells.push(week);
+    }
+
+    // Build month labels: find the first week where a new month starts
+    const labels: { weekIndex: number; label: string }[] = [];
+    let lastMonth = -1;
+    for (let w = 0; w < WEEKS; w++) {
+      const month = cells[w][0].date.getMonth();
+      if (month !== lastMonth) {
+        labels.push({ weekIndex: w, label: formatMonthLabel(cells[w][0].date) });
+        lastMonth = month;
+      }
+    }
+
+    return { grid: cells, monthLabels: labels, maxVolume: maxVol };
+  }, [sessions]);
+
+  const colWidth = CELL_SIZE + GAP;
+  const rowHeight = CELL_SIZE + GAP;
+  const leftOffset = 20; // for day-of-week initials
+  const topOffset = 18; // for month labels
+
+  function handleMouseEnter(
+    e: React.MouseEvent<SVGRectElement>,
+    date: Date,
+    volume: number,
+    count: number
+  ) {
+    if (count === 0 && volume === 0) return;
+    const rect = (e.target as SVGRectElement).getBoundingClientRect();
+    const dateLabel = date
+      .toLocaleString("en-US", { month: "short", day: "numeric" })
+      .toUpperCase();
+    const volumeLabel = volume > 0 ? `${volume.toLocaleString()} KG` : `${count} SESSION${count > 1 ? "S" : ""}`;
+    setTooltip({
+      visible: true,
+      x: rect.left + rect.width / 2,
+      y: rect.top - 8,
+      label: `${dateLabel} — ${volumeLabel}`,
+    });
+  }
+
+  function handleMouseLeave() {
+    setTooltip((t) => ({ ...t, visible: false }));
+  }
+
+  const svgWidth = leftOffset + WEEKS * colWidth;
+  const svgHeight = topOffset + DAYS * rowHeight;
+
+  return (
+    <div className="relative select-none">
+      {/* Tooltip */}
+      {tooltip.visible && (
+        <div
+          className="fixed z-50 pointer-events-none"
+          style={{ left: tooltip.x, top: tooltip.y, transform: "translate(-50%, -100%)" }}
+        >
+          <div
+            className="stamp px-2 py-1 text-[10px]"
+            style={{
+              background: "var(--surface-3)",
+              border: "1px solid var(--border-strong)",
+              borderTop: "2px solid var(--rust)",
+              color: "var(--ink-high)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {tooltip.label}
+          </div>
+        </div>
+      )}
+
+      <svg
+        width={svgWidth}
+        height={svgHeight}
+        style={{ display: "block", overflow: "visible" }}
+        aria-label="Training frequency heatmap"
+        role="img"
+      >
+        {/* Month labels */}
+        {monthLabels.map(({ weekIndex, label }) => (
+          <text
+            key={`month-${weekIndex}`}
+            x={leftOffset + weekIndex * colWidth}
+            y={topOffset - 6}
+            style={{
+              fontSize: "10px",
+              fontFamily: "var(--font-mono, monospace)",
+              textTransform: "uppercase",
+              fill: "rgba(163,163,163,0.9)",
+              letterSpacing: "0.1em",
+            }}
+          >
+            {label}
+          </text>
+        ))}
+
+        {/* Day-of-week initials — M W F only */}
+        {[1, 3, 5].map((d) => (
+          <text
+            key={`dow-${d}`}
+            x={leftOffset - 6}
+            y={topOffset + d * rowHeight + CELL_SIZE / 2 + 3}
+            textAnchor="end"
+            style={{
+              fontSize: "10px",
+              fontFamily: "var(--font-mono, monospace)",
+              fill: "rgba(163,163,163,0.9)",
+              textTransform: "uppercase",
+            }}
+          >
+            {DAY_INITIALS[d]}
+          </text>
+        ))}
+
+        {/* Cells */}
+        {grid.map((week, w) =>
+          week.map((cell, d) => {
+            const color = getIntensityColor(cell.volume, maxVolume, cell.count);
+            return (
+              <rect
+                key={`${w}-${d}`}
+                x={leftOffset + w * colWidth}
+                y={topOffset + d * rowHeight}
+                width={CELL_SIZE}
+                height={CELL_SIZE}
+                fill={color}
+                rx={0}
+                ry={0}
+                style={{ cursor: cell.count > 0 ? "pointer" : "default" }}
+                onMouseEnter={(e) => handleMouseEnter(e, cell.date, cell.volume, cell.count)}
+                onMouseLeave={handleMouseLeave}
+                aria-label={`${cell.date.toDateString()}: ${cell.count} sessions`}
+              />
+            );
+          })
+        )}
+      </svg>
+
+      {/* Legend */}
+      <div
+        className="flex items-center gap-1 justify-end mt-2"
+        style={{ fontFamily: "var(--font-mono, monospace)", fontSize: "10px", textTransform: "uppercase", color: "rgba(163,163,163,0.9)" }}
+      >
+        <span>LESS</span>
+        {(["var(--surface-2)", "#14532d", "var(--tactical)", "#22c55e"] as const).map(
+          (color, i) => (
+            <span
+              key={i}
+              style={{
+                display: "inline-block",
+                width: CELL_SIZE,
+                height: CELL_SIZE,
+                background: color,
+                border: "1px solid rgba(229,229,229,0.06)",
+              }}
+            />
+          )
+        )}
+        <span>MORE</span>
+      </div>
+    </div>
+  );
+}

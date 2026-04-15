@@ -23,16 +23,16 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("dark");
 
   useEffect(() => {
-    const stored = localStorage.getItem("st-theme") as Theme | null;
-    const preferred = stored ?? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-    setThemeState(preferred);
-    document.documentElement.classList.toggle("dark", preferred === "dark");
+    // Check if theme class is already set by server-side script
+    const hasLightClass = document.documentElement.classList.contains("light");
+    const currentTheme: Theme = hasLightClass ? "light" : "dark";
+    setThemeState(currentTheme);
   }, []);
 
   const setTheme = useCallback((t: Theme) => {
     setThemeState(t);
     localStorage.setItem("st-theme", t);
-    document.documentElement.classList.toggle("dark", t === "dark");
+    document.documentElement.classList.toggle("light", t === "light");
   }, []);
 
   const toggleTheme = useCallback(() => {

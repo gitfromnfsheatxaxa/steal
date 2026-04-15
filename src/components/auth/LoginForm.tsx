@@ -46,15 +46,15 @@ export function LoginForm() {
   }
 
   return (
-    <div className="border border-border bg-card p-6">
+    <div className="border-l-4 border-[#8B0000] bg-[#0a0a0a] p-6">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} method="post" className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} method="post" className="space-y-5">
           <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="font-data text-xs uppercase tracking-widest text-muted-foreground">
+                <FormLabel className="font-data text-[10px] font-semibold uppercase tracking-widest text-[#71717A]">
                   Email
                 </FormLabel>
                 <FormControl>
@@ -62,11 +62,11 @@ export function LoginForm() {
                     type="email"
                     placeholder="your@email.com"
                     autoComplete="email"
-                    className="border-border bg-input font-data text-sm"
+                    className="h-11 rounded-none border-[#2a2a2a] bg-[#050505] font-data text-sm text-[#E5E5E5] placeholder:text-[#71717A]/50 focus:border-[#8B0000] focus:ring-0"
                     {...field}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="font-data text-[10px] text-[#8B0000]" />
               </FormItem>
             )}
           />
@@ -76,35 +76,37 @@ export function LoginForm() {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="font-data text-xs uppercase tracking-widest text-muted-foreground">
+                <FormLabel className="font-data text-[10px] font-semibold uppercase tracking-widest text-[#71717A]">
                   Password
                 </FormLabel>
                 <FormControl>
                   <Input
                     type="password"
-                    placeholder="Password"
+                    placeholder="••••••••"
                     autoComplete="current-password"
-                    className="border-border bg-input font-data text-sm"
+                    className="h-11 rounded-none border-[#2a2a2a] bg-[#050505] font-data text-sm text-[#E5E5E5] placeholder:text-[#71717A]/50 focus:border-[#8B0000] focus:ring-0"
                     {...field}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="font-data text-[10px] text-[#8B0000]" />
               </FormItem>
             )}
           />
 
           {error && (
-            <p className="text-sm text-destructive" role="alert">
-              {error}
-            </p>
+            <div className="border-l-2 border-[#8B0000] bg-[#8B0000]/5 p-3">
+              <p className="font-data text-xs text-[#8B0000]" role="alert">
+                {error}
+              </p>
+            </div>
           )}
 
           <Button
             type="submit"
-            className="w-full rounded-none bg-[#e53e00] font-data text-xs font-bold uppercase tracking-widest text-white hover:bg-[#ff4500]"
+            className="h-11 w-full rounded-none bg-[#8B0000] font-data text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#9F1239] active:scale-[0.98]"
             disabled={form.formState.isSubmitting}
           >
-            {form.formState.isSubmitting ? "LOADING..." : "ENTER"}
+            {form.formState.isSubmitting ? "AUTHENTICATING..." : "ENTER"}
           </Button>
         </form>
       </Form>

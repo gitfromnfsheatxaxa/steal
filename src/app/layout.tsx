@@ -3,6 +3,20 @@ import { Barlow_Condensed, JetBrains_Mono } from "next/font/google";
 import { Providers } from "@/components/providers/Providers";
 import "./globals.css";
 
+const themeScript = `
+  (function() {
+    try {
+      var stored = localStorage.getItem('st-theme');
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var theme = stored ?? (prefersDark ? 'dark' : 'light');
+      
+      if (theme === 'light') {
+        document.documentElement.classList.add('light');
+      }
+    } catch (e) {}
+  })();
+`;
+
 const barlowCondensed = Barlow_Condensed({
   subsets: ["latin"],
   weight: ["600", "700", "800"],
@@ -49,10 +63,16 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${barlowCondensed.variable} ${jetbrainsMono.variable}`}
+      className={`${barlowCondensed.variable} ${jetbrainsMono.variable}`}
       suppressHydrationWarning
     >
-      <body className="relative min-h-dvh bg-background text-foreground antialiased">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
+      <body
+        className="relative min-h-dvh bg-background text-foreground antialiased"
+        suppressHydrationWarning
+      >
         <Providers>{children}</Providers>
       </body>
     </html>
