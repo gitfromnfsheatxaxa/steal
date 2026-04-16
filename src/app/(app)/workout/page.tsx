@@ -10,15 +10,21 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Dumbbell, Calendar, ArrowRight, CheckCircle2 } from "lucide-react";
 import { DAYS_OF_WEEK } from "@/lib/constants";
+import { useGuestActivePlan } from "@/hooks/useGuestWorkouts";
+import { useGuestPlanDays } from "@/hooks/useGuestWorkouts";
+import { useGuestWorkoutSessions } from "@/hooks/useGuestWorkouts";
+import { useIsGuestUser } from "@/hooks/useGuestWorkouts";
 
-function PlanDayAction({ dayId, dayLabel }: { dayId: string; dayLabel: string }) {
+function PlanDayAction({ dayId, dayLabel, isGuest }: { dayId: string; dayLabel: string; isGuest: boolean }) {
   const { data: session, isLoading } = usePlanDaySession(dayId);
+  const { getCompletedSessionForPlanDay } = useGuestWorkoutSessions();
+  const guestSession = isGuest ? getCompletedSessionForPlanDay(dayId) : null;
 
   if (isLoading) {
     return <Skeleton className="h-10 w-full" />;
   }
 
-  if (session) {
+  if (session || guestSession) {
     return (
       <div className="flex items-center justify-between">
         <span className="font-data text-xs font-semibold uppercase tracking-widest text-[#10B981]">
@@ -44,12 +50,22 @@ function PlanDayAction({ dayId, dayLabel }: { dayId: string; dayLabel: string })
 }
 
 export default function WorkoutIndexPage() {
+  const isGuest = useIsGuestUser();
   const { data: plan, isLoading: planLoading } = useActivePlan();
   const { data: days, isLoading: daysLoading } = usePlanDays(plan?.id);
+  
+  // Guest mode hooks
+  const { activePlan: guestActivePlan, isLoading: guestPlanLoading } = useGuestActivePlan();
+  const { planDays: guestDays, isLoading: guestDaysLoading } = useGuestPlanDays(guestActivePlan?.id);
+
+  // Use guest data if guest, otherwise use authenticated data
+  const currentPlan = isGuest ? guestActivePlan : plan;
+  const currentDays = isGuest ? guestDays : days;
+  const isLoading = isGuest ? (guestPlanLoading || guestDaysLoading) : (planLoading || daysLoading);
 
   const today = new Date().getDay() || 7; // 1=Mon, 7=Sun
-  const todayDays = days?.filter(
-    (d) => d.week === plan?.currentWeek && d.dayOfWeek === today,
+  const todayDays = currentDays?.filter(
+    (d) => d.week === currentPlan?.currentWeek && d.dayOfWeek === today,
   );
 
   return (
@@ -62,11 +78,16 @@ export default function WorkoutIndexPage() {
           TRAIN
         </h1>
         <div className="mt-1 h-0.5 w-12 bg-[#e53e00]" />
+        {isGuest && currentPlan && (
+          <p className="mt-2 text-xs text-[#71717A] font-data uppercase tracking-widest">
+            Guest Mode — Your progress is saved locally
+          </p>
+        )}
       </div>
 
-      {planLoading || daysLoading ? (
+      {isLoading ? (
         <Skeleton className="h-48 w-full" />
-      ) : !plan ? (
+      ) : !currentPlan ? (
         <div className="border border-dashed border-border p-8 text-center">
           <Dumbbell className="mx-auto h-8 w-8 text-muted-foreground" />
           <p className="mt-2 text-sm text-muted-foreground">No active program.</p>
@@ -74,7 +95,7 @@ export default function WorkoutIndexPage() {
             asChild
             className="mt-4 rounded-none bg-[#e53e00] font-data text-xs font-bold uppercase tracking-widest text-white hover:bg-[#ff4500]"
           >
-            <Link href="/plans">FIND A PROGRAM</Link>
+            <Link href="/programs">FIND A PROGRAM</Link>
           </Button>
         </div>
       ) : (
@@ -107,14 +128,14 @@ export default function WorkoutIndexPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <PlanDayAction dayId={day.id} dayLabel={day.label} />
+                    <PlanDayAction dayId={day.id} dayLabel={day.label} isGuest={isGuest} />
                   </CardContent>
                 </Card>
               ))
             ) : (
               <div className="border border-border bg-card p-4">
                 <p className="font-data text-sm text-muted-foreground uppercase tracking-wide">
-                  REST DAY — RECOVER. YOU&apos;LL NEED IT.
+                  REST DAY — RECOVER. YOU'LL NEED IT.
                 </p>
               </div>
             )}
@@ -122,10 +143,10 @@ export default function WorkoutIndexPage() {
 
           {/* This week's schedule */}
           <div className="space-y-3">
-            <h2 className="label-section">Week {plan.currentWeek} Schedule</h2>
+            <h2 className="label-section">Week {currentPlan.currentWeek} Schedule</h2>
             <div className="space-y-1">
-              {days
-                ?.filter((d) => d.week === plan.currentWeek)
+              {currentDays
+                ?.filter((d) => d.week === currentPlan.currentWeek)
                 .sort((a, b) => a.dayOfWeek - b.dayOfWeek)
                 .map((day) => (
                   <Link key={day.id} href={`/workout/${day.id}`}>

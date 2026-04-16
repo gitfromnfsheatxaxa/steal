@@ -14,6 +14,8 @@ import { useRouter } from "next/navigation";
 import { getPocketBase } from "@/lib/pocketbase";
 import { getProgramTemplate, getExerciseForWeek } from "@/lib/program-templates";
 import type { ProgramTemplateDefinition } from "@/types/plan";
+import { activateGuestProgram, useGuestActivePlan } from "@/hooks/useGuestWorkouts";
+import { useIsGuestUser } from "@/hooks/useGuestWorkouts";
 
 interface ProgramCard {
   id: string;
@@ -126,7 +128,7 @@ const DIFFICULTY_CONFIG: Record<string, { border: string; text: string; bg: stri
 function checkAuthAndRedirect(): boolean {
   const pb = getPocketBase();
   if (!pb.authStore.isValid || !pb.authStore.record) {
-    toast.error("Please log in to activate programs");
+    toast.error("Please log in to build custom programs");
     return false;
   }
   return true;
@@ -136,14 +138,11 @@ export default function ProgramsPage() {
   const router = useRouter();
   const [activating, setActivating] = useState<string | null>(null);
   const [selectedProgram, setSelectedProgram] = useState<ProgramTemplateDefinition | null>(null);
+  const isGuest = useIsGuestUser();
+  const { activePlan: guestActivePlan } = useGuestActivePlan();
 
   function handleStartProgram(program: ProgramCard) {
     if (program.comingSoon) return;
-    
-    // Check auth first
-    if (!checkAuthAndRedirect()) {
-      return;
-    }
     
     // If we have a template, show preview first
     if (program.templateId) {
@@ -161,11 +160,26 @@ export default function ProgramsPage() {
   async function activateProgram(program: ProgramCard) {
     setActivating(program.id);
     try {
+      // Check if user is a guest
       const pb = getPocketBase();
       const userId = pb.authStore.record?.id;
+      
       if (!userId) {
-        toast.error("Please log in to activate programs");
-        router.push("/login");
+        // Guest mode - activate program in localStorage
+        const template = getProgramTemplate(program.templateId || "");
+        const guestPlan = activateGuestProgram(
+          {
+            id: program.id,
+            title: program.title,
+            description: program.description,
+            templateId: program.templateId,
+            weeks: program.weeks,
+          },
+          template || undefined
+        );
+        
+        toast.success(`${program.subtitle} activated (Guest Mode)`);
+        router.push("/workout");
         return;
       }
 
