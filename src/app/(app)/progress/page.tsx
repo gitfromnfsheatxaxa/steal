@@ -279,7 +279,8 @@ export default function ProgressPage() {
     isError: setsError,
     refetch: refetchSets,
   } = useAllSets();
-  const { data: muscleData, isLoading: muscleLoading } = useMuscleDistribution();
+  const muscleData = useMuscleDistribution();
+  const muscleLoading = false; // Computed data, no loading state
   const streakData = useStreakData();
   const personalRecords = usePersonalRecords();
   const achievements = useAchievements();
