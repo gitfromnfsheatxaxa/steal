@@ -38,7 +38,7 @@ export default function Home() {
               Progressive Overload
             </h3>
             <p className="text-xs text-muted-foreground">
-              Every session harder than the last. That&apos;s the only rule.
+              Every session harder than the last. That's the only rule.
             </p>
           </div>
           <div className="space-y-3 bg-background p-6">
@@ -62,7 +62,7 @@ export default function Home() {
               No Bullshit Tracking
             </h3>
             <p className="text-xs text-muted-foreground">
-              Log what matters. See what&apos;s working. Cut the rest.
+              Log what matters. See what's working. Cut the rest.
             </p>
           </div>
         </div>
@@ -70,7 +70,7 @@ export default function Home() {
         {/* CTA */}
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
           <Link
-            href="/register"
+            href="/programs"
             className="inline-flex h-12 items-center gap-2 bg-[#e53e00] px-8 text-sm font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#ff4500]"
           >
             Start Training

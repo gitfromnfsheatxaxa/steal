@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { useActivePlan, useUpdatePlanStatus } from "@/hooks/usePlans";
 import { BrandNoiseOverlay } from "@/components/layout/BrandNoiseOverlay";
 import { PlanImageCarousel } from "@/components/programs/PlanImageCarousel";
 import { ProgramPreview } from "@/components/programs/ProgramPreview";
@@ -13,7 +12,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { getPocketBase } from "@/lib/pocketbase";
-import { PROGRAM_TEMPLATES, getProgramTemplate, getExerciseForWeek } from "@/lib/program-templates";
+import { getProgramTemplate, getExerciseForWeek } from "@/lib/program-templates";
 import type { ProgramTemplateDefinition } from "@/types/plan";
 
 interface ProgramCard {
@@ -124,15 +123,27 @@ const DIFFICULTY_CONFIG: Record<string, { border: string; text: string; bg: stri
   Elite: { border: "border-[#C2410C]/40", text: "text-[#C2410C]", bg: "bg-[#C2410C]/5" },
 };
 
+function checkAuthAndRedirect(): boolean {
+  const pb = getPocketBase();
+  if (!pb.authStore.isValid || !pb.authStore.record) {
+    toast.error("Please log in to activate programs");
+    return false;
+  }
+  return true;
+}
+
 export default function ProgramsPage() {
   const router = useRouter();
-  const { data: activePlan } = useActivePlan();
-  const updateStatus = useUpdatePlanStatus();
   const [activating, setActivating] = useState<string | null>(null);
   const [selectedProgram, setSelectedProgram] = useState<ProgramTemplateDefinition | null>(null);
 
-  async function handleActivateTemplate(program: ProgramCard) {
+  function handleStartProgram(program: ProgramCard) {
     if (program.comingSoon) return;
+    
+    // Check auth first
+    if (!checkAuthAndRedirect()) {
+      return;
+    }
     
     // If we have a template, show preview first
     if (program.templateId) {
@@ -144,7 +155,7 @@ export default function ProgramsPage() {
     }
     
     // Fallback to direct activation
-    await activateProgram(program);
+    activateProgram(program);
   }
 
   async function activateProgram(program: ProgramCard) {
@@ -153,7 +164,8 @@ export default function ProgramsPage() {
       const pb = getPocketBase();
       const userId = pb.authStore.record?.id;
       if (!userId) {
-        toast.error("Not logged in.");
+        toast.error("Please log in to activate programs");
+        router.push("/login");
         return;
       }
 
@@ -184,13 +196,6 @@ export default function ProgramsPage() {
           }
         }
         
-        if (activePlan && activePlan.id !== existingPlan.id) {
-          await updateStatus.mutateAsync({
-            planId: activePlan.id,
-            status: "paused",
-          });
-        }
-
         if (existingPlan.status !== "active") {
           await pb.collection("workout_plans").update(existingPlan.id, {
             status: "active",
@@ -200,13 +205,6 @@ export default function ProgramsPage() {
         toast.success(`${program.subtitle} already exists. Resuming...`);
         router.push(`/plans/${existingPlan.id}`);
         return;
-      }
-
-      if (activePlan) {
-        await updateStatus.mutateAsync({
-          planId: activePlan.id,
-          status: "paused",
-        });
       }
 
       // Create the plan
@@ -302,6 +300,20 @@ export default function ProgramsPage() {
     setSelectedProgram(null);
   }
 
+  function handleViewMyPrograms() {
+    if (!checkAuthAndRedirect()) {
+      return;
+    }
+    router.push("/dashboard");
+  }
+
+  function handleBuildCustom() {
+    if (!checkAuthAndRedirect()) {
+      return;
+    }
+    router.push("/plans/create");
+  }
+
   // If a program is selected, show preview
   if (selectedProgram) {
     return (
@@ -353,7 +365,7 @@ export default function ProgramsPage() {
                   !program.comingSoon && "cursor-pointer border border-[#2a2a2a] hover:border-[#e53e00]/50 hover:bg-[#111111]",
                   program.comingSoon && "border border-[#2a2a2a] opacity-50",
                 )}
-                onClick={() => !program.comingSoon && handleActivateTemplate(program)}
+                onClick={() => !program.comingSoon && handleStartProgram(program)}
               >
                 {/* Image Carousel for programs with images */}
                 {program.imageUrls && program.imageUrls.length > 0 && !program.comingSoon && (
@@ -495,13 +507,12 @@ export default function ProgramsPage() {
               </p>
             </div>
             <Button
-              asChild
+              onClick={handleBuildCustom}
+              disabled={activating !== null}
               className="shrink-0 rounded-none bg-[#e53e00] font-data text-xs font-bold uppercase tracking-widest text-white hover:bg-[#ff4500]"
             >
-              <Link href="/plans/create">
-                <Pencil className="mr-2 h-3 w-3" />
-                BUILD MANUALLY
-              </Link>
+              <Pencil className="mr-2 h-3 w-3" />
+              BUILD MANUALLY
             </Button>
           </div>
         </div>
@@ -509,14 +520,14 @@ export default function ProgramsPage() {
 
       {/* My Programs link */}
       <div className="border-t border-[#1a1a1a] pt-4">
-        <Link
-          href="/plans"
+        <button
+          onClick={handleViewMyPrograms}
           className="group flex items-center gap-2 font-data text-xs font-semibold uppercase tracking-widest text-[#71717A] transition-colors hover:text-[#E5E5E5]"
         >
           <Target className="h-3 w-3 transition-transform group-hover:translate-x-1" />
           VIEW MY PROGRAMS
           <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
-        </Link>
+        </button>
       </div>
     </div>
   );
