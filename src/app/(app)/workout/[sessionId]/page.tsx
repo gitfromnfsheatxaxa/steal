@@ -121,7 +121,7 @@ export default function WorkoutSessionPage({
     current.startSession(
       sessionId,
       sessionId,
-      currentExercises.map((ex, i) => ({
+      currentExercises.map((ex: any, i) => ({
         exerciseId: ex.expand?.exercise?.id ?? ex.id,
         exerciseName:
           ex.name?.trim() ||

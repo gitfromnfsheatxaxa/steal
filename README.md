@@ -29,7 +29,7 @@
  | [Türkçe](docs/tr/README.md)
 
 </div>
-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
 ---
 
 **The performance optimization system for AI agent harnesses. From an Anthropic hackathon winner.**
