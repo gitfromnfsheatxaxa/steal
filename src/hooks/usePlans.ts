@@ -54,17 +54,17 @@ export function usePlanCompletedSessions(planId: string | undefined) {
   const pb = getPocketBase();
   const userId = pb.authStore.record?.id;
 
-  return useQuery<Set<string>>({
+  return useQuery<string[]>({
     queryKey: ["planCompletedDays", planId, userId],
     queryFn: async () => {
-      if (!planId || !userId) return new Set<string>();
+      if (!planId || !userId) return [];
       const records = await pb
         .collection("workout_sessions")
         .getList<WorkoutSession>(1, 200, {
           filter: `plan="${planId}" && user="${userId}" && status="completed"`,
           fields: "planDay",
         });
-      return new Set(records.items.map((r) => r.planDay).filter((id): id is string => !!id));
+      return records.items.map((r) => r.planDay).filter((id): id is string => !!id);
     },
     enabled: !!planId && !!userId,
   });

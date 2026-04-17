@@ -251,7 +251,6 @@ export default function PlanDetailPage({
 
   const { data: days, isLoading: daysLoading } = usePlanDays(planId);
   const { data: completedDayIds, isLoading: sessionsLoading } = usePlanCompletedSessions(planId);
-  const completedDaySet = completedDayIds as Set<string> | undefined;
 
   if (planLoading || daysLoading || sessionsLoading) {
     return <SkeletonGrid />;
@@ -396,7 +395,7 @@ export default function PlanDetailPage({
               {/* Week days grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {sortedDays.map((day) => {
-                  const dayCompleted = completedDaySet?.has(day.id) ?? false;
+                  const dayCompleted = completedDayIds?.includes(day.id) ?? false;
 
                   let dayLocked: boolean;
                   if (isFutureWeek) {
