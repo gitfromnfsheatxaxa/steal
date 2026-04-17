@@ -19,7 +19,8 @@
       "Bash(sed 's/collection\\(\"//g')",
       "Bash(sed 's/\"\\)//g')",
       "Bash(curl:*)",
-      "Bash(python3 -c \"import sys,json; data=json.load\\(sys.stdin\\); [print\\(c['name'], '- status values:', next\\(\\(f['options'].get\\('values','?'\\) for f in c.get\\('fields',[]\\) if f['name']=='status'\\), 'no status field'\\)\\) for c in data.get\\('items',[]\\)]\")"
+      "Bash(python3 -c \"import sys,json; data=json.load\\(sys.stdin\\); [print\\(c['name'], '- status values:', next\\(\\(f['options'].get\\('values','?'\\) for f in c.get\\('fields',[]\\) if f['name']=='status'\\), 'no status field'\\)\\) for c in data.get\\('items',[]\\)]\")",
+      "Bash(taskkill //F //IM node.exe)"
     ]
   }
 }

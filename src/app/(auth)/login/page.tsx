@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LoginForm } from "@/components/auth/LoginForm";
+import { ConnectionDebug } from "@/components/auth/ConnectionDebug";
 
 export const metadata: Metadata = { title: "Sign In" };
 
@@ -59,6 +60,9 @@ export default function LoginPage() {
             </Link>
           </p>
         </div>
+
+        {/* Debug — remove after confirming connection works
+        <ConnectionDebug /> */}
 
         {/* Footer accent */}
         <div className="mt-10 flex items-center justify-center gap-4">

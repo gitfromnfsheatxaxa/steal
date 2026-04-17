@@ -11,6 +11,61 @@ import {
 import type { RecordModel } from "pocketbase";
 import { getPocketBase, clearPocketBase } from "@/lib/pocketbase";
 
+interface PBError {
+  status?: number;
+  data?: Record<string, { message?: string } | string>;
+  message?: string;
+  originalError?: { message?: string };
+  url?: string;
+  response?: Record<string, unknown>;
+}
+
+function parseAuthError(error: unknown, action: "login" | "register"): Error {
+  const e = error as PBError;
+
+  // Network / connection errors (Failed to fetch = browser couldn't reach the server)
+  const raw = e.originalError?.message ?? e.message ?? "";
+  if (
+    raw.includes("Failed to fetch") ||
+    raw.includes("NetworkError") ||
+    raw.includes("ERR_CONNECTION") ||
+    raw.includes("Load failed")
+  ) {
+    const url = e.url ?? process.env.NEXT_PUBLIC_API_URL ?? "(unknown)";
+    return new Error(
+      `Cannot reach PocketBase at ${url}. Check that the server is running and accessible from your browser.`
+    );
+  }
+
+  // Auth-specific errors
+  if (action === "login") {
+    if (e.status === 400) return new Error("Invalid email or password.");
+    if (e.status === 404) return new Error("User not found.");
+  }
+
+  if (action === "register") {
+    if (e.status === 400 && e.data) {
+      // PocketBase validation errors live in e.data as { field: { message } }
+      const msgs = Object.entries(e.data)
+        .filter(([k]) => k !== "message")
+        .map(([k, v]) => {
+          const msg = typeof v === "string" ? v : v?.message ?? "";
+          return `${k}: ${msg}`;
+        })
+        .filter(Boolean);
+      if (msgs.length) return new Error(msgs.join(". "));
+      return new Error("Registration failed. Check your information.");
+    }
+  }
+
+  // Fallback: surface whatever PocketBase gave us
+  const fallback =
+    (typeof e.data?.message === "string" ? e.data.message : null) ??
+    e.message ??
+    `${action} failed`;
+  return new Error(`${fallback} (status: ${e.status ?? "unknown"})`);
+}
+
 interface AuthState {
   user: RecordModel | null;
   token: string | null;
@@ -62,30 +117,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading: false,
         isAuthenticated: true,
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("[LOGIN ERROR]", error);
-      const pbError = error as { status?: number; data?: { message?: string }; message?: string; original?: Error };
-      
-      // Check for network/connection errors
-      if (pbError.original?.message?.includes('Failed to fetch') || 
-          pbError.original?.message?.includes('network') ||
-          pbError.message?.includes('Failed to fetch') ||
-          pbError.message?.includes('network')) {
-        throw new Error("Cannot connect to server. Please check your internet connection or contact support.");
-      }
-      
-      // Handle specific PocketBase errors
-      if (pbError.status === 400) {
-        throw new Error("Invalid email or password. Please try again.");
-      } else if (pbError.status === 404) {
-        throw new Error("User not found. Please check your credentials.");
-      } else if (pbError.data?.message) {
-        throw new Error(pbError.data.message);
-      } else if (pbError.message) {
-        throw new Error(pbError.message);
-      } else {
-        throw new Error("Failed to login. Please check your connection and try again.");
-      }
+      throw parseAuthError(error, "login");
     }
   }, []);
 
@@ -109,40 +143,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           isLoading: false,
           isAuthenticated: true,
         });
-      } catch (error) {
+      } catch (error: unknown) {
         console.error("[REGISTER ERROR]", error);
-        const pbError = error as { status?: number; data?: any; message?: string; original?: Error };
-        
-        // Check for network/connection errors
-        if (pbError.original?.message?.includes('Failed to fetch') || 
-            pbError.original?.message?.includes('network') ||
-            pbError.message?.includes('Failed to fetch') ||
-            pbError.message?.includes('network')) {
-          throw new Error("Cannot connect to server. Please check your internet connection or contact support.");
-        }
-        
-        // Handle specific PocketBase errors
-        if (pbError.status === 400) {
-          const validationErrors = pbError.data;
-          if (validationErrors) {
-            // Extract first validation error message
-            const errorKeys = Object.keys(validationErrors);
-            if (errorKeys.length > 0) {
-              const firstError = validationErrors[errorKeys[0]];
-              const errorMsg = firstError?.message || firstError || "Registration failed";
-              throw new Error(errorMsg);
-            }
-          }
-          throw new Error("Registration failed. Please check your information.");
-        } else if (pbError.status === 409) {
-          throw new Error("An account with this email already exists.");
-        } else if (pbError.data?.message) {
-          throw new Error(pbError.data.message);
-        } else if (pbError.message) {
-          throw new Error(pbError.message);
-        } else {
-          throw new Error("Failed to create account. Please check your connection.");
-        }
+        throw parseAuthError(error, "register");
       }
     },
     [],

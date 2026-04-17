@@ -48,7 +48,7 @@ export function LoginForm() {
   return (
     <div className="border-l-4 border-[#8B0000] bg-[#0a0a0a] p-6">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} method="post" className="space-y-5">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
           <FormField
             control={form.control}
             name="email"
