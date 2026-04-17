@@ -1,16 +1,18 @@
-import type { Metadata } from "next";
+"use client";
+
 import Link from "next/link";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { ConnectionDebug } from "@/components/auth/ConnectionDebug";
-
-export const metadata: Metadata = { title: "Sign In" };
+import { useI18n } from "@/components/providers/I18nProvider";
 
 export default function LoginPage() {
+  const { t } = useI18n();
+
   return (
     <div className="page-enter flex min-h-dvh flex-col items-center justify-center p-4">
       {/* Background atmosphere */}
       <div className="steal-atmosphere -z-10" />
-      
+
       {/* Main card container */}
       <div className="w-full max-w-md">
         {/* Brand header */}
@@ -33,12 +35,12 @@ export default function LoginPage() {
             className="text-4xl font-black uppercase tracking-tight text-[#E5E5E5]"
             style={{ fontFamily: "var(--font-heading, system-ui)" }}
           >
-            BACK IN THE
+            {t("login.BACK_IN_THE")}
             <br />
-            <span className="text-[#8B0000]">RACK</span>
+            <span className="text-[#8B0000]">{t("login.RACK")}</span>
           </h1>
           <p className="mt-4 font-data text-xs uppercase tracking-widest text-[#71717A]">
-            Get back to work.
+            {t("login.SUBTITLE")}
           </p>
         </div>
 
@@ -51,24 +53,24 @@ export default function LoginPage() {
         {/* Register link */}
         <div className="mt-6 text-center">
           <p className="font-data text-xs text-[#71717A]">
-            No account?{" "}
+            {t("login.NO_ACCOUNT")}{" "}
             <Link
               href="/register"
               className="font-semibold uppercase tracking-widest text-[#8B0000] transition-colors hover:text-[#9F1239]"
             >
-              REGISTER
+              {t("login.REGISTER")}
             </Link>
           </p>
         </div>
 
-        {/* Debug — remove after confirming connection works
-        <ConnectionDebug /> */}
+        {/* Debug — remove after confirming connection works */}
+        {/* <ConnectionDebug /> */}
 
         {/* Footer accent */}
         <div className="mt-10 flex items-center justify-center gap-4">
           <div className="h-px w-12 bg-[#2a2a2a]" />
           <span className="font-data text-[9px] uppercase tracking-[0.2em] text-[#71717A]">
-            Steal Forges Steel
+            {t("login.FOOTER")}
           </span>
           <div className="h-px w-12 bg-[#2a2a2a]" />
         </div>

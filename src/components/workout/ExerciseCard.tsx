@@ -6,6 +6,7 @@ import { formatDuration } from "@/lib/utils";
 import { Clock, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/components/providers/I18nProvider";
 
 interface ExerciseCardProps {
   exerciseName: string;
@@ -34,6 +35,7 @@ export function ExerciseCard({
   onCompleteSet,
   isActive,
 }: ExerciseCardProps) {
+  const { t } = useI18n();
   const [collapsed, setCollapsed] = useState(false);
   const targetReps = repsMin === repsMax ? `${repsMin}` : `${repsMin}–${repsMax}`;
   const allComplete = completedSets.length >= sets;
@@ -78,7 +80,7 @@ export function ExerciseCard({
               </span>
             )}
             <span className="font-data text-xs tabular-nums text-[#e53e00]">
-              {completedSets.length}/{sets} done
+              {completedSets.length}/{sets} {t("dashboard.DONE").toLowerCase()}
             </span>
           </div>
         </div>

@@ -16,6 +16,7 @@ import { getProgramTemplate, getExerciseForWeek } from "@/lib/program-templates"
 import type { ProgramTemplateDefinition } from "@/types/plan";
 import { activateGuestProgram, useGuestActivePlan } from "@/hooks/useGuestWorkouts";
 import { useIsGuestUser } from "@/hooks/useGuestWorkouts";
+import { useI18n } from "@/components/providers/I18nProvider";
 
 interface ProgramCard {
   id: string;
@@ -125,10 +126,10 @@ const DIFFICULTY_CONFIG: Record<string, { border: string; text: string; bg: stri
   Elite: { border: "border-[#C2410C]/40", text: "text-[#C2410C]", bg: "bg-[#C2410C]/5" },
 };
 
-function checkAuthAndRedirect(): boolean {
+function checkAuthAndRedirect(t: (key: string) => string): boolean {
   const pb = getPocketBase();
   if (!pb.authStore.isValid || !pb.authStore.record) {
-    toast.error("Please log in to build custom programs");
+    toast.error(t("programs.LOGIN_REQUIRED"));
     return false;
   }
   return true;
@@ -136,6 +137,7 @@ function checkAuthAndRedirect(): boolean {
 
 export default function ProgramsPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const [activating, setActivating] = useState<string | null>(null);
   const [selectedProgram, setSelectedProgram] = useState<ProgramTemplateDefinition | null>(null);
   const isGuest = useIsGuestUser();
@@ -178,7 +180,7 @@ export default function ProgramsPage() {
           template || undefined
         );
         
-        toast.success(`${program.subtitle} activated (Guest Mode)`);
+        toast.success(`${program.subtitle} ${t("programs.ACTIVATED")}`);
         router.push("/workout");
         return;
       }
@@ -216,7 +218,7 @@ export default function ProgramsPage() {
           });
         }
 
-        toast.success(`${program.subtitle} already exists. Resuming...`);
+        toast.success(`${program.subtitle} ${t("programs.ALREADY_EXISTS")}`);
         router.push(`/plans/${existingPlan.id}`);
         return;
       }
@@ -240,12 +242,12 @@ export default function ProgramsPage() {
         await createPlanDaysForWeek(template, plan.id, 1);
       }
 
-      toast.success(`${program.subtitle} activated.`);
+      toast.success(`${program.subtitle} ${t("programs.ACTIVATED")}`);
       router.push(`/plans/${plan.id}`);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       console.error("[START PROGRAM]", err);
-      toast.error(`Failed to activate: ${msg}`);
+      toast.error(`${t("programs.FAILED_TO_ACTIVATE")} ${msg}`);
     } finally {
       setActivating(null);
     }
@@ -315,14 +317,14 @@ export default function ProgramsPage() {
   }
 
   function handleViewMyPrograms() {
-    if (!checkAuthAndRedirect()) {
+    if (!checkAuthAndRedirect(t)) {
       return;
     }
     router.push("/dashboard");
   }
 
   function handleBuildCustom() {
-    if (!checkAuthAndRedirect()) {
+    if (!checkAuthAndRedirect(t)) {
       return;
     }
     router.push("/plans/create");
@@ -350,11 +352,11 @@ export default function ProgramsPage() {
             className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-[#e5e5e5]"
             style={{ fontFamily: "var(--font-heading, system-ui)" }}
           >
-            PROGRAMS
+            {t("programs.TITLE")}
           </h1>
         </div>
         <p className="mt-2 max-w-xl text-sm text-[#71717A]">
-          Pick a proven program. Execute. No AI. No excuses. Just work.
+          {t("programs.SUBTITLE")}
         </p>
       </div>
 
@@ -363,7 +365,7 @@ export default function ProgramsPage() {
         <div className="flex items-center gap-4">
           <div className="h-px flex-1 bg-[#2a2a2a]" />
           <span className="font-data text-[10px] font-semibold uppercase tracking-[0.2em] text-[#71717A]">
-            SELECT YOUR PATH
+            {t("programs.SELECT_PATH")}
           </span>
           <div className="h-px flex-1 bg-[#2a2a2a]" />
         </div>
@@ -396,7 +398,7 @@ export default function ProgramsPage() {
                 {program.comingSoon && (
                   <div className="absolute right-3 top-3 z-20 border border-[#2a2a2a] bg-[#050505] px-2 py-0.5">
                     <span className="font-data text-[10px] uppercase tracking-widest text-[#71717A]">
-                      SOON
+                      {t("programs.SOON")}
                     </span>
                   </div>
                 )}
@@ -474,10 +476,10 @@ export default function ProgramsPage() {
                     )}
                   >
                     {activating === program.id
-                      ? "ACTIVATING..."
+                      ? t("programs.ACTIVATING")
                       : program.comingSoon
-                        ? "COMING SOON"
-                        : "START PROGRAM"}
+                        ? t("programs.COMING_SOON")
+                        : t("programs.START_PROGRAM")}
                     {!program.comingSoon && <ChevronRight className="ml-1 h-3 w-3" />}
                   </Button>
                 </div>
@@ -491,7 +493,7 @@ export default function ProgramsPage() {
       <div className="flex items-center gap-4">
         <div className="h-px flex-1 bg-[#2a2a2a]" />
         <span className="font-data text-[10px] uppercase tracking-widest text-[#71717A]">
-          OR
+          {t("programs.OR")}
         </span>
         <div className="h-px flex-1 bg-[#2a2a2a]" />
       </div>
@@ -501,7 +503,7 @@ export default function ProgramsPage() {
         <div className="flex items-center gap-4">
           <div className="h-px flex-1 bg-[#2a2a2a]" />
           <span className="font-data text-[10px] font-semibold uppercase tracking-[0.2em] text-[#71717A]">
-            CUSTOM PROGRAM
+            {t("programs.CUSTOM_PROGRAM")}
           </span>
           <div className="h-px flex-1 bg-[#2a2a2a]" />
         </div>
@@ -514,10 +516,10 @@ export default function ProgramsPage() {
                 className="text-2xl font-black uppercase tracking-tight text-[#e5e5e5]"
                 style={{ fontFamily: "var(--font-heading, system-ui)" }}
               >
-                BUILD YOUR OWN
+                {t("programs.BUILD_YOUR_OWN")}
               </h3>
               <p className="mt-1 max-w-md text-sm text-[#71717A]">
-                Full control. Your exercises, your splits, your progression. Build it from scratch.
+                {t("programs.BUILD_DESC")}
               </p>
             </div>
             <Button
@@ -526,7 +528,7 @@ export default function ProgramsPage() {
               className="shrink-0 rounded-none bg-[#e53e00] font-data text-xs font-bold uppercase tracking-widest text-white hover:bg-[#ff4500]"
             >
               <Pencil className="mr-2 h-3 w-3" />
-              BUILD MANUALLY
+              {t("programs.BUILD_MANUALLY")}
             </Button>
           </div>
         </div>
@@ -539,7 +541,7 @@ export default function ProgramsPage() {
           className="group flex items-center gap-2 font-data text-xs font-semibold uppercase tracking-widest text-[#71717A] transition-colors hover:text-[#E5E5E5]"
         >
           <Target className="h-3 w-3 transition-transform group-hover:translate-x-1" />
-          VIEW MY PROGRAMS
+          {t("programs.VIEW_MY_PROGRAMS")}
           <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
         </button>
       </div>

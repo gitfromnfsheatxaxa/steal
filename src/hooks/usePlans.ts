@@ -49,6 +49,27 @@ export function usePlanDaySession(planDayId: string | undefined) {
   });
 }
 
+/** Fetch all completed sessions for a given plan (used for sequential locking). */
+export function usePlanCompletedSessions(planId: string | undefined) {
+  const pb = getPocketBase();
+  const userId = pb.authStore.record?.id;
+
+  return useQuery<Set<string>>({
+    queryKey: ["planCompletedDays", planId, userId],
+    queryFn: async () => {
+      if (!planId || !userId) return new Set<string>();
+      const records = await pb
+        .collection("workout_sessions")
+        .getList<WorkoutSession>(1, 200, {
+          filter: `plan="${planId}" && user="${userId}" && status="completed"`,
+          fields: "planDay",
+        });
+      return new Set(records.items.map((r) => r.planDay));
+    },
+    enabled: !!planId && !!userId,
+  });
+}
+
 export function useActivePlan() {
   const pb = getPocketBase();
   const userId = pb.authStore.record?.id;

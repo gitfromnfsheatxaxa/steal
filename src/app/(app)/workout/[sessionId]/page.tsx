@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Clock, CheckCircle2 } from "lucide-react";
+import { useI18n } from "@/components/providers/I18nProvider";
 import { formatDuration } from "@/lib/utils";
 import type { PlanDay, PlanExercise } from "@/types/plan";
 import type { MoodLevel, ActiveSetInput } from "@/types/session";
@@ -33,6 +34,7 @@ export default function WorkoutSessionPage({
   const timer = useRestTimer();
   const store = useWorkoutStore();
   const isGuest = useIsGuestUser();
+  const { t } = useI18n();
 
   const [mood, setMood] = useState<MoodLevel | null>(null);
   const [notes, setNotes] = useState("");
@@ -152,7 +154,7 @@ export default function WorkoutSessionPage({
     store.completeSet(exerciseIndex, data);
     const ex = currentExercises[exerciseIndex];
     if (ex?.restSeconds) timer.start(ex.restSeconds);
-    toast.success("Set logged.", { duration: 1500 });
+    toast.success(t("workout.SET_LOGGED"), { duration: 1500 });
   }
 
   async function handleFinishWorkout() {
@@ -195,7 +197,7 @@ export default function WorkoutSessionPage({
         });
 
         setShowSummary(true);
-        toast.success("Session saved locally.");
+        toast.success(t("workout.SESSION_SAVED_LOCAL"));
       } else {
         // Authenticated mode - save to PocketBase
         // Create the session record
@@ -261,12 +263,12 @@ export default function WorkoutSessionPage({
         await queryClient.invalidateQueries({ queryKey: ["streakData"] });
         
         setShowSummary(true);
-        toast.success("Session saved.");
+        toast.success(t("workout.SESSION_SAVED"));
       }
     } catch (err) {
       const pbErr = err as { status?: number; response?: unknown; data?: unknown; message?: string };
       console.error("[FINISH SESSION] Error:", pbErr.status, pbErr.message, JSON.stringify(pbErr.response ?? pbErr.data));
-      toast.error("Failed to save. Check your connection and try again.");
+      toast.error(t("workout.SAVE_FAILED"));
     } finally {
       setIsFinishing(false);
     }
@@ -295,7 +297,7 @@ export default function WorkoutSessionPage({
     return (
       <div className="py-16 text-center">
         <p className="font-data text-sm uppercase tracking-widest text-muted-foreground">
-          No exercises found for this session.
+          {t("workout.NO_EXERCISES")}
         </p>
       </div>
     );
@@ -319,7 +321,7 @@ export default function WorkoutSessionPage({
           <div className="mt-2 h-0.5 w-12 bg-[#e53e00]" />
           {isGuest && (
             <p className="mt-1 text-xs text-[#71717A] font-data uppercase tracking-widest">
-              Guest Mode — Your progress is saved locally
+              {t("workout.GUEST_MODE")}
             </p>
           )}
         </div>
@@ -334,7 +336,7 @@ export default function WorkoutSessionPage({
             variant="outline"
             className="rounded-none border-[#e53e00]/40 font-data text-[10px] uppercase tracking-widest text-[#e53e00]"
           >
-            {totalSets} / {targetSets} SETS
+            {totalSets} / {targetSets} {t("workout.SETS")}
           </Badge>
         </div>
 
@@ -373,23 +375,23 @@ export default function WorkoutSessionPage({
           className="text-base font-extrabold uppercase tracking-widest"
           style={{ fontFamily: "var(--font-heading, system-ui)" }}
         >
-          WRAP IT UP
+          {t("workout.WRAP_IT_UP")}
         </h2>
 
-        <MoodCheck value={mood} onChange={setMood} label="HOW'D IT GO?" />
+        <MoodCheck value={mood} onChange={setMood} label={t("workout.HOW_IT_GO")} />
 
         <div className="space-y-1.5">
           <label
             className="font-data text-xs font-semibold uppercase tracking-widest text-muted-foreground"
             htmlFor="session-notes"
           >
-            Notes
+            {t("workout.NOTES")}
           </label>
           <Textarea
             id="session-notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="What to remember. What to fix. What to crush next time."
+            placeholder={t("workout.NOTES_PLACEHOLDER")}
             rows={2}
             className="rounded-none border-border bg-input font-data text-sm"
           />
@@ -402,12 +404,12 @@ export default function WorkoutSessionPage({
           size="lg"
         >
           <CheckCircle2 className="mr-2 h-4 w-4" />
-          {isFinishing ? "SAVING..." : "FINISH SESSION"}
+          {isFinishing ? t("workout.SAVING") : t("workout.FINISH_SESSION")}
         </Button>
 
         {totalSets === 0 && (
           <p className="text-center font-data text-xs text-muted-foreground">
-            Log at least one set to finish.
+            {t("workout.LOG_AT_LEAST_ONE")}
           </p>
         )}
       </div>

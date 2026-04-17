@@ -18,12 +18,14 @@ import {
 import { FITNESS_LEVELS } from "@/lib/constants";
 import type { UseFormReturn } from "react-hook-form";
 import type { OnboardingFormData } from "./types";
+import { useI18n } from "@/components/providers/I18nProvider";
 
 interface ProfileStepProps {
   form: UseFormReturn<OnboardingFormData>;
 }
 
 export function ProfileStep({ form }: ProfileStepProps) {
+  const { t } = useI18n();
   return (
     <div className="space-y-6">
       <div className="space-y-1">
@@ -31,10 +33,10 @@ export function ProfileStep({ form }: ProfileStepProps) {
           className="text-2xl font-extrabold uppercase tracking-tight"
           style={{ fontFamily: "var(--font-heading, system-ui)" }}
         >
-          YOUR STATS
+          {t("onboarding.YOUR_STATS")}
         </h2>
         <p className="font-data text-xs text-muted-foreground">
-          Raw numbers only. No fluff.
+          {t("onboarding.STATS_DESC")}
         </p>
       </div>
 
@@ -45,7 +47,7 @@ export function ProfileStep({ form }: ProfileStepProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel className="font-data text-xs uppercase tracking-widest text-muted-foreground">
-                Age
+                {t("onboarding.AGE")}
               </FormLabel>
               <FormControl>
                 <Input
@@ -69,7 +71,7 @@ export function ProfileStep({ form }: ProfileStepProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel className="font-data text-xs uppercase tracking-widest text-muted-foreground">
-                Gender
+                {t("onboarding.GENDER")}
               </FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
@@ -78,9 +80,9 @@ export function ProfileStep({ form }: ProfileStepProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent className="rounded-none border-border bg-card">
-                  <SelectItem value="male" className="font-data text-sm">Male</SelectItem>
-                  <SelectItem value="female" className="font-data text-sm">Female</SelectItem>
-                  <SelectItem value="other" className="font-data text-sm">Other</SelectItem>
+                  <SelectItem value="male" className="font-data text-sm">{t("onboarding.MALE")}</SelectItem>
+                  <SelectItem value="female" className="font-data text-sm">{t("onboarding.FEMALE")}</SelectItem>
+                  <SelectItem value="other" className="font-data text-sm">{t("onboarding.OTHER")}</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -94,7 +96,7 @@ export function ProfileStep({ form }: ProfileStepProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel className="font-data text-xs uppercase tracking-widest text-muted-foreground">
-                Height (cm)
+                {t("onboarding.HEIGHT_CM")}
               </FormLabel>
               <FormControl>
                 <Input
@@ -118,7 +120,7 @@ export function ProfileStep({ form }: ProfileStepProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel className="font-data text-xs uppercase tracking-widest text-muted-foreground">
-                Weight (kg)
+                {t("onboarding.WEIGHT_KG")}
               </FormLabel>
               <FormControl>
                 <Input
@@ -143,10 +145,10 @@ export function ProfileStep({ form }: ProfileStepProps) {
         render={({ field }) => (
           <FormItem>
             <FormLabel className="font-data text-xs uppercase tracking-widest text-muted-foreground">
-              Experience Level
+              {t("onboarding.EXPERIENCE")}
             </FormLabel>
             <p className="font-data text-[10px] text-muted-foreground">
-              Be straight with yourself.
+              {t("onboarding.EXPERIENCE_DESC")}
             </p>
             <div className="grid gap-2 sm:grid-cols-3">
               {FITNESS_LEVELS.map((level) => (

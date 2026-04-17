@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "@/hooks/useAuth";
+import { useI18n } from "@/components/providers/I18nProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,17 +18,18 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-const loginSchema = z.object({
-  email: z.string().email("Enter a valid email"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-});
-
-type LoginValues = z.infer<typeof loginSchema>;
+type LoginValues = { email: string; password: string };
 
 export function LoginForm() {
   const router = useRouter();
   const { login } = useAuth();
+  const { t } = useI18n();
   const [error, setError] = useState<string | null>(null);
+
+  const loginSchema = z.object({
+    email: z.string().email(t("login.EMAIL_INVALID")),
+    password: z.string().min(8, t("login.PASSWORD_MIN")),
+  });
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -55,12 +57,12 @@ export function LoginForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="font-data text-[10px] font-semibold uppercase tracking-widest text-[#71717A]">
-                  Email
+                  {t("login.EMAIL")}
                 </FormLabel>
                 <FormControl>
                   <Input
                     type="email"
-                    placeholder="your@email.com"
+                    placeholder={t("login.EMAIL_PLACEHOLDER")}
                     autoComplete="email"
                     className="h-11 rounded-none border-[#2a2a2a] bg-[#050505] font-data text-sm text-[#E5E5E5] placeholder:text-[#71717A]/50 focus:border-[#8B0000] focus:ring-0"
                     {...field}
@@ -77,12 +79,12 @@ export function LoginForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="font-data text-[10px] font-semibold uppercase tracking-widest text-[#71717A]">
-                  Password
+                  {t("login.PASSWORD")}
                 </FormLabel>
                 <FormControl>
                   <Input
                     type="password"
-                    placeholder="••••••••"
+                    placeholder={t("login.PASSWORD_PLACEHOLDER")}
                     autoComplete="current-password"
                     className="h-11 rounded-none border-[#2a2a2a] bg-[#050505] font-data text-sm text-[#E5E5E5] placeholder:text-[#71717A]/50 focus:border-[#8B0000] focus:ring-0"
                     {...field}
@@ -106,7 +108,7 @@ export function LoginForm() {
             className="h-11 w-full rounded-none bg-[#8B0000] font-data text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#9F1239] active:scale-[0.98]"
             disabled={form.formState.isSubmitting}
           >
-            {form.formState.isSubmitting ? "AUTHENTICATING..." : "ENTER"}
+            {form.formState.isSubmitting ? t("login.SUBMITTING") : t("login.SUBMIT")}
           </Button>
         </form>
       </Form>

@@ -20,12 +20,14 @@ import {
 } from "@/components/ui/select";
 import { Plus, X } from "lucide-react";
 import type { OnboardingFormData } from "./types";
+import { useI18n } from "@/components/providers/I18nProvider";
 
 interface LimitationsStepProps {
   form: UseFormReturn<OnboardingFormData>;
 }
 
 export function LimitationsStep({ form }: LimitationsStepProps) {
+  const { t } = useI18n();
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "limitations",
@@ -38,10 +40,10 @@ export function LimitationsStep({ form }: LimitationsStepProps) {
           className="text-2xl font-extrabold uppercase tracking-tight"
           style={{ fontFamily: "var(--font-heading, system-ui)" }}
         >
-          INJURIES &amp; LIMITS
+          {t("onboarding.INJURIES_TITLE")}
         </h2>
         <p className="font-data text-xs text-muted-foreground">
-          Report your damage. We&apos;ll train around it, not through it.
+          {t("onboarding.INJURIES_DESC")}
         </p>
       </div>
 
@@ -67,11 +69,11 @@ export function LimitationsStep({ form }: LimitationsStepProps) {
                 render={({ field: f }) => (
                   <FormItem>
                     <FormLabel className="font-data text-xs uppercase tracking-widest text-muted-foreground">
-                      Area
+                      {t("onboarding.AREA")}
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="e.g. Lower back, Left knee"
+                        placeholder={t("onboarding.AREA_PLACEHOLDER")}
                         className="rounded-none border-border bg-input font-data text-sm"
                         {...f}
                       />
@@ -87,7 +89,7 @@ export function LimitationsStep({ form }: LimitationsStepProps) {
                 render={({ field: f }) => (
                   <FormItem>
                     <FormLabel className="font-data text-xs uppercase tracking-widest text-muted-foreground">
-                      Severity
+                      {t("onboarding.SEVERITY")}
                     </FormLabel>
                     <Select onValueChange={f.onChange} value={f.value}>
                       <FormControl>
@@ -96,9 +98,9 @@ export function LimitationsStep({ form }: LimitationsStepProps) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="rounded-none border-border bg-card">
-                        <SelectItem value="mild" className="font-data text-sm">Minor</SelectItem>
-                        <SelectItem value="moderate" className="font-data text-sm">Moderate</SelectItem>
-                        <SelectItem value="severe" className="font-data text-sm">Severe</SelectItem>
+                        <SelectItem value="mild" className="font-data text-sm">{t("onboarding.MINOR")}</SelectItem>
+                        <SelectItem value="moderate" className="font-data text-sm">{t("onboarding.MODERATE")}</SelectItem>
+                        <SelectItem value="severe" className="font-data text-sm">{t("onboarding.SEVERE")}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -113,11 +115,11 @@ export function LimitationsStep({ form }: LimitationsStepProps) {
               render={({ field: f }) => (
                 <FormItem>
                   <FormLabel className="font-data text-xs uppercase tracking-widest text-muted-foreground">
-                    Notes
+                    {t("onboarding.INJURY_NOTES")}
                   </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="What movement triggers it? Any surgery history?"
+                      placeholder={t("onboarding.INJURY_NOTES_PLACEHOLDER")}
                       className="rounded-none border-border bg-input font-data text-sm"
                       {...f}
                     />
@@ -137,7 +139,7 @@ export function LimitationsStep({ form }: LimitationsStepProps) {
           className="rounded-none border-border font-data text-xs font-bold uppercase tracking-widest hover:border-[#e53e00]/40"
         >
           <Plus className="mr-2 h-4 w-4" />
-          ADD INJURY
+          {t("onboarding.ADD_INJURY")}
         </Button>
       </div>
 
@@ -147,11 +149,11 @@ export function LimitationsStep({ form }: LimitationsStepProps) {
         render={({ field }) => (
           <FormItem>
             <FormLabel className="font-data text-xs uppercase tracking-widest text-muted-foreground">
-              Injury History (optional)
+              {t("onboarding.INJURY_HISTORY")}
             </FormLabel>
             <FormControl>
               <Textarea
-                placeholder="Other notes..."
+                placeholder={t("onboarding.OTHER_NOTES")}
                 rows={3}
                 className="rounded-none border-border bg-input font-data text-sm"
                 {...field}

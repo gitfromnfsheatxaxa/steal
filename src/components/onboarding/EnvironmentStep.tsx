@@ -11,6 +11,7 @@ import { Building2, Home, Trees, Shuffle } from "lucide-react";
 import type { UseFormReturn } from "react-hook-form";
 import type { OnboardingFormData } from "./types";
 import type { EquipmentItem } from "@/types/profile";
+import { useI18n } from "@/components/providers/I18nProvider";
 
 const envIcons = {
   gym: Building2,
@@ -24,6 +25,7 @@ interface EnvironmentStepProps {
 }
 
 export function EnvironmentStep({ form }: EnvironmentStepProps) {
+  const { t } = useI18n();
   const environment = form.watch("environment");
 
   return (
@@ -33,10 +35,10 @@ export function EnvironmentStep({ form }: EnvironmentStepProps) {
           className="text-2xl font-extrabold uppercase tracking-tight"
           style={{ fontFamily: "var(--font-heading, system-ui)" }}
         >
-          YOUR ARENA
+          {t("onboarding.YOUR_ARENA")}
         </h2>
         <p className="font-data text-xs text-muted-foreground">
-          Where do you lift? We&apos;ll build around it.
+          {t("onboarding.ARENA_DESC")}
         </p>
       </div>
 
@@ -87,10 +89,10 @@ export function EnvironmentStep({ form }: EnvironmentStepProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel className="font-data text-xs uppercase tracking-widest text-muted-foreground">
-                AVAILABLE GEAR
+                {t("onboarding.AVAILABLE_GEAR")}
               </FormLabel>
               <p className="font-data text-[10px] text-muted-foreground">
-                More gear = more variety.
+                {t("onboarding.GEAR_DESC")}
               </p>
               <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
                 {EQUIPMENT_OPTIONS.map((eq) => {

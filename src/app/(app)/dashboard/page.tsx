@@ -9,6 +9,7 @@ import { CounterFX } from "@/components/fx/ImpactFlash";
 import { BrandNoiseOverlay } from "@/components/layout/BrandNoiseOverlay";
 import { GymBackgroundOverlay } from "@/components/layout/GymBackgroundOverlay";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/components/providers/I18nProvider";
 import {
   Zap,
   Flame,
@@ -125,9 +126,10 @@ interface SessionHistoryItemProps {
   isUpcoming?: boolean;
   isLocked?: boolean;
   dateStr?: string;
+  t: (path: string) => string;
 }
 
-function SessionHistoryItem({ dayLabel, muscleTags, isCompleted, isUpcoming, isLocked, dateStr }: SessionHistoryItemProps) {
+function SessionHistoryItem({ dayLabel, muscleTags, isCompleted, isUpcoming, isLocked, dateStr, t }: SessionHistoryItemProps) {
   return (
     <div className={cn(
       "flex items-center gap-3 py-2 px-3 border border-[#2a2a2a] relative overflow-hidden",
@@ -167,13 +169,13 @@ function SessionHistoryItem({ dayLabel, muscleTags, isCompleted, isUpcoming, isL
               {dayLabel}
             </span>
             {isCompleted && (
-              <span className="stamp text-[8px] text-[#10b981]">DONE</span>
+              <span className="stamp text-[8px] text-[#10b981]">{t("dashboard.DONE")}</span>
             )}
             {isUpcoming && !isLocked && (
-              <span className="stamp text-[8px] text-[#e53e00]">NEXT</span>
+              <span className="stamp text-[8px] text-[#e53e00]">{t("dashboard.NEXT")}</span>
             )}
             {isLocked && (
-              <span className="stamp text-[8px] text-[#525252]">LOCKED</span>
+              <span className="stamp text-[8px] text-[#525252]">{t("dashboard.LOCKED")}</span>
             )}
           </div>
           {muscleTags.length > 0 && (
@@ -243,7 +245,7 @@ function SkeletonGrid() {
 }
 
 // ─── Active Mission panel ─────────────────────────────────────────────────────
-function ActiveMissionPanel({ planId }: { planId: string }) {
+function ActiveMissionPanel({ planId, t }: { planId: string; t: (path: string) => string }) {
   const { data: days, isLoading } = usePlanDays(planId);
   const { data: sessions } = useSessions();
   const today = new Date().getDay() || 7;
@@ -287,7 +289,7 @@ function ActiveMissionPanel({ planId }: { planId: string }) {
 
   if (!nextSessionDay) {
     return (
-      <p className="stamp text-[10px] text-[#525252]">NO TRAINING DAYS CONFIGURED</p>
+      <p className="stamp text-[10px] text-[#525252]">{t("dashboard.NO_TRAINING_DAYS_CONFIGURED")}</p>
     );
   }
 
@@ -298,7 +300,7 @@ function ActiveMissionPanel({ planId }: { planId: string }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3 flex-wrap">
-        <span className="stamp text-[9px] tracking-[0.2em] text-[#525252]">DAY</span>
+        <span className="stamp text-[9px] tracking-[0.2em] text-[#525252]">{t("dashboard.DAY")}</span>
         <span className="font-data text-sm font-bold text-[#e5e5e5] uppercase tracking-widest">
           {nextSessionDay.label}
         </span>
@@ -317,7 +319,7 @@ function ActiveMissionPanel({ planId }: { planId: string }) {
         {completedSession && (
           <div className="flex items-center gap-1.5 text-[#10b981]">
             <CheckCircle2 className="h-3.5 w-3.5" />
-            <span className="font-data text-[9px] uppercase tracking-widest">COMPLETED</span>
+            <span className="font-data text-[9px] uppercase tracking-widest">{t("dashboard.COMPLETED")}</span>
           </div>
         )}
       </div>
@@ -347,7 +349,7 @@ function ActiveMissionPanel({ planId }: { planId: string }) {
           })}
           {exercises.length > 6 && (
             <p className="stamp text-[9px] text-[#525252] pl-2">
-              +{exercises.length - 6} MORE
+              +{exercises.length - 6} {t("dashboard.MORE")}
             </p>
           )}
         </div>
@@ -355,7 +357,7 @@ function ActiveMissionPanel({ planId }: { planId: string }) {
 
       {estMinutes > 0 && (
         <div className="flex items-center gap-2 pt-1">
-          <span className="stamp text-[9px] text-[#525252]">EST. {estMinutes} MIN</span>
+          <span className="stamp text-[9px] text-[#525252]">{t("dashboard.EST_MIN").replace("MIN", `${estMinutes} MIN`)}</span>
         </div>
       )}
 
@@ -373,12 +375,12 @@ function ActiveMissionPanel({ planId }: { planId: string }) {
           {completedSession ? (
             <>
               <CheckCircle2 className="mr-2 h-3.5 w-3.5" />
-              [ COMPLETED ]
+              [ {t("dashboard.COMPLETED")} ]
             </>
           ) : (
             <>
               <Play className="mr-2 h-3.5 w-3.5" />
-              [ DEPLOY — START ]
+              [ {t("dashboard.DEPLOY_START").replace("[", "").replace("]", "")} ]
             </>
           )}
         </Link>
@@ -388,7 +390,7 @@ function ActiveMissionPanel({ planId }: { planId: string }) {
 }
 
 // ─── Session History Panel ────────────────────────────────────────────────────
-function SessionHistoryPanel({ planId }: { planId: string }) {
+function SessionHistoryPanel({ planId, t }: { planId: string; t: (path: string) => string }) {
   const { data: days, isLoading } = usePlanDays(planId);
   const { data: sessions } = useSessions();
 
@@ -437,8 +439,8 @@ function SessionHistoryPanel({ planId }: { planId: string }) {
     const firstUncompletedIndex = sortedDays.findIndex(d => !completedSessionMap.has(d.id));
     const startIndex = firstUncompletedIndex >= 0 ? firstUncompletedIndex : 0;
 
-    const upcoming: Array<SessionHistoryItemProps & { dateStr: string; isLocked: boolean }> = [];
-    const completed: SessionHistoryItemProps[] = [];
+    const upcoming: Array<Omit<SessionHistoryItemProps, "t"> & { dateStr: string; isLocked: boolean }> = [];
+    const completed: Omit<SessionHistoryItemProps, "t">[] = [];
 
     // Function to calculate the next date for a given day of week
     function calculateSessionDate(dayOfWeek: number, sessionIndex: number): string {
@@ -514,7 +516,7 @@ function SessionHistoryPanel({ planId }: { planId: string }) {
 
   if (!days || days.length === 0) {
     return (
-      <p className="stamp text-[10px] text-[#525252]">NO SCHEDULE DATA</p>
+      <p className="stamp text-[10px] text-[#525252]">{t("dashboard.NO_SCHEDULE_DATA")}</p>
     );
   }
 
@@ -523,16 +525,16 @@ function SessionHistoryPanel({ planId }: { planId: string }) {
       {/* Upcoming section */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <span className="stamp text-[9px] tracking-[0.2em] text-[#e53e00]">UPCOMING</span>
+          <span className="stamp text-[9px] tracking-[0.2em] text-[#e53e00]">{t("dashboard.UPCOMING")}</span>
           <div className="h-px flex-1 bg-[#2a2a2a]" />
         </div>
         <div className="space-y-1.5">
           {sessionHistory.upcoming.length > 0 ? (
             sessionHistory.upcoming.map((item, i) => (
-              <SessionHistoryItem key={i} {...item} />
+              <SessionHistoryItem key={i} {...item} t={t} />
             ))
           ) : (
-            <p className="stamp text-[9px] text-[#525252] py-2">ALL SESSIONS COMPLETED</p>
+            <p className="stamp text-[9px] text-[#525252] py-2">{t("dashboard.ALL_SESSIONS_COMPLETED")}</p>
           )}
         </div>
       </div>
@@ -540,16 +542,16 @@ function SessionHistoryPanel({ planId }: { planId: string }) {
       {/* Completed section */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <span className="stamp text-[9px] tracking-[0.2em] text-[#10b981]">COMPLETED</span>
+          <span className="stamp text-[9px] tracking-[0.2em] text-[#10b981]">{t("dashboard.COMPLETED")}</span>
           <div className="h-px flex-1 bg-[#2a2a2a]" />
         </div>
         <div className="space-y-1.5">
           {sessionHistory.completed.length > 0 ? (
             sessionHistory.completed.map((item, i) => (
-              <SessionHistoryItem key={i} {...item} />
+              <SessionHistoryItem key={i} {...item} t={t} />
             ))
           ) : (
-            <p className="stamp text-[9px] text-[#525252] py-2">NO COMPLETED SESSIONS YET</p>
+            <p className="stamp text-[9px] text-[#525252] py-2">{t("dashboard.NO_COMPLETED_SESSIONS_YET")}</p>
           )}
         </div>
       </div>
@@ -558,7 +560,7 @@ function SessionHistoryPanel({ planId }: { planId: string }) {
 }
 
 // ─── Recent activity feed ─────────────────────────────────────────────────────
-function RecentFeed() {
+function RecentFeed({ t }: { t: (path: string) => string }) {
   const { data: sessions, isLoading: sessionsLoading } = useSessions();
   const { data: allSets, isLoading: setsLoading } = useAllSets();
 
@@ -629,7 +631,7 @@ function RecentFeed() {
   if (!recentSessions.length) {
     return (
       <div className="border border-dashed border-[#2a2a2a] p-6 text-center">
-        <span className="stamp text-[9px] text-[#525252]">NO SESSION HISTORY</span>
+        <span className="stamp text-[9px] text-[#525252]">{t("dashboard.NO_SESSION_HISTORY")}</span>
       </div>
     );
   }
@@ -658,7 +660,7 @@ function RecentFeed() {
               {planDayLabel}
             </span>
             <span className="font-data text-[10px] text-[#71717A] shrink-0">
-              {sets} SETS
+              {sets} {t("dashboard.SETS")}
             </span>
             <span className="font-data text-[10px] text-[#e53e00] shrink-0 w-12 text-right">
               {volume}
@@ -671,7 +673,7 @@ function RecentFeed() {
 }
 
 // ─── Recent PRs strip ──────────────────────────────────────────────────────────
-function RecentPRs() {
+function RecentPRs({ t }: { t: (path: string) => string }) {
   const records = usePersonalRecords();
 
   const top3 = records.slice(0, 3);
@@ -685,7 +687,7 @@ function RecentPRs() {
   if (!top3.length) {
     return (
       <div className="border border-dashed border-[#2a2a2a] p-6 text-center">
-        <span className="stamp text-[9px] text-[#525252]">NO PRs YET</span>
+        <span className="stamp text-[9px] text-[#525252]">{t("dashboard.NO_PRS_YET")}</span>
       </div>
     );
   }
@@ -717,14 +719,6 @@ function RecentPRs() {
   );
 }
 
-// ─── Quick ops tiles ──────────────────────────────────────────────────────────
-const QUICK_OPS = [
-  { label: "PROGRAMS", href: "/programs", icon: <Dumbbell className="h-4 w-4" />, kbd: "P" },
-  { label: "PROGRESS", href: "/progress", icon: <TrendingUp className="h-4 w-4" />, kbd: "R" },
-  { label: "LOG SESSION", href: "/workout", icon: <Activity className="h-4 w-4" />, kbd: "L" },
-  { label: "SETTINGS", href: "/settings", icon: <Settings className="h-4 w-4" />, kbd: "S" },
-];
-
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -733,6 +727,7 @@ export default function DashboardPage() {
   const personalRecords = usePersonalRecords();
   const { data: allSets } = useAllSets();
   const { data: sessions } = useSessions();
+  const { t } = useI18n();
 
   const firstName = (user?.name?.split(" ")[0] ?? "OPERATOR").toUpperCase();
 
@@ -772,15 +767,15 @@ export default function DashboardPage() {
       <div className="border-b border-[#2a2a2a] pb-4">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <p className="stamp text-[9px] tracking-[0.3em] text-[#525252] mb-1">STEAL THERAPY</p>
+            <p className="stamp text-[9px] tracking-[0.3em] text-[#525252] mb-1">{t("dashboard.STEAL_THERAPY")}</p>
             <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight leading-none text-[#e5e5e5]">
-              OPERATIONS DASHBOARD
+              {t("dashboard.OPERATIONS_DASHBOARD")}
             </h1>
             <div className="mt-2 h-0.5 w-12 bg-[#e53e00]" />
           </div>
           <div className="flex flex-col items-end gap-1 shrink-0">
             <TacticalClock />
-            <span className="stamp text-[9px] text-[#525252]">OPERATOR: {firstName}</span>
+            <span className="stamp text-[9px] text-[#525252]">{t("dashboard.OPERATOR")}: {firstName}</span>
           </div>
         </div>
       </div>
@@ -788,37 +783,37 @@ export default function DashboardPage() {
       {/* ── KPI row ────────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <KpiPanel
-          label="CURRENT STREAK"
+          label={t("dashboard.CURRENT_STREAK")}
           value={streakData.currentStreak}
-          unit="DAYS"
-          subValue={`BEST: ${streakData.longestStreak}D`}
+          unit={t("dashboard.DAYS")}
+          subValue={`${t("dashboard.BEST")}: ${streakData.longestStreak}D`}
           icon={<Flame className="h-3.5 w-3.5" />}
           accent="green"
           tag="01"
           trend="up"
         />
         <KpiPanel
-          label="THIS WEEK"
+          label={t("dashboard.THIS_WEEK")}
           value={streakData.thisWeekSessions}
-          unit="SESSIONS"
+          unit={t("dashboard.SESSIONS")}
           icon={<Zap className="h-3.5 w-3.5" />}
           accent="orange"
           tag="02"
           trend="up"
         />
         <KpiPanel
-          label="TOTAL VOLUME"
+          label={t("dashboard.TOTAL_VOLUME")}
           value={totalVolumeTons}
-          unit="TONNES LIFTED"
+          unit={t("dashboard.TONNES_LIFTED")}
           icon={<BarChart3 className="h-3.5 w-3.5" />}
           accent="orange"
           tag="03"
           trend="up"
         />
         <KpiPanel
-          label="PRS THIS MONTH"
+          label={t("dashboard.PRS_THIS_MONTH")}
           value={prsThisMonth}
-          unit="RECORDS SET"
+          unit={t("dashboard.RECORDS_SET")}
           icon={<Trophy className="h-3.5 w-3.5" />}
           accent="blue"
           tag="04"
@@ -833,10 +828,10 @@ export default function DashboardPage() {
           <BrandNoiseOverlay />
           <div className="relative z-10 space-y-3">
             <div className="flex items-center gap-2 mb-1">
-              <span className="stamp text-[9px] tracking-[0.25em] text-[#525252]">MISSION BRIEFING</span>
+              <span className="stamp text-[9px] tracking-[0.25em] text-[#525252]">{t("dashboard.MISSION_BRIEFING")}</span>
               <div className="h-px flex-1 bg-[#1a1a1a]" />
               {activePlan && (
-                <span className="stamp text-[9px] text-[#10b981] tracking-widest">ACTIVE</span>
+                <span className="stamp text-[9px] text-[#10b981] tracking-widest">{t("dashboard.ACTIVE")}</span>
               )}
             </div>
 
@@ -851,16 +846,16 @@ export default function DashboardPage() {
                   </p>
                 </div>
                 <div className="h-px bg-[#1a1a1a]" />
-                <ActiveMissionPanel planId={activePlan.id} />
+                <ActiveMissionPanel planId={activePlan.id} t={t} />
               </>
             ) : (
               <div className="flex flex-col gap-4 py-6">
-                <p className="stamp text-[10px] text-[#525252]">NO ACTIVE MISSION ASSIGNED</p>
+                <p className="stamp text-[10px] text-[#525252]">{t("dashboard.NO_ACTIVE_MISSION_ASSIGNED")}</p>
                 <h2 className="text-xl font-black uppercase tracking-tight text-[#e5e5e5]">
-                  NO ACTIVE PROGRAM
+                  {t("dashboard.NO_ACTIVE_PROGRAM")}
                 </h2>
                 <p className="text-sm text-[#71717A] max-w-sm">
-                  Deploy a program from the unit catalog or build your own. Stop waiting, start working.
+                  {t("dashboard.NO_PROGRAM_DESC")}
                 </p>
                 <div className="flex gap-3 flex-wrap">
                   <Button
@@ -869,7 +864,7 @@ export default function DashboardPage() {
                   >
                     <Link href="/programs">
                       <Dumbbell className="mr-2 h-3 w-3" />
-                      [ FIND A PROGRAM ]
+                      [ {t("dashboard.FIND_A_PROGRAM").replace("[", "").replace("]", "")} ]
                     </Link>
                   </Button>
                   <Button
@@ -877,7 +872,7 @@ export default function DashboardPage() {
                     variant="outline"
                     className="rounded-none border-[#2a2a2a] font-data text-xs font-bold uppercase tracking-widest text-[#e5e5e5] hover:border-[#e53e00]/50 hover:bg-[#1a1a1a] h-10"
                   >
-                    <Link href="/plans">BROWSE TEMPLATES</Link>
+                    <Link href="/plans">{t("dashboard.BROWSE_TEMPLATES")}</Link>
                   </Button>
                 </div>
               </div>
@@ -890,13 +885,13 @@ export default function DashboardPage() {
           <BrandNoiseOverlay />
           <div className="relative z-10 space-y-3">
             <div className="flex items-center gap-2 mb-1">
-              <span className="stamp text-[9px] tracking-[0.25em] text-[#525252]">SESSION HISTORY</span>
+              <span className="stamp text-[9px] tracking-[0.25em] text-[#525252]">{t("dashboard.SESSION_HISTORY")}</span>
               <div className="h-px flex-1 bg-[#1a1a1a]" />
             </div>
             {activePlan ? (
-              <SessionHistoryPanel planId={activePlan.id} />
+              <SessionHistoryPanel planId={activePlan.id} t={t} />
             ) : (
-              <p className="stamp text-[10px] text-[#525252]">NO ACTIVE PROGRAM</p>
+              <p className="stamp text-[10px] text-[#525252]">{t("dashboard.NO_ACTIVE_PROGRAM")}</p>
             )}
           </div>
         </div>
@@ -909,16 +904,16 @@ export default function DashboardPage() {
           <BrandNoiseOverlay />
           <div className="relative z-10 space-y-3">
             <div className="flex items-center gap-2 mb-1">
-              <span className="stamp text-[9px] tracking-[0.25em] text-[#525252]">ACTIVITY LOG</span>
+              <span className="stamp text-[9px] tracking-[0.25em] text-[#525252]">{t("dashboard.ACTIVITY_LOG")}</span>
               <div className="h-px flex-1 bg-[#1a1a1a]" />
               <Link
                 href="/progress"
                 className="stamp text-[9px] text-[#525252] hover:text-[#e53e00] transition-colors"
               >
-                VIEW ALL →
+                {t("dashboard.VIEW_ALL")}
               </Link>
             </div>
-            <RecentFeed />
+            <RecentFeed t={t} />
           </div>
         </div>
 
@@ -927,11 +922,11 @@ export default function DashboardPage() {
           <BrandNoiseOverlay />
           <div className="relative z-10 space-y-3">
             <div className="flex items-center gap-2 mb-1">
-              <span className="stamp text-[9px] tracking-[0.25em] text-[#525252]">RECENT PRs</span>
+              <span className="stamp text-[9px] tracking-[0.25em] text-[#525252]">{t("dashboard.RECENT_PRS")}</span>
               <div className="h-px flex-1 bg-[#1a1a1a]" />
               <Trophy className="h-3 w-3 text-[#71717A]" />
             </div>
-            <RecentPRs />
+            <RecentPRs t={t} />
           </div>
         </div>
       </div>
@@ -940,16 +935,16 @@ export default function DashboardPage() {
       <div className="border-t-2 border-[#e53e00] pt-4">
         <div className="grid grid-cols-3">
           <div className="px-4 py-2 text-center border-r border-[#1a1a1a]">
-            <p className="stamp text-[8px] text-[#525252] mb-1">LAST SYNC</p>
-            <p className="font-data text-[10px] text-[#71717A]">LIVE</p>
+            <p className="stamp text-[8px] text-[#525252] mb-1">{t("dashboard.LAST_SYNC")}</p>
+            <p className="font-data text-[10px] text-[#71717A]">{t("dashboard.LIVE")}</p>
           </div>
           <div className="px-4 py-2 text-center border-r border-[#1a1a1a]">
-            <p className="stamp text-[8px] text-[#525252] mb-1">DEVICE</p>
-            <p className="font-data text-[10px] text-[#71717A] uppercase">WEB</p>
+            <p className="stamp text-[8px] text-[#525252] mb-1">{t("dashboard.DEVICE")}</p>
+            <p className="font-data text-[10px] text-[#71717A] uppercase">{t("dashboard.WEB")}</p>
           </div>
           <div className="px-4 py-2 text-center">
-            <p className="stamp text-[8px] text-[#525252] mb-1">BUILD</p>
-            <p className="font-data text-[10px] text-[#71717A]">STEAL v2</p>
+            <p className="stamp text-[8px] text-[#525252] mb-1">{t("dashboard.BUILD")}</p>
+            <p className="font-data text-[10px] text-[#71717A]">STEEL v2</p>
           </div>
         </div>
       </div>

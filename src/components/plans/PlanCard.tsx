@@ -11,12 +11,14 @@ import { formatRelativeDate } from "@/lib/utils";
 import { Calendar, Target, Trash2, X, Play, Pause } from "lucide-react";
 import { toast } from "sonner";
 import { useDeletePlan, useUpdatePlanStatus } from "@/hooks/usePlans";
+import { useI18n } from "@/components/providers/I18nProvider";
 
 interface PlanCardProps {
   plan: WorkoutPlan;
 }
 
 export function PlanCard({ plan }: PlanCardProps) {
+  const { t } = useI18n();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isTogglingStatus, setIsTogglingStatus] = useState(false);
   const deletePlan = useDeletePlan();
@@ -47,11 +49,11 @@ export function PlanCard({ plan }: PlanCardProps) {
   const handleDelete = async () => {
     try {
       await deletePlan.mutateAsync(plan.id);
-      toast.success("Program deleted successfully.");
+      toast.success(t("plans.DELETED"));
       setShowDeleteConfirm(false);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      toast.error(`Failed to delete: ${msg}`);
+      toast.error(`${t("plans.DELETE_FAILED")} ${msg}`);
     }
   };
 
@@ -64,13 +66,13 @@ export function PlanCard({ plan }: PlanCardProps) {
         status: newStatus,
       });
       toast.success(
-        newStatus === "active" 
-          ? "Program resumed." 
-          : "Program paused."
+        newStatus === "active"
+          ? t("plans.RESUMED")
+          : t("plans.PAUSED")
       );
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      toast.error(`Failed to update: ${msg}`);
+      toast.error(`${t("plans.UPDATE_FAILED")} ${msg}`);
     } finally {
       setIsTogglingStatus(false);
     }
@@ -165,10 +167,10 @@ export function PlanCard({ plan }: PlanCardProps) {
               <X className="h-4 w-4" />
             </button>
             <h3 className="text-lg font-bold uppercase tracking-tight text-[#E5E5E5]">
-              Delete Program?
+              {t("plans.DELETE_TITLE")}
             </h3>
             <p className="mt-2 text-sm text-[#71717A]">
-              Are you sure you want to delete <span className="text-[#E5E5E5]">{plan.title}</span>? This action cannot be undone and all associated data will be removed.
+              {t("plans.DELETE_CONFIRM")} <span className="text-[#E5E5E5]">{plan.title}</span>? {t("plans.DELETE_WARNING")}
             </p>
             <div className="mt-6 flex gap-3">
               <Button
@@ -177,14 +179,14 @@ export function PlanCard({ plan }: PlanCardProps) {
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={deletePlan.isPending}
               >
-                Cancel
+                {t("plans.CANCEL")}
               </Button>
               <Button
                 className="flex-1 rounded-none bg-[#8B0000] font-data text-xs font-bold uppercase tracking-widest text-white hover:bg-[#9F1239]"
                 onClick={handleDelete}
                 disabled={deletePlan.isPending}
               >
-                {deletePlan.isPending ? "Deleting..." : "Delete"}
+                {deletePlan.isPending ? t("plans.DELETING") : t("plans.DELETE")}
               </Button>
             </div>
           </div>

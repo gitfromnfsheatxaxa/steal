@@ -328,21 +328,34 @@ export function useIsGuestUser() {
   const [isGuest, setIsGuest] = useState(false);
 
   useEffect(() => {
-    // Check if user is not authenticated (no valid PocketBase session)
     if (typeof window === "undefined") return;
-    
+
+    // Auth is stored in a cookie (pb_auth), not localStorage.
+    // Also check the PocketBase SDK auth store directly.
     try {
-      const pbAuth = localStorage.getItem("pb_auth");
-      if (pbAuth) {
-        const authData = JSON.parse(pbAuth);
-        // Check if auth is valid (has record and token)
+      const { getPocketBase } = require("@/lib/pocketbase");
+      const pb = getPocketBase();
+      if (pb.authStore.isValid && pb.authStore.record?.id) {
+        setIsGuest(false);
+        return;
+      }
+    } catch {}
+
+    // Fallback: check cookie directly
+    try {
+      const cookie = document.cookie
+        .split("; ")
+        .find((c) => c.startsWith("pb_auth="));
+      if (cookie) {
+        const value = decodeURIComponent(cookie.split("=")[1]);
+        const authData = JSON.parse(value);
         if (authData.record && authData.token) {
           setIsGuest(false);
           return;
         }
       }
     } catch {}
-    
+
     setIsGuest(true);
   }, []);
 

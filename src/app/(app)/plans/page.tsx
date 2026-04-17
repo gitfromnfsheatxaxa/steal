@@ -8,8 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Pencil } from "lucide-react";
+import { useI18n } from "@/components/providers/I18nProvider";
 
 export default function PlansPage() {
+  const { t } = useI18n();
   const { data: plans, isLoading } = usePlans();
 
   return (
@@ -20,7 +22,7 @@ export default function PlansPage() {
             className="text-3xl font-extrabold uppercase tracking-tight"
             style={{ fontFamily: "var(--font-heading, system-ui)" }}
           >
-            PROGRAMS
+            {t("plans.PROGRAMS")}
           </h1>
           <div className="mt-1 h-0.5 w-12 bg-[#e53e00]" />
         </div>
@@ -31,7 +33,7 @@ export default function PlansPage() {
           >
             <Link href="/plans/create">
               <Pencil className="mr-2 h-3 w-3" />
-              BUILD
+              {t("plans.BUILD")}
             </Link>
           </Button>
         </div>
@@ -43,13 +45,13 @@ export default function PlansPage() {
             value="my-plans"
             className="rounded-none font-data text-xs uppercase tracking-widest data-[state=active]:bg-[#e53e00] data-[state=active]:text-white"
           >
-            MY PROGRAMS
+            {t("plans.MY_PROGRAMS")}
           </TabsTrigger>
           <TabsTrigger
             value="templates"
             className="rounded-none font-data text-xs uppercase tracking-widest data-[state=active]:bg-[#e53e00] data-[state=active]:text-white"
           >
-            TEMPLATES
+            {t("plans.TEMPLATES")}
           </TabsTrigger>
         </TabsList>
 
@@ -64,7 +66,7 @@ export default function PlansPage() {
             <div className="border border-dashed border-border p-8 text-center">
               <Plus className="mx-auto h-8 w-8 text-muted-foreground" />
               <p className="mt-2 text-sm text-muted-foreground">
-                No programs yet. Build your own or pick a template.
+                {t("plans.NO_PROGRAMS")}
               </p>
               <div className="mt-4 flex items-center justify-center gap-2">
                 <Button
@@ -73,7 +75,7 @@ export default function PlansPage() {
                 >
                   <Link href="/plans/create">
                     <Pencil className="mr-2 h-3 w-3" />
-                    BUILD MANUALLY
+                    {t("plans.BUILD_MANUALLY")}
                   </Link>
                 </Button>
               </div>

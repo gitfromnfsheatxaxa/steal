@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/components/providers/ThemeProvider";
+import { useI18n } from "@/components/providers/I18nProvider";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,13 +15,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Sun, Moon, User, LogOut, Settings, LayoutDashboard } from "lucide-react";
+import { Sun, Moon, User, LogOut, Settings, LayoutDashboard, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { href: "/dashboard", label: "DASHBOARD" },
-  { href: "/programs", label: "PROGRAMS" },
-  { href: "/progress", label: "PROGRESS" },
+  { href: "/dashboard", label: "navbar.DASHBOARD" },
+  { href: "/programs", label: "navbar.PROGRAMS" },
+  { href: "/plans", label: "navbar.PLANS" },
+  { href: "/progress", label: "navbar.PROGRESS" },
 ] as const;
 
 /** UTC clock — updates every second, tabular-nums mono */
@@ -54,7 +56,7 @@ function LiveClock() {
 }
 
 /** Tactical-green status dot with slow pulse */
-function StatusIndicator() {
+function StatusIndicator({ t }: { t: (path: string) => string }) {
   return (
     <span className="flex items-center gap-1.5" aria-label="System online">
       <span className="relative flex h-2 w-2">
@@ -64,7 +66,7 @@ function StatusIndicator() {
         />
         <span className="relative inline-flex h-2 w-2 rounded-full bg-tactical" />
       </span>
-      <span className="stamp text-tactical hidden lg:inline">ONLINE</span>
+      <span className="stamp text-tactical hidden lg:inline">{t("navbar.ONLINE")}</span>
     </span>
   );
 }
@@ -73,6 +75,7 @@ export function Navbar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { language, setLanguage, t } = useI18n();
 
   const displayName: string =
     (typeof user?.name === "string" && user.name.length > 0
@@ -104,10 +107,10 @@ export function Navbar() {
                 letterSpacing: "-0.02em",
               }}
             >
-              STEAL
+              STEEL
             </span>
             <span className="stamp text-ink-low" style={{ letterSpacing: "0.3em" }}>
-              STEEL
+              {t("navbar.STEEL")}
             </span>
           </Link>
 
@@ -132,7 +135,7 @@ export function Navbar() {
                       : "text-ink-mid hover:text-ink-high",
                   )}
                 >
-                  {link.label}
+                  {t(link.label)}
                   {active && (
                     <motion.span
                       layoutId="nav-underline"
@@ -156,7 +159,7 @@ export function Navbar() {
 
           {/* Status dot */}
           <div className="hidden items-center sm:flex">
-            <StatusIndicator />
+            <StatusIndicator t={t} />
           </div>
 
           {/* Hairline divider */}
@@ -198,24 +201,67 @@ export function Navbar() {
               style={{ borderColor: "rgba(185,28,28,0.3)" }}
             >
               {/* User identity header */}
+              {/* Language Selector */}
               <div className="border-b border-surface-3 px-3 py-2.5">
-                <p className="stamp text-ink-low">OPERATOR</p>
+                <div className="flex items-center gap-2 mb-2">
+                  <Globe className="h-3.5 w-3.5 text-ink-mid" />
+                  <p className="stamp text-ink-low">{t("navbar.OPERATOR")}</p>
+                </div>
                 <p className="font-data mt-0.5 truncate text-[11px] font-semibold uppercase tracking-wider text-ink-high">
                   {displayName}
                 </p>
+              </div>
+
+              <div className="border-b border-surface-3 px-3 py-2">
+                <p className="stamp text-[9px] text-ink-mid mb-2">LANGUAGE</p>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => setLanguage("en")}
+                    className={cn(
+                      "px-2 py-1 text-[10px] font-data uppercase tracking-widest border transition-colors",
+                      language === "en"
+                        ? "border-rust text-rust bg-surface-3"
+                        : "border-surface-4 text-ink-mid hover:border-rust hover:text-ink-high"
+                    )}
+                  >
+                    EN
+                  </button>
+                  <button
+                    onClick={() => setLanguage("ru")}
+                    className={cn(
+                      "px-2 py-1 text-[10px] font-data uppercase tracking-widest border transition-colors",
+                      language === "ru"
+                        ? "border-rust text-rust bg-surface-3"
+                        : "border-surface-4 text-ink-mid hover:border-rust hover:text-ink-high"
+                    )}
+                  >
+                    RU
+                  </button>
+                  <button
+                    onClick={() => setLanguage("uz")}
+                    className={cn(
+                      "px-2 py-1 text-[10px] font-data uppercase tracking-widest border transition-colors",
+                      language === "uz"
+                        ? "border-rust text-rust bg-surface-3"
+                        : "border-surface-4 text-ink-mid hover:border-rust hover:text-ink-high"
+                    )}
+                  >
+                    UZ
+                  </button>
+                </div>
               </div>
 
               <div className="py-1">
                 <DropdownMenuItem asChild className="rounded-none px-3 py-2 focus:bg-surface-3">
                   <Link href="/dashboard" className="flex items-center gap-2 font-data text-[11px] uppercase tracking-widest text-ink-mid hover:text-ink-high">
                     <LayoutDashboard className="h-3.5 w-3.5" />
-                    DASHBOARD
+                    {t("navbar.DASHBOARD")}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="rounded-none px-3 py-2 focus:bg-surface-3">
                   <Link href="/settings" className="flex items-center gap-2 font-data text-[11px] uppercase tracking-widest text-ink-mid hover:text-ink-high">
                     <Settings className="h-3.5 w-3.5" />
-                    SETTINGS
+                    {t("navbar.SETTINGS")}
                   </Link>
                 </DropdownMenuItem>
               </div>
@@ -228,7 +274,7 @@ export function Navbar() {
                   className="rounded-none px-3 py-2 font-data text-[11px] uppercase tracking-widest text-rust focus:bg-surface-3 focus:text-rust cursor-pointer"
                 >
                   <LogOut className="mr-2 h-3.5 w-3.5" />
-                  SIGN OUT
+                  {t("navbar.SIGN_OUT")}
                 </DropdownMenuItem>
               </div>
             </DropdownMenuContent>
@@ -241,6 +287,12 @@ export function Navbar() {
         @keyframes st-pulse {
           0%, 100% { transform: scale(1); opacity: 0.75; }
           50%       { transform: scale(2); opacity: 0;    }
+        }
+      `}</style>
+      <style>{`
+        .stamp {
+          font-family: 'JetBrains Mono', monospace;
+          letter-spacing: 0.15em;
         }
       `}</style>
     </header>

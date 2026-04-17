@@ -3,51 +3,16 @@
 import { use } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getPocketBase } from "@/lib/pocketbase";
-import { usePlanDays, usePlanDaySession } from "@/hooks/usePlans";
+import { usePlanDays, usePlanCompletedSessions } from "@/hooks/usePlans";
 import { BrandNoiseOverlay } from "@/components/layout/BrandNoiseOverlay";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar, Dumbbell, CheckCircle2, Target, Clock, ChevronRight } from "lucide-react";
+import { Calendar, Dumbbell, CheckCircle2, Target, Clock, ChevronRight, Lock } from "lucide-react";
 import type { WorkoutPlan, PlanDay } from "@/types/plan";
 import { DAYS_OF_WEEK } from "@/lib/constants";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-
-// ─── Day Status Panel ────────────────────────────────────────────────────────
-function DayStatusPanel({ day }: { day: PlanDay }) {
-  const { data: session, isLoading } = usePlanDaySession(day.id);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center gap-2">
-        <div className="h-3 w-3 bg-[#2a2a2a] animate-pulse" />
-        <span className="font-data text-[9px] text-[#525252]">LOADING</span>
-      </div>
-    );
-  }
-
-  if (session) {
-    return (
-      <div className="flex items-center gap-1.5">
-        <div className="bg-[#10b981]/10 p-1 rounded-sm">
-          <CheckCircle2 className="h-3.5 w-3.5 text-[#10b981]" />
-        </div>
-        <span className="font-data text-[9px] font-bold uppercase tracking-widest text-[#10b981]">
-          COMPLETED
-        </span>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex items-center gap-1.5">
-      <div className="bg-[#2a2a2a] p-1 rounded-sm">
-        <Clock className="h-3.5 w-3.5 text-[#525252]" />
-      </div>
-      <span className="font-data text-[9px] text-[#525252]">PENDING</span>
-    </div>
-  );
-}
+import { useI18n } from "@/components/providers/I18nProvider";
 
 // ─── Exercise List Panel ─────────────────────────────────────────────────────
 function ExerciseListPanel({ dayId }: { dayId: string }) {
@@ -114,18 +79,24 @@ function ExerciseListPanel({ dayId }: { dayId: string }) {
 }
 
 // ─── Day Card ────────────────────────────────────────────────────────────────
-function DayCard({ day, isCurrentWeek, planCurrentWeek }: { day: PlanDay; isCurrentWeek: boolean; planCurrentWeek: number }) {
-  const { data: session, isLoading } = usePlanDaySession(day.id);
-  const isCompleted = !!session;
-  const isLocked = day.week > planCurrentWeek;
-
+function DayCard({
+  day,
+  isCurrentWeek,
+  isCompleted,
+  isLocked,
+}: {
+  day: PlanDay;
+  isCurrentWeek: boolean;
+  isCompleted: boolean;
+  isLocked: boolean;
+}) {
   return (
     <div
       className={cn(
         "border bg-[#0a0a0a] relative overflow-hidden transition-all",
         isCompleted
           ? "border-[#10b981]/40"
-          : isCurrentWeek
+          : !isLocked && isCurrentWeek
           ? "border-[#e53e00]/40"
           : isLocked
           ? "border-[#2a2a2a] opacity-50"
@@ -133,11 +104,9 @@ function DayCard({ day, isCurrentWeek, planCurrentWeek }: { day: PlanDay; isCurr
       )}
     >
       <BrandNoiseOverlay />
-      {/* Completion overlay */}
       {isCompleted && (
         <div className="absolute inset-0 bg-[#10b981]/5 pointer-events-none" />
       )}
-      {/* Locked overlay */}
       {isLocked && (
         <div className="absolute inset-0 bg-[#0a0a0a]/70 pointer-events-none" />
       )}
@@ -167,7 +136,31 @@ function DayCard({ day, isCurrentWeek, planCurrentWeek }: { day: PlanDay; isCurr
               </div>
             )}
           </div>
-          <DayStatusPanel day={day} />
+          {/* Inline status */}
+          {isCompleted ? (
+            <div className="flex items-center gap-1.5">
+              <div className="bg-[#10b981]/10 p-1 rounded-sm">
+                <CheckCircle2 className="h-3.5 w-3.5 text-[#10b981]" />
+              </div>
+              <span className="font-data text-[9px] font-bold uppercase tracking-widest text-[#10b981]">
+                COMPLETED
+              </span>
+            </div>
+          ) : isLocked ? (
+            <div className="flex items-center gap-1.5">
+              <div className="bg-[#2a2a2a] p-1 rounded-sm">
+                <Lock className="h-3.5 w-3.5 text-[#525252]" />
+              </div>
+              <span className="font-data text-[9px] text-[#525252]">LOCKED</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5">
+              <div className="bg-[#e53e00]/10 p-1 rounded-sm">
+                <Clock className="h-3.5 w-3.5 text-[#e53e00]" />
+              </div>
+              <span className="font-data text-[9px] font-bold uppercase tracking-widest text-[#e53e00]">READY</span>
+            </div>
+          )}
         </div>
 
         {/* Divider */}
@@ -196,6 +189,7 @@ function DayCard({ day, isCurrentWeek, planCurrentWeek }: { day: PlanDay; isCurr
             </span>
           ) : isLocked ? (
             <span className="font-data text-[9px] text-[#525252]">
+              <Lock className="inline h-3 w-3 mr-1" />
               LOCKED
             </span>
           ) : (
@@ -248,6 +242,7 @@ export default function PlanDetailPage({
 }) {
   const { planId } = use(params);
   const pb = getPocketBase();
+  const { t } = useI18n();
 
   const { data: plan, isLoading: planLoading } = useQuery<WorkoutPlan>({
     queryKey: ["plan", planId],
@@ -255,16 +250,17 @@ export default function PlanDetailPage({
   });
 
   const { data: days, isLoading: daysLoading } = usePlanDays(planId);
+  const { data: completedDayIds, isLoading: sessionsLoading } = usePlanCompletedSessions(planId);
 
-  if (planLoading || daysLoading) {
+  if (planLoading || daysLoading || sessionsLoading) {
     return <SkeletonGrid />;
   }
 
   if (!plan) {
     return (
       <div className="border border-[#ef4444]/40 bg-[#0a0a0a] flex flex-col items-center justify-center py-20 gap-4" style={{ borderLeft: "3px solid #ef4444" }}>
-        <div className="stamp text-[14px] tracking-[0.3em] text-[#ef4444]">NOT FOUND</div>
-        <div className="stamp text-[10px] text-[#525252]">PROGRAM DOES NOT EXIST</div>
+        <div className="stamp text-[14px] tracking-[0.3em] text-[#ef4444]">{t("plans.NOT_FOUND")}</div>
+        <div className="stamp text-[10px] text-[#525252]">{t("plans.PROGRAM_NOT_EXIST")}</div>
       </div>
     );
   }
@@ -286,9 +282,9 @@ export default function PlanDetailPage({
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="stamp text-[9px] tracking-[0.3em] text-[#525252]">ACTIVE MISSION</span>
+              <span className="stamp text-[9px] tracking-[0.3em] text-[#525252]">{t("plans.ACTIVE_MISSION")}</span>
               <div className="h-px w-8 bg-[#2a2a2a]" />
-              <span className="stamp text-[8px] text-[#10b981] tracking-widest">ONLINE</span>
+              <span className="stamp text-[8px] text-[#10b981] tracking-widest">{t("plans.ONLINE")}</span>
             </div>
             <h1
               className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-[#e5e5e5]"
@@ -300,7 +296,7 @@ export default function PlanDetailPage({
           </div>
           <div className="flex flex-col items-end gap-1 shrink-0">
             <div className="flex items-center gap-2">
-              <span className="stamp text-[9px] tracking-[0.15em] text-[#525252]">STATUS</span>
+              <span className="stamp text-[9px] tracking-[0.15em] text-[#525252]">{t("plans.STATUS")}</span>
               <span className={cn(
                 "font-data text-[9px] font-bold uppercase tracking-widest px-2 py-0.5",
                 plan.status === "active" ? "bg-[#10b981]/10 text-[#10b981]" : "bg-[#525252]/10 text-[#71717A]"
@@ -318,8 +314,8 @@ export default function PlanDetailPage({
               <Calendar className="h-3.5 w-3.5 text-[#525252]" />
             </div>
             <div>
-              <div className="font-data text-[9px] text-[#525252]">DURATION</div>
-              <div className="font-data text-xs text-[#a3a3a3]">WEEK {plan.currentWeek} / {plan.durationWeeks}</div>
+              <div className="font-data text-[9px] text-[#525252]">{t("plans.DURATION")}</div>
+              <div className="font-data text-xs text-[#a3a3a3]">{t("plans.WEEK")} {plan.currentWeek} / {plan.durationWeeks}</div>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -327,8 +323,8 @@ export default function PlanDetailPage({
               <Dumbbell className="h-3.5 w-3.5 text-[#525252]" />
             </div>
             <div>
-              <div className="font-data text-[9px] text-[#525252]">TOTAL DAYS</div>
-              <div className="font-data text-xs text-[#a3a3a3]">{totalDays} TRAINING</div>
+              <div className="font-data text-[9px] text-[#525252]">{t("plans.TOTAL_DAYS")}</div>
+              <div className="font-data text-xs text-[#a3a3a3]">{totalDays} {t("plans.TRAINING")}</div>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -336,7 +332,7 @@ export default function PlanDetailPage({
               <Target className="h-3.5 w-3.5 text-[#525252]" />
             </div>
             <div>
-              <div className="font-data text-[9px] text-[#525252]">GOAL</div>
+              <div className="font-data text-[9px] text-[#525252]">{t("plans.GOAL")}</div>
               <div className="font-data text-xs text-[#a3a3a3]">{plan.goalType?.replace(/_/g, " ") || "N/A"}</div>
             </div>
           </div>
@@ -345,7 +341,7 @@ export default function PlanDetailPage({
               <Clock className="h-3.5 w-3.5 text-[#525252]" />
             </div>
             <div>
-              <div className="font-data text-[9px] text-[#525252]">ENVIRONMENT</div>
+              <div className="font-data text-[9px] text-[#525252]">{t("plans.ENVIRONMENT")}</div>
               <div className="font-data text-xs text-[#a3a3a3]">{plan.environment || "N/A"}</div>
             </div>
           </div>
@@ -357,67 +353,99 @@ export default function PlanDetailPage({
         <div className="flex items-center gap-4">
           <div className="h-px flex-1 bg-[#2a2a2a]" />
           <span className="font-data text-[10px] uppercase tracking-widest text-[#71717A]">
-            TRAINING SCHEDULE
+            {t("plans.TRAINING_SCHEDULE")}
           </span>
           <div className="h-px flex-1 bg-[#2a2a2a]" />
         </div>
 
-        {Array.from(weeks.entries()).sort(([a], [b]) => a - b).map(([weekNum, weekDays]) => (
-          <div key={weekNum} className="space-y-3">
-            {/* Week header */}
-            <div className="flex items-center gap-3">
-              <div className={cn(
-                "w-1 h-6",
-                weekNum === plan.currentWeek ? "bg-[#e53e00]" : "bg-[#2a2a2a]"
-              )} />
-              <div>
-                <span className={cn(
-                  "font-data text-xs font-bold uppercase tracking-widest",
-                  weekNum === plan.currentWeek ? "text-[#e5e5e5]" : "text-[#525252]"
-                )}>
-                  WEEK {weekNum}
-                </span>
-                <span className="font-data text-[9px] text-[#71717A] ml-2">
-                  {weekDays?.length} DAYS
-                </span>
-              </div>
-              {weekNum === plan.currentWeek && (
-                <span className="stamp text-[8px] text-[#e53e00] tracking-widest">CURRENT</span>
-              )}
-            </div>
+        {Array.from(weeks.entries()).sort(([a], [b]) => a - b).map(([weekNum, weekDays]) => {
+          const isCurrentWeek = weekNum === plan.currentWeek;
+          const isFutureWeek = weekNum > plan.currentWeek;
+          const sortedDays = weekDays?.sort((a, b) => a.dayOfWeek - b.dayOfWeek) ?? [];
 
-            {/* Week days grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {weekDays
-                ?.sort((a, b) => a.dayOfWeek - b.dayOfWeek)
-                .map((day) => (
-                  <DayCard
-                    key={day.id}
-                    day={day}
-                    isCurrentWeek={weekNum === plan.currentWeek}
-                    planCurrentWeek={plan.currentWeek}
-                  />
-                ))}
+          // Sequential locking: within current week, only the first
+          // uncompleted day is open. Past weeks are all open (or completed).
+          // Future weeks are fully locked.
+          let nextOpenFound = false;
+
+          return (
+            <div key={weekNum} className="space-y-3">
+              {/* Week header */}
+              <div className="flex items-center gap-3">
+                <div className={cn(
+                  "w-1 h-6",
+                  isCurrentWeek ? "bg-[#e53e00]" : "bg-[#2a2a2a]"
+                )} />
+                <div>
+                  <span className={cn(
+                    "font-data text-xs font-bold uppercase tracking-widest",
+                    isCurrentWeek ? "text-[#e5e5e5]" : "text-[#525252]"
+                  )}>
+                    {t("plans.WEEK")} {weekNum}
+                  </span>
+                  <span className="font-data text-[9px] text-[#71717A] ml-2">
+                    {sortedDays.length} {t("plans.DAYS")}
+                  </span>
+                </div>
+                {isCurrentWeek && (
+                  <span className="stamp text-[8px] text-[#e53e00] tracking-widest">{t("plans.CURRENT")}</span>
+                )}
+              </div>
+
+              {/* Week days grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {sortedDays.map((day) => {
+                  const dayCompleted = completedDayIds?.has(day.id) ?? false;
+
+                  let dayLocked: boolean;
+                  if (isFutureWeek) {
+                    dayLocked = true;
+                  } else if (dayCompleted) {
+                    dayLocked = false;
+                  } else if (isCurrentWeek) {
+                    // First uncompleted day in current week is open
+                    if (!nextOpenFound) {
+                      nextOpenFound = true;
+                      dayLocked = false;
+                    } else {
+                      dayLocked = true;
+                    }
+                  } else {
+                    // Past week — all unlocked
+                    dayLocked = false;
+                  }
+
+                  return (
+                    <DayCard
+                      key={day.id}
+                      day={day}
+                      isCurrentWeek={isCurrentWeek}
+                      isCompleted={dayCompleted}
+                      isLocked={dayLocked}
+                    />
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* ── Bottom HUD ────────────────────────────────────────────────────── */}
       <div className="border-t-2 border-[#e53e00] pt-4">
         <div className="grid grid-cols-3">
           <div className="px-4 py-2 text-center border-r border-[#1a1a1a]">
-            <p className="stamp text-[8px] text-[#525252] mb-1">LAST SYNC</p>
-            <p className="font-data text-[10px] text-[#71717A]">LIVE</p>
+            <p className="stamp text-[8px] text-[#525252] mb-1">{t("plans.LAST_SYNC")}</p>
+            <p className="font-data text-[10px] text-[#71717A]">{t("plans.LIVE")}</p>
           </div>
           <div className="px-4 py-2 text-center border-r border-[#1a1a1a]">
-            <p className="stamp text-[8px] text-[#525252] mb-1">PROGRESS</p>
+            <p className="stamp text-[8px] text-[#525252] mb-1">{t("plans.PROGRESS")}</p>
             <p className="font-data text-[10px] text-[#71717A]">
               {Math.round((plan.currentWeek / plan.durationWeeks) * 100)}%
             </p>
           </div>
           <div className="px-4 py-2 text-center">
-            <p className="stamp text-[8px] text-[#525252] mb-1">PLAN ID</p>
+            <p className="stamp text-[8px] text-[#525252] mb-1">{t("plans.PLAN_ID")}</p>
             <p className="font-data text-[10px] text-[#71717A] truncate">{planId.slice(0, 8)}</p>
           </div>
         </div>

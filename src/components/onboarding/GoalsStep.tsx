@@ -11,6 +11,7 @@ import { GOAL_OPTIONS } from "@/lib/constants";
 import { Target, Flame, Zap, Heart, Activity } from "lucide-react";
 import type { UseFormReturn } from "react-hook-form";
 import type { OnboardingFormData } from "./types";
+import { useI18n } from "@/components/providers/I18nProvider";
 
 const goalIcons = {
   muscle_building: Zap,
@@ -25,6 +26,7 @@ interface GoalsStepProps {
 }
 
 export function GoalsStep({ form }: GoalsStepProps) {
+  const { t } = useI18n();
   return (
     <div className="space-y-6">
       <div className="space-y-1">
@@ -32,10 +34,10 @@ export function GoalsStep({ form }: GoalsStepProps) {
           className="text-2xl font-extrabold uppercase tracking-tight"
           style={{ fontFamily: "var(--font-heading, system-ui)" }}
         >
-          YOUR MISSION
+          {t("onboarding.YOUR_MISSION")}
         </h2>
         <p className="font-data text-xs text-muted-foreground">
-          Pick your target. Everything else follows.
+          {t("onboarding.MISSION_DESC")}
         </p>
       </div>
 
@@ -86,7 +88,7 @@ export function GoalsStep({ form }: GoalsStepProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel className="font-data text-xs uppercase tracking-widest text-muted-foreground">
-                Days/Week:{" "}
+                {t("onboarding.DAYS_WEEK")}{" "}
                 <span className="font-bold text-foreground">{field.value}</span>
               </FormLabel>
               <Slider
@@ -107,8 +109,8 @@ export function GoalsStep({ form }: GoalsStepProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel className="font-data text-xs uppercase tracking-widest text-muted-foreground">
-                Session Length:{" "}
-                <span className="font-bold text-foreground">{field.value} min</span>
+                {t("onboarding.SESSION_LENGTH")}{" "}
+                <span className="font-bold text-foreground">{field.value} {t("onboarding.MIN")}</span>
               </FormLabel>
               <Slider
                 min={20}

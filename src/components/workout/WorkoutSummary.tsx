@@ -7,6 +7,7 @@ import { Trophy, Clock, Dumbbell, TrendingUp } from "lucide-react";
 import { formatDuration, formatWeight } from "@/lib/utils";
 import type { ActiveSetInput } from "@/types/session";
 import Link from "next/link";
+import { useI18n } from "@/components/providers/I18nProvider";
 
 interface WorkoutSummaryProps {
   duration: number; // seconds
@@ -17,6 +18,7 @@ interface WorkoutSummaryProps {
 }
 
 export function WorkoutSummary({ duration, exercises }: WorkoutSummaryProps) {
+  const { t } = useI18n();
   const totalSets = exercises.reduce(
     (sum, ex) => sum + ex.completedSets.length,
     0,
@@ -37,10 +39,9 @@ export function WorkoutSummary({ duration, exercises }: WorkoutSummaryProps) {
     <div className="mx-auto max-w-md space-y-6 py-8 text-center">
       <div className="space-y-2">
         <Trophy className="mx-auto h-12 w-12 text-warning" />
-        <h2 className="text-2xl font-bold">Workout Complete</h2>
+        <h2 className="text-2xl font-bold">{t("summary.TITLE")}</h2>
         <p className="text-sm text-muted-foreground">
-          You showed up and put in the work. That&apos;s what builds lasting
-          change.
+          {t("summary.DESC")}
         </p>
       </div>
 
@@ -49,28 +50,28 @@ export function WorkoutSummary({ duration, exercises }: WorkoutSummaryProps) {
           <CardContent className="flex flex-col items-center py-4">
             <Clock className="mb-1 h-5 w-5 text-muted-foreground" />
             <span className="text-lg font-bold">{formatDuration(duration)}</span>
-            <span className="text-xs text-muted-foreground">Duration</span>
+            <span className="text-xs text-muted-foreground">{t("summary.DURATION")}</span>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="flex flex-col items-center py-4">
             <Dumbbell className="mb-1 h-5 w-5 text-muted-foreground" />
             <span className="text-lg font-bold">{totalSets}</span>
-            <span className="text-xs text-muted-foreground">Sets</span>
+            <span className="text-xs text-muted-foreground">{t("summary.SETS")}</span>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="flex flex-col items-center py-4">
             <TrendingUp className="mb-1 h-5 w-5 text-muted-foreground" />
             <span className="text-lg font-bold">{formatWeight(totalVolume)}</span>
-            <span className="text-xs text-muted-foreground">Total volume</span>
+            <span className="text-xs text-muted-foreground">{t("summary.TOTAL_VOLUME")}</span>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="flex flex-col items-center py-4">
             <span className="mb-1 text-lg">💪</span>
             <span className="text-lg font-bold">{totalReps}</span>
-            <span className="text-xs text-muted-foreground">Total reps</span>
+            <span className="text-xs text-muted-foreground">{t("summary.TOTAL_REPS")}</span>
           </CardContent>
         </Card>
       </div>
@@ -78,7 +79,7 @@ export function WorkoutSummary({ duration, exercises }: WorkoutSummaryProps) {
       {/* Exercise breakdown */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Exercise Breakdown</CardTitle>
+          <CardTitle className="text-sm">{t("summary.EXERCISE_BREAKDOWN")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           {exercises.map((ex, i) => (
@@ -88,7 +89,7 @@ export function WorkoutSummary({ duration, exercises }: WorkoutSummaryProps) {
             >
               <span className="text-muted-foreground">{ex.name}</span>
               <Badge variant="secondary">
-                {ex.completedSets.length} sets
+                {ex.completedSets.length} {t("summary.SETS_COUNT")}
               </Badge>
             </div>
           ))}
@@ -97,10 +98,10 @@ export function WorkoutSummary({ duration, exercises }: WorkoutSummaryProps) {
 
       <div className="flex gap-3">
         <Button asChild className="flex-1">
-          <Link href="/dashboard">Back to Dashboard</Link>
+          <Link href="/dashboard">{t("summary.BACK_TO_DASHBOARD")}</Link>
         </Button>
         <Button asChild variant="outline" className="flex-1">
-          <Link href="/progress">View Progress</Link>
+          <Link href="/progress">{t("summary.VIEW_PROGRESS")}</Link>
         </Button>
       </div>
     </div>

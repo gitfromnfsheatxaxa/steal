@@ -5,22 +5,25 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   ClipboardList,
+  FileText,
   Dumbbell,
   TrendingUp,
   Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/components/providers/I18nProvider";
 
 const tabs = [
-  { href: "/dashboard", label: "HOME", icon: LayoutDashboard },
-  { href: "/programs", label: "PROGRAMS", icon: ClipboardList },
-  { href: "/workout", label: "TRAIN", icon: Dumbbell },
-  { href: "/progress", label: "STATS", icon: TrendingUp },
-  { href: "/settings", label: "GEAR", icon: Settings },
+  { href: "/dashboard", labelKey: "bottomNav.HOME", icon: LayoutDashboard },
+  { href: "/programs", labelKey: "bottomNav.PROGRAMS", icon: ClipboardList },
+  { href: "/plans", labelKey: "bottomNav.PLANS", icon: FileText },
+  { href: "/progress", labelKey: "bottomNav.STATS", icon: TrendingUp },
+  { href: "/settings", labelKey: "bottomNav.GEAR", icon: Settings },
 ] as const;
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { t } = useI18n();
 
   return (
     <nav
@@ -48,7 +51,7 @@ export function BottomNav() {
                   active && "scale-110",
                 )}
               />
-              <span>{tab.label}</span>
+              <span>{t(tab.labelKey)}</span>
               {active && (
                 <span className="absolute bottom-0 left-1/2 h-0.5 w-8 -translate-x-1/2 bg-[#8B0000]" />
               )}

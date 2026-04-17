@@ -25,6 +25,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { LogOut, Moon, Sun, UserCog } from "lucide-react";
+import { useI18n } from "@/components/providers/I18nProvider";
 
 const profileSchema = z.object({
   name: z.string().min(2),
@@ -38,6 +39,7 @@ export default function SettingsPage() {
   const { user, logout } = useAuth();
   const { data: profile, isLoading } = useProfile();
   const { theme, toggleTheme } = useTheme();
+  const { t } = useI18n();
 
   const form = useForm<ProfileValues>({
     resolver: zodResolver(profileSchema),
@@ -64,9 +66,9 @@ export default function SettingsPage() {
           height: values.height,
         });
       }
-      toast.success("Saved.");
+      toast.success(t("settings.SAVED"));
     } catch {
-      toast.error("Failed to save.");
+      toast.error(t("settings.SAVE_FAILED"));
     }
   }
 
@@ -82,7 +84,7 @@ export default function SettingsPage() {
           className="text-3xl font-extrabold uppercase tracking-tight"
           style={{ fontFamily: "var(--font-heading, system-ui)" }}
         >
-          GEAR
+          {t("settings.GEAR")}
         </h1>
         <p className="font-data mt-1 text-xs text-muted-foreground">{user?.email}</p>
       </div>
@@ -96,7 +98,7 @@ export default function SettingsPage() {
               className="text-sm font-bold uppercase tracking-widest"
               style={{ fontFamily: "var(--font-heading, system-ui)" }}
             >
-              PROFILE
+              {t("settings.PROFILE")}
             </span>
           </CardTitle>
         </CardHeader>
@@ -115,7 +117,7 @@ export default function SettingsPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="font-data text-xs uppercase tracking-widest text-muted-foreground">
-                        Display Name
+                        {t("settings.DISPLAY_NAME")}
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -134,7 +136,7 @@ export default function SettingsPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="font-data text-xs uppercase tracking-widest text-muted-foreground">
-                          Weight (kg)
+                          {t("settings.WEIGHT_KG")}
                         </FormLabel>
                         <FormControl>
                           <Input
@@ -155,7 +157,7 @@ export default function SettingsPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="font-data text-xs uppercase tracking-widest text-muted-foreground">
-                          Height (cm)
+                          {t("settings.HEIGHT_CM")}
                         </FormLabel>
                         <FormControl>
                           <Input
@@ -175,7 +177,7 @@ export default function SettingsPage() {
                   disabled={form.formState.isSubmitting}
                   className="rounded-none bg-[#e53e00] font-data text-xs font-bold uppercase tracking-widest text-white hover:bg-[#ff4500]"
                 >
-                  {form.formState.isSubmitting ? "SAVING..." : "SAVE"}
+                  {form.formState.isSubmitting ? t("settings.SAVING") : t("settings.SAVE")}
                 </Button>
               </form>
             </Form>
@@ -194,10 +196,10 @@ export default function SettingsPage() {
             )}
             <div>
               <p className="font-data text-xs font-semibold uppercase tracking-widest">
-                Dark Mode
+                {t("settings.DARK_MODE")}
               </p>
               <p className="font-data text-[10px] text-muted-foreground">
-                {theme === "dark" ? "Active" : "Off"}
+                {theme === "dark" ? t("settings.ACTIVE") : t("settings.OFF")}
               </p>
             </div>
           </div>
@@ -217,7 +219,7 @@ export default function SettingsPage() {
         onClick={handleLogout}
       >
         <LogOut className="mr-2 h-4 w-4" />
-        SIGN OUT
+        {t("settings.SIGN_OUT")}
       </Button>
     </div>
   );

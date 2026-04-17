@@ -22,6 +22,7 @@ import { EnhancedVolumeChart } from "@/components/progress/EnhancedVolumeChart";
 import { ProgressTrendChart } from "@/components/progress/ProgressTrendChart";
 import { RepsDistributionChart } from "@/components/progress/RepsDistributionChart";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { useI18n } from "@/components/providers/I18nProvider";
 
 // ============================================================================
 // LiveClock — ticking monospace HH:MM:SS
@@ -169,7 +170,7 @@ function KPIPanel({ label, value, subValue, trend, panelNum, accent = "orange" }
 // ============================================================================
 // SignalLost — error state panel
 // ============================================================================
-function SignalLost({ onRetry }: { onRetry?: () => void }) {
+function SignalLost({ onRetry, t }: { onRetry?: () => void; t: (p: string) => string }) {
   return (
     <div
       className="border border-[#ef4444]/40 bg-[#0a0a0a] flex flex-col items-center justify-center py-16 gap-4"
@@ -179,10 +180,10 @@ function SignalLost({ onRetry }: { onRetry?: () => void }) {
         className="stamp"
         style={{ fontSize: 14, letterSpacing: "0.3em", color: "#ef4444" }}
       >
-        !! SIGNAL LOST
+        {t("progress.SIGNAL_LOST")}
       </div>
       <div className="stamp" style={{ color: "#525252", fontSize: 10 }}>
-        UNABLE TO RETRIEVE TACTICAL DATA — CHECK CONNECTION
+        {t("progress.SIGNAL_LOST_DESC")}
       </div>
       {onRetry && (
         <button
@@ -199,7 +200,7 @@ function SignalLost({ onRetry }: { onRetry?: () => void }) {
             marginTop: 4,
           }}
         >
-          RETRY
+          {t("progress.RETRY")}
         </button>
       )}
     </div>
@@ -240,7 +241,7 @@ function SkeletonGrid() {
 // ============================================================================
 // EmptyState — when no data exists
 // ============================================================================
-function EmptyState() {
+function EmptyState({ t }: { t: (p: string) => string }) {
   return (
     <div
       className="border border-[#2a2a2a] bg-[#0a0a0a] flex flex-col items-center justify-center py-20 gap-6"
@@ -251,13 +252,13 @@ function EmptyState() {
         className="stamp relative z-10"
         style={{ fontSize: 14, letterSpacing: "0.3em", color: "#525252", textAlign: "center" }}
       >
-        NO DATA ACQUIRED
+        {t("progress.NO_DATA_ACQUIRED")}
       </div>
       <div
         className="stamp relative z-10"
         style={{ fontSize: 10, letterSpacing: "0.2em", color: "#71717A", textAlign: "center" }}
       >
-        LOG YOUR FIRST SESSION TO BEGIN TRACKING
+        {t("progress.NO_DATA_DESC")}
       </div>
     </div>
   );
@@ -284,6 +285,7 @@ export default function ProgressPage() {
   const streakData = useStreakData();
   const personalRecords = usePersonalRecords();
   const achievements = useAchievements();
+  const { t } = useI18n();
 
   // -- Volume data for enhanced chart --
   const enhancedVolumeData = useMemo(() => {
@@ -572,11 +574,11 @@ export default function ProgressPage() {
       <div className="space-y-6 py-6">
         <div>
           <h1 className="text-3xl font-extrabold uppercase tracking-tight text-[#e5e5e5]" style={{ fontFamily: "var(--font-heading, system-ui)" }}>
-            STATS
+            {t("progress.STATS")}
           </h1>
           <div className="mt-2 h-0.5 w-12 bg-[#e53e00]" />
         </div>
-        <SignalLost onRetry={handleRetry} />
+        <SignalLost onRetry={handleRetry} t={t} />
       </div>
     );
   }
@@ -587,7 +589,7 @@ export default function ProgressPage() {
       <div className="space-y-6 py-6">
         <div>
           <h1 className="text-3xl font-extrabold uppercase tracking-tight text-[#e5e5e5]" style={{ fontFamily: "var(--font-heading, system-ui)" }}>
-            STATS
+            {t("progress.STATS")}
           </h1>
           <div className="mt-2 h-0.5 w-12 bg-[#e53e00]" />
         </div>
@@ -602,11 +604,11 @@ export default function ProgressPage() {
       <div className="space-y-6 py-6">
         <div>
           <h1 className="text-3xl font-extrabold uppercase tracking-tight text-[#e5e5e5]" style={{ fontFamily: "var(--font-heading, system-ui)" }}>
-            STATS
+            {t("progress.STATS")}
           </h1>
           <div className="mt-2 h-0.5 w-12 bg-[#e53e00]" />
         </div>
-        <EmptyState />
+        <EmptyState t={t} />
       </div>
     );
   }
@@ -624,14 +626,14 @@ export default function ProgressPage() {
               className="text-3xl font-extrabold uppercase tracking-tight text-[#e5e5e5]"
               style={{ fontFamily: "var(--font-heading, system-ui)" }}
             >
-              STATS
+              {t("progress.STATS")}
             </h1>
             <div className="mt-2 h-0.5 w-12 bg-[#e53e00]" />
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <span className="stamp" style={{ color: "#71717A", fontSize: 10, letterSpacing: "0.15em" }}>
-                LAST SYNC
+                {t("progress.LAST_SYNC")}
               </span>
               <LiveClock />
             </div>
@@ -642,23 +644,23 @@ export default function ProgressPage() {
       {/* ── KPI ROW ────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <KPIPanel
-          label="TOTAL SESSIONS"
+          label={t("progress.TOTAL_SESSIONS")}
           value={streakData.totalSessions}
-          subValue="LIFETIME"
+          subValue={t("progress.LIFETIME")}
           trend="up"
           panelNum="01"
           accent="orange"
         />
         <KPIPanel
-          label="CURRENT STREAK"
+          label={t("progress.CURRENT_STREAK")}
           value={streakData.currentStreak}
-          subValue={`BEST: ${streakData.longestStreak}D`}
+          subValue={`${t("progress.BEST")}: ${streakData.longestStreak}D`}
           trend={streakData.currentStreak > 0 ? "up" : "neutral"}
           panelNum="02"
           accent="green"
         />
         <KPIPanel
-          label="TOTAL VOLUME"
+          label={t("progress.TOTAL_VOLUME")}
           value={Math.round(totalVolume / 1000)}
           subValue={`${Math.round(totalVolume).toLocaleString()} KG`}
           trend="up"
@@ -666,9 +668,9 @@ export default function ProgressPage() {
           accent="orange"
         />
         <KPIPanel
-          label="THIS MONTH"
+          label={t("progress.THIS_MONTH")}
           value={streakData.thisMonthSessions}
-          subValue={`${streakData.thisWeekSessions} THIS WK`}
+          subValue={`${streakData.thisWeekSessions} ${t("progress.THIS_WK")}`}
           trend="up"
           panelNum="04"
           accent="blue"
@@ -683,8 +685,8 @@ export default function ProgressPage() {
             <BrandNoiseOverlay />
             <div className="relative z-10">
               <PanelHeader 
-                label="WEEKLY VOLUME" 
-                sub="LAST 8 WEEKS" 
+                label={t("progress.WEEKLY_VOLUME")}
+                sub={t("progress.LAST_8_WEEKS")} 
                 panelNum="05"
               />
               <EnhancedVolumeChart data={enhancedVolumeData} />
@@ -698,8 +700,8 @@ export default function ProgressPage() {
             <BrandNoiseOverlay />
             <div className="relative z-10">
               <PanelHeader 
-                label="PROGRESS TREND" 
-                sub="WEIGHT vs REPS" 
+                label={t("progress.PROGRESS_TREND")}
+                sub={t("progress.WEIGHT_VS_REPS")} 
                 panelNum="06"
               />
               <ProgressTrendChart data={progressTrendData} />
@@ -715,8 +717,8 @@ export default function ProgressPage() {
           <BrandNoiseOverlay />
           <div className="relative z-10">
             <PanelHeader 
-              label="CONTACT MATRIX" 
-              sub="LAST 26 WEEKS" 
+              label={t("progress.CONTACT_MATRIX")}
+              sub={t("progress.LAST_26_WEEKS")}
               panelNum="07"
             />
             <div className="overflow-x-auto">
@@ -730,8 +732,8 @@ export default function ProgressPage() {
           <BrandNoiseOverlay />
           <div className="relative z-10">
             <PanelHeader 
-              label="REP DISTRIBUTION" 
-              sub="INTENSITY PROFILE" 
+              label={t("progress.REP_DISTRIBUTION")}
+              sub={t("progress.INTENSITY_PROFILE")} 
               panelNum="08"
             />
             <RepsDistributionChart data={repsDistributionData} />
@@ -746,8 +748,8 @@ export default function ProgressPage() {
           <BrandNoiseOverlay />
           <div className="relative z-10">
             <PanelHeader 
-              label="MUSCLE BALANCE" 
-              sub="TRAINING DISTRIBUTION %" 
+              label={t("progress.MUSCLE_BALANCE")}
+              sub={t("progress.TRAINING_DISTRIBUTION")} 
               panelNum="09"
             />
             {muscleLoading ? (
@@ -755,7 +757,7 @@ export default function ProgressPage() {
             ) : musclePieData.length === 0 ? (
               <div className="flex items-center justify-center py-16">
                 <span className="stamp" style={{ color: "#525252", letterSpacing: "0.2em" }}>
-                  NO MUSCLE DATA YET
+                  {t("progress.NO_MUSCLE_DATA")}
                 </span>
               </div>
             ) : (
@@ -769,8 +771,8 @@ export default function ProgressPage() {
           <BrandNoiseOverlay />
           <div className="relative z-10">
             <PanelHeader 
-              label="PR WALL" 
-              sub="PERSONAL RECORDS" 
+              label={t("progress.PR_WALL")}
+              sub={t("progress.PERSONAL_RECORDS")} 
               panelNum="10"
             />
             <PRWall records={personalRecords.slice(0, 6)} />
@@ -783,8 +785,8 @@ export default function ProgressPage() {
         <BrandNoiseOverlay />
         <div className="relative z-10">
           <PanelHeader 
-            label="MERIT BOARD" 
-            sub="ACHIEVEMENTS UNLOCKED" 
+            label={t("progress.MERIT_BOARD")}
+            sub={t("progress.ACHIEVEMENTS_UNLOCKED")}
             panelNum="11"
           />
           <AchievementsBoard unlocked={achievements} />
@@ -796,7 +798,7 @@ export default function ProgressPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="flex flex-col gap-1">
             <span className="stamp" style={{ color: "#71717A", fontSize: 9, letterSpacing: "0.1em" }}>
-              TOTAL REPS
+              {t("progress.TOTAL_REPS")}
             </span>
             <span
               style={{
@@ -811,13 +813,13 @@ export default function ProgressPage() {
               <CounterFX value={hudStats.totalReps} />
             </span>
             <span className="stamp" style={{ color: "#e53e00", fontSize: 9 }}>
-              REPS LOGGED
+              {t("progress.REPS_LOGGED")}
             </span>
           </div>
 
           <div className="flex flex-col gap-1 border-l border-[#2a2a2a] pl-4">
             <span className="stamp" style={{ color: "#71717A", fontSize: 9, letterSpacing: "0.1em" }}>
-              AVG RPE
+              {t("progress.AVG_RPE")}
             </span>
             <span
               style={{
@@ -832,13 +834,13 @@ export default function ProgressPage() {
               {hudStats.avgRpe > 0 ? hudStats.avgRpe.toFixed(1) : "—"}
             </span>
             <span className="stamp" style={{ color: "#71717A", fontSize: 9 }}>
-              / 10 INTENSITY
+              {t("progress.INTENSITY_10")}
             </span>
           </div>
 
           <div className="flex flex-col gap-1 border-l border-[#2a2a2a] pl-4">
             <span className="stamp" style={{ color: "#71717A", fontSize: 9, letterSpacing: "0.1em" }}>
-              HEAVIEST SET
+              {t("progress.HEAVIEST_SET")}
             </span>
             <span
               style={{
@@ -855,13 +857,13 @@ export default function ProgressPage() {
             <span className="stamp" style={{ color: "#71717A", fontSize: 9 }}>
               {hudStats.heaviestWeight > 0
                 ? `KG × ${hudStats.heaviestReps} @ RPE ${hudStats.heaviestRpe}`
-                : "NO DATA"}
+                : t("progress.NO_DATA")}
             </span>
           </div>
 
           <div className="flex flex-col gap-1 border-l border-[#2a2a2a] pl-4">
             <span className="stamp" style={{ color: "#71717A", fontSize: 9, letterSpacing: "0.1em" }}>
-              TOTAL VOLUME
+              {t("progress.TOTAL_VOLUME")}
             </span>
             <span
               style={{
@@ -876,7 +878,7 @@ export default function ProgressPage() {
               {Math.round(hudStats.totalVolume / 1000)}
             </span>
             <span className="stamp" style={{ color: "#e53e00", fontSize: 9 }}>
-              TONNE
+              {t("progress.TONNE")}
             </span>
           </div>
         </div>

@@ -1,10 +1,12 @@
-import type { Metadata } from "next";
+"use client";
+
 import Link from "next/link";
 import { RegisterForm } from "@/components/auth/RegisterForm";
-
-export const metadata: Metadata = { title: "Create Account" };
+import { useI18n } from "@/components/providers/I18nProvider";
 
 export default function RegisterPage() {
+  const { t } = useI18n();
+
   return (
     <>
       <div className="mb-6 space-y-1">
@@ -12,20 +14,20 @@ export default function RegisterPage() {
           className="text-4xl font-extrabold uppercase tracking-tight"
           style={{ fontFamily: "var(--font-heading, system-ui)" }}
         >
-          JOIN THE IRON
+          {t("register.TITLE")}
         </h1>
         <p className="font-data text-xs text-muted-foreground">
-          Build your profile. Start your first program.
+          {t("register.SUBTITLE")}
         </p>
       </div>
       <RegisterForm />
       <p className="mt-4 text-center font-data text-xs text-muted-foreground">
-        Already in?{" "}
+        {t("register.ALREADY_IN")}{" "}
         <Link
           href="/login"
           className="font-semibold uppercase tracking-widest text-[#e53e00] underline-offset-4 hover:underline"
         >
-          Sign in
+          {t("register.SIGN_IN")}
         </Link>
       </p>
     </>

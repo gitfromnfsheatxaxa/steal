@@ -18,6 +18,7 @@ import {
 } from "@/components/onboarding/types";
 import { getPocketBase } from "@/lib/pocketbase";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { useI18n } from "@/components/providers/I18nProvider";
 
 const STEPS = [
   { label: "STATS", component: ProfileStep },
@@ -35,6 +36,7 @@ const STEP_FIELDS: (keyof OnboardingFormData)[][] = [
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
@@ -103,9 +105,7 @@ export default function OnboardingPage() {
       } catch (profileErr: unknown) {
         const status = (profileErr as { status?: number })?.status;
         if (status === 404) {
-          toast.error(
-            "Collections not found. Import pocketbase/pb_schema.json via the PocketBase Admin UI at 127.0.0.1:8090/_/"
-          );
+          toast.error(t("onboarding.COLLECTIONS_ERROR"));
           return;
         }
         throw profileErr;
@@ -132,18 +132,18 @@ export default function OnboardingPage() {
         }
       } catch {
         // Goals are non-fatal — profile saved successfully
-        toast.warning("Profile saved, but we couldn't save your goals. You can set them later.");
+        toast.warning(t("onboarding.GOALS_PARTIAL"));
       }
 
-      toast.success("Profile set. Time to build.");
+      toast.success(t("onboarding.PROFILE_SET"));
       router.push("/dashboard");
     } catch (err: unknown) {
       const status = (err as { status?: number })?.status;
       if (status === 401 || status === 403) {
-        toast.error("Session expired. Log in again.");
+        toast.error(t("onboarding.SESSION_EXPIRED"));
         router.push("/login");
       } else {
-        toast.error("Something went wrong. Make sure PocketBase is running.");
+        toast.error(t("onboarding.GENERIC_ERROR"));
       }
     } finally {
       setSubmitting(false);
@@ -156,7 +156,7 @@ export default function OnboardingPage() {
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <span className="font-data text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-            STEP {step + 1} / {STEPS.length}
+            {t("onboarding.STEP")} {step + 1} / {STEPS.length}
           </span>
           <span className="font-data text-xs font-semibold uppercase tracking-widest text-[#e53e00]">
             {STEPS[step].label}
@@ -185,7 +185,7 @@ export default function OnboardingPage() {
               className="rounded-none border-border font-data text-xs font-bold uppercase tracking-widest hover:border-foreground/40"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              BACK
+              {t("onboarding.BACK")}
             </Button>
 
             <Button
@@ -196,11 +196,11 @@ export default function OnboardingPage() {
               {isLast ? (
                 <>
                   <Check className="mr-2 h-4 w-4" />
-                  {submitting ? "SAVING..." : "FINISH SETUP"}
+                  {submitting ? t("onboarding.SAVING") : t("onboarding.FINISH_SETUP")}
                 </>
               ) : (
                 <>
-                  NEXT
+                  {t("onboarding.NEXT")}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </>
               )}

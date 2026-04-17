@@ -1,9 +1,14 @@
+"use client";
+
 import type { ReactNode } from "react";
+import { useI18n } from "@/components/providers/I18nProvider";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
+  const { t } = useI18n();
+
   return (
     <div className="relative flex min-h-dvh items-center justify-center bg-[#050505] px-4 py-12">
-      {/* Ambient barbell plate rings — visible through the layout */}
+      {/* Ambient barbell plate rings */}
       <div
         aria-hidden="true"
         className="pointer-events-none fixed right-[-140px] top-[10%] h-[480px] w-[480px] rounded-full opacity-50"
@@ -22,7 +27,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         }}
       />
 
-      {/* Tactical panel — max-w-md, has-corner notch */}
+      {/* Tactical panel */}
       <div className="panel has-corner relative w-full max-w-md overflow-hidden">
         {/* Diagonal rust stripe on left edge */}
         <div
@@ -40,16 +45,16 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
             className="stamp mb-2"
             style={{ color: "var(--ink-dim)", letterSpacing: "0.3em" }}
           >
-            OPERATOR ACCESS PORTAL
+            {t("authLayout.ACCESS_PORTAL")}
           </p>
           <h1
             className="font-heading text-6xl font-black uppercase leading-none tracking-tight text-[#E5E5E5]"
             style={{ fontFamily: "var(--font-heading, system-ui)" }}
           >
-            STEAL
+            {t("authLayout.STEAL")}
           </h1>
           <p className="stamp mt-2" style={{ color: "var(--rust)", letterSpacing: "0.25em" }}>
-            STEAL FORGES STEEL
+            {t("authLayout.FORGES_STEEL")}
           </p>
         </div>
 
@@ -59,7 +64,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         {/* Footer stamp */}
         <div className="border-t border-[#1a1a1a] px-8 py-3">
           <p className="stamp" style={{ color: "var(--ink-dim)", fontSize: "9px", letterSpacing: "0.22em" }}>
-            OPERATOR ACCESS&nbsp;&nbsp;/&nbsp;&nbsp;v1.0&nbsp;&nbsp;/&nbsp;&nbsp;CLEARANCE REQUIRED
+            {t("authLayout.FOOTER")}
           </p>
         </div>
       </div>

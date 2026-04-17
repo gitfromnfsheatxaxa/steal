@@ -29,6 +29,7 @@ import { Slider } from "@/components/ui/slider";
 import { DAYS_OF_WEEK, MUSCLE_GROUPS } from "@/lib/constants";
 import { Plus, X, ChevronDown, ChevronUp, Save, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/components/providers/I18nProvider";
 
 // ─── Zod schema ──────────────────────────────────────────────────────────────
 
@@ -64,19 +65,20 @@ type ExerciseValues = z.infer<typeof exerciseSchema>;
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const GOAL_LABELS: Record<ManualPlanValues["goalType"], string> = {
-  muscle_building: "Muscle Building",
-  strength: "Strength",
-  fat_loss: "Fat Loss",
-  endurance: "Endurance",
-  rehabilitation: "Rehabilitation",
+// These are now resolved via t() in the component
+const GOAL_KEYS: Record<ManualPlanValues["goalType"], string> = {
+  muscle_building: "planForm.MUSCLE_BUILDING",
+  strength: "planForm.STRENGTH",
+  fat_loss: "planForm.FAT_LOSS",
+  endurance: "planForm.ENDURANCE",
+  rehabilitation: "planForm.REHABILITATION",
 };
 
-const ENV_LABELS: Record<ManualPlanValues["environment"], string> = {
-  gym: "Gym",
-  home: "Home",
-  outdoor: "Outdoor",
-  mixed: "Mixed",
+const ENV_KEYS: Record<ManualPlanValues["environment"], string> = {
+  gym: "planForm.GYM",
+  home: "planForm.HOME",
+  outdoor: "planForm.OUTDOOR",
+  mixed: "planForm.MIXED",
 };
 
 const REST_PRESETS = [
@@ -93,11 +95,13 @@ function ExerciseRow({
   dayIndex,
   form,
   onRemove,
+  t,
 }: {
   index: number;
   dayIndex: number;
   form: ReturnType<typeof useForm<ManualPlanValues>>;
   onRemove: () => void;
+  t: (key: string) => string;
 }) {
   const base = `days.${dayIndex}.exercises.${index}` as const;
 
@@ -105,7 +109,7 @@ function ExerciseRow({
     <div className="space-y-3 border border-border bg-[#0d0d0d] p-3">
       <div className="flex items-center justify-between">
         <span className="font-data text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-          EXERCISE {index + 1}
+          {t("planForm.EXERCISE_N").replace("{n}", String(index + 1))}
         </span>
         <button
           type="button"
@@ -125,7 +129,7 @@ function ExerciseRow({
           <FormItem>
             <FormControl>
               <Input
-                placeholder="e.g. Barbell Back Squat"
+                placeholder={t("planForm.EXERCISE_PLACEHOLDER")}
                 className="rounded-none border-border bg-input font-data text-sm"
                 {...field}
               />
@@ -143,7 +147,7 @@ function ExerciseRow({
           render={({ field }) => (
             <FormItem>
               <FormLabel className="font-data text-[10px] uppercase tracking-widest text-muted-foreground">
-                Sets
+                {t("planForm.SETS")}
               </FormLabel>
               <FormControl>
                 <Input
@@ -165,7 +169,7 @@ function ExerciseRow({
           render={({ field }) => (
             <FormItem>
               <FormLabel className="font-data text-[10px] uppercase tracking-widest text-muted-foreground">
-                Reps Min
+                {t("planForm.REPS_MIN")}
               </FormLabel>
               <FormControl>
                 <Input
@@ -186,7 +190,7 @@ function ExerciseRow({
           render={({ field }) => (
             <FormItem>
               <FormLabel className="font-data text-[10px] uppercase tracking-widest text-muted-foreground">
-                Reps Max
+                {t("planForm.REPS_MAX")}
               </FormLabel>
               <FormControl>
                 <Input
@@ -207,7 +211,7 @@ function ExerciseRow({
           render={({ field }) => (
             <FormItem>
               <FormLabel className="font-data text-[10px] uppercase tracking-widest text-muted-foreground">
-                RPE
+                {t("planForm.RPE")}
               </FormLabel>
               <FormControl>
                 <Input
@@ -233,7 +237,7 @@ function ExerciseRow({
         render={({ field }) => (
           <FormItem>
             <FormLabel className="font-data text-[10px] uppercase tracking-widest text-muted-foreground">
-              Rest — {field.value}s
+              {t("planForm.REST").replace("{v}", String(field.value))}
             </FormLabel>
             <div className="flex items-center gap-2">
               {REST_PRESETS.map((p) => (
@@ -273,7 +277,7 @@ function ExerciseRow({
           <FormItem>
             <FormControl>
               <Input
-                placeholder="Coaching note (optional)"
+                placeholder={t("planForm.COACHING_NOTE")}
                 className="rounded-none border-border bg-input font-data text-xs text-muted-foreground"
                 {...field}
               />
@@ -289,10 +293,12 @@ function DayEditor({
   dayIndex,
   form,
   onRemove,
+  t,
 }: {
   dayIndex: number;
   form: ReturnType<typeof useForm<ManualPlanValues>>;
   onRemove: () => void;
+  t: (key: string) => string;
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const { fields: exFields, append: appendEx, remove: removeEx } = useFieldArray({
@@ -333,7 +339,7 @@ function DayEditor({
             {dayLabel}
           </span>
           <span className="font-data text-[10px] text-muted-foreground">
-            {exFields.length} exercises
+            {exFields.length} {t("planForm.EXERCISES").toLowerCase()}
           </span>
         </button>
         <button
@@ -356,7 +362,7 @@ function DayEditor({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="font-data text-[10px] uppercase tracking-widest text-muted-foreground">
-                    Day of Week
+                    {t("planForm.DAY_OF_WEEK")}
                   </FormLabel>
                   <Select
                     onValueChange={(v) => field.onChange(Number(v))}
@@ -389,11 +395,11 @@ function DayEditor({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="font-data text-[10px] uppercase tracking-widest text-muted-foreground">
-                    Session Label
+                    {t("planForm.SESSION_LABEL")}
                   </FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="e.g. Push Day, Upper Body"
+                      placeholder={t("planForm.SESSION_LABEL_PLACEHOLDER")}
                       className="rounded-none border-border bg-input font-data text-sm"
                       {...field}
                     />
@@ -411,7 +417,7 @@ function DayEditor({
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="font-data text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Muscle Focus
+                  {t("planForm.MUSCLE_FOCUS")}
                 </FormLabel>
                 <div className="flex flex-wrap gap-1.5">
                   {MUSCLE_GROUPS.map((mg) => {
@@ -447,7 +453,7 @@ function DayEditor({
 
           {/* Exercises */}
           <div className="space-y-2">
-            <p className="label-section">Exercises</p>
+            <p className="label-section">{t("planForm.EXERCISES")}</p>
             {exFields.map((f, ei) => (
               <ExerciseRow
                 key={f.id}
@@ -455,6 +461,7 @@ function DayEditor({
                 dayIndex={dayIndex}
                 form={form}
                 onRemove={() => removeEx(ei)}
+                t={t}
               />
             ))}
             <Button
@@ -465,7 +472,7 @@ function DayEditor({
               className="rounded-none border-border font-data text-xs font-bold uppercase tracking-widest hover:border-[#e53e00]/40"
             >
               <Plus className="mr-1.5 h-3 w-3" />
-              ADD EXERCISE
+              {t("planForm.ADD_EXERCISE")}
             </Button>
           </div>
         </div>
@@ -478,6 +485,7 @@ function DayEditor({
 
 export function ManualPlanForm() {
   const router = useRouter();
+  const { t } = useI18n();
   const [saving, setSaving] = useState(false);
 
   const defaultDay: DayValues = {
@@ -558,10 +566,10 @@ export function ManualPlanForm() {
         }
       }
 
-      toast.success("Program built. Get to work.");
+      toast.success(t("planForm.SAVED"));
       router.push(`/plans/${savedPlan.id}`);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Save failed";
+      const msg = err instanceof Error ? err.message : t("planForm.SAVE_FAILED");
       toast.error(msg);
     } finally {
       setSaving(false);
@@ -573,7 +581,7 @@ export function ManualPlanForm() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {/* ── Plan metadata ── */}
         <div className="border border-border bg-card p-4 space-y-4">
-          <p className="label-section">Program Details</p>
+          <p className="label-section">{t("planForm.PROGRAM_DETAILS")}</p>
 
           <FormField
             control={form.control}
@@ -581,11 +589,11 @@ export function ManualPlanForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="font-data text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Program Name
+                  {t("planForm.PROGRAM_NAME")}
                 </FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="e.g. 4-Day Upper/Lower Split"
+                    placeholder={t("planForm.PROGRAM_NAME_PLACEHOLDER")}
                     className="rounded-none border-border bg-input font-data text-sm"
                     {...field}
                   />
@@ -601,11 +609,11 @@ export function ManualPlanForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="font-data text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Description (optional)
+                  {t("planForm.DESCRIPTION")}
                 </FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="What's the focus of this program?"
+                    placeholder={t("planForm.DESCRIPTION_PLACEHOLDER")}
                     rows={2}
                     className="rounded-none border-border bg-input font-data text-sm"
                     {...field}
@@ -622,7 +630,7 @@ export function ManualPlanForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="font-data text-[10px] uppercase tracking-widest text-muted-foreground">
-                    Goal
+                    {t("planForm.GOAL")}
                   </FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
@@ -631,9 +639,9 @@ export function ManualPlanForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="rounded-none border-border bg-card">
-                      {(Object.keys(GOAL_LABELS) as ManualPlanValues["goalType"][]).map((k) => (
+                      {(Object.keys(GOAL_KEYS) as ManualPlanValues["goalType"][]).map((k) => (
                         <SelectItem key={k} value={k} className="font-data text-sm">
-                          {GOAL_LABELS[k]}
+                          {t(GOAL_KEYS[k])}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -648,7 +656,7 @@ export function ManualPlanForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="font-data text-[10px] uppercase tracking-widest text-muted-foreground">
-                    Environment
+                    {t("planForm.ENVIRONMENT")}
                   </FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
@@ -657,9 +665,9 @@ export function ManualPlanForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="rounded-none border-border bg-card">
-                      {(Object.keys(ENV_LABELS) as ManualPlanValues["environment"][]).map((k) => (
+                      {(Object.keys(ENV_KEYS) as ManualPlanValues["environment"][]).map((k) => (
                         <SelectItem key={k} value={k} className="font-data text-sm">
-                          {ENV_LABELS[k]}
+                          {t(ENV_KEYS[k])}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -676,7 +684,7 @@ export function ManualPlanForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="font-data text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Duration — {field.value} weeks
+                  {t("planForm.DURATION_WEEKS").replace("{v}", String(field.value))}
                 </FormLabel>
                 <Slider
                   min={1}
@@ -694,9 +702,9 @@ export function ManualPlanForm() {
         {/* ── Training days ── */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <p className="label-section">Training Days</p>
+            <p className="label-section">{t("planForm.TRAINING_DAYS")}</p>
             <span className="font-data text-[10px] text-muted-foreground">
-              Repeated across all {form.watch("durationWeeks")} weeks
+              {t("planForm.REPEATED_ACROSS").replace("{v}", String(form.watch("durationWeeks")))}
             </span>
           </div>
 
@@ -706,6 +714,7 @@ export function ManualPlanForm() {
               dayIndex={di}
               form={form}
               onRemove={() => removeDay(di)}
+              t={t}
             />
           ))}
 
@@ -722,7 +731,7 @@ export function ManualPlanForm() {
             className="w-full rounded-none border-dashed border-border font-data text-xs font-bold uppercase tracking-widest hover:border-[#e53e00]/40"
           >
             <Plus className="mr-2 h-4 w-4" />
-            ADD TRAINING DAY
+            {t("planForm.ADD_TRAINING_DAY")}
           </Button>
         </div>
 
@@ -736,12 +745,12 @@ export function ManualPlanForm() {
           {saving ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              SAVING...
+              {t("planForm.SAVING")}
             </>
           ) : (
             <>
               <Save className="mr-2 h-4 w-4" />
-              SAVE PROGRAM
+              {t("planForm.SAVE_PROGRAM")}
             </>
           )}
         </Button>

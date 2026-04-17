@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "@/hooks/useAuth";
+import { useI18n } from "@/components/providers/I18nProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,24 +18,25 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-const registerSchema = z
-  .object({
-    name: z.string().min(2, "Name must be at least 2 characters"),
-    email: z.string().email("Enter a valid email"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
-
-type RegisterValues = z.infer<typeof registerSchema>;
+type RegisterValues = { name: string; email: string; password: string; confirmPassword: string };
 
 export function RegisterForm() {
   const router = useRouter();
   const { register } = useAuth();
+  const { t } = useI18n();
   const [error, setError] = useState<string | null>(null);
+
+  const registerSchema = z
+    .object({
+      name: z.string().min(2, t("register.NAME_MIN")),
+      email: z.string().email(t("register.EMAIL_INVALID")),
+      password: z.string().min(8, t("register.PASSWORD_MIN")),
+      confirmPassword: z.string(),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t("register.PASSWORDS_MISMATCH"),
+      path: ["confirmPassword"],
+    });
 
   const form = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
@@ -62,11 +64,11 @@ export function RegisterForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="font-data text-xs uppercase tracking-widest text-muted-foreground">
-                  Name
+                  {t("register.NAME")}
                 </FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Your name"
+                    placeholder={t("register.NAME_PLACEHOLDER")}
                     autoComplete="name"
                     className="border-border bg-input font-data text-sm"
                     {...field}
@@ -83,12 +85,12 @@ export function RegisterForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="font-data text-xs uppercase tracking-widest text-muted-foreground">
-                  Email
+                  {t("register.EMAIL")}
                 </FormLabel>
                 <FormControl>
                   <Input
                     type="email"
-                    placeholder="your@email.com"
+                    placeholder={t("register.EMAIL_PLACEHOLDER")}
                     autoComplete="email"
                     className="border-border bg-input font-data text-sm"
                     {...field}
@@ -105,12 +107,12 @@ export function RegisterForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="font-data text-xs uppercase tracking-widest text-muted-foreground">
-                  Password
+                  {t("register.PASSWORD")}
                 </FormLabel>
                 <FormControl>
                   <Input
                     type="password"
-                    placeholder="8+ characters"
+                    placeholder={t("register.PASSWORD_PLACEHOLDER")}
                     autoComplete="new-password"
                     className="border-border bg-input font-data text-sm"
                     {...field}
@@ -127,12 +129,12 @@ export function RegisterForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="font-data text-xs uppercase tracking-widest text-muted-foreground">
-                  Confirm Password
+                  {t("register.CONFIRM_PASSWORD")}
                 </FormLabel>
                 <FormControl>
                   <Input
                     type="password"
-                    placeholder="Confirm"
+                    placeholder={t("register.CONFIRM_PLACEHOLDER")}
                     autoComplete="new-password"
                     className="border-border bg-input font-data text-sm"
                     {...field}
@@ -154,7 +156,7 @@ export function RegisterForm() {
             className="w-full rounded-none bg-[#e53e00] font-data text-xs font-bold uppercase tracking-widest text-white hover:bg-[#ff4500]"
             disabled={form.formState.isSubmitting}
           >
-            {form.formState.isSubmitting ? "SETTING UP..." : "CREATE ACCOUNT"}
+            {form.formState.isSubmitting ? t("register.SUBMITTING") : t("register.SUBMIT")}
           </Button>
         </form>
       </Form>
