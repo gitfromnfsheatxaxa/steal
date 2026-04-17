@@ -64,7 +64,7 @@ export function usePlanCompletedSessions(planId: string | undefined) {
           filter: `plan="${planId}" && user="${userId}" && status="completed"`,
           fields: "planDay",
         });
-      return new Set(records.items.map((r) => r.planDay));
+      return new Set(records.items.map((r) => r.planDay).filter((id): id is string => !!id));
     },
     enabled: !!planId && !!userId,
   });
