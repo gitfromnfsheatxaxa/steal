@@ -22,9 +22,9 @@ export function ConnectionDebug() {
       let authTestOk = false;
       let authTestError: string | null = null;
 
-      // 1. Health check via raw fetch
+      // 1. Health check via proxy (same-origin /pb path)
       try {
-        const res = await fetch(`${envUrl}/api/health`, { mode: "cors" });
+        const res = await fetch(`/pb/api/health`);
         const data = await res.json();
         healthOk = data.code === 200;
         if (!healthOk) healthError = JSON.stringify(data);

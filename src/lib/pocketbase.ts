@@ -1,19 +1,28 @@
 import PocketBase from "pocketbase";
 
-const POCKETBASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8090";
-
 /**
- * Singleton PocketBase client.
+ * Resolve the PocketBase URL based on environment:
  *
- * On the client side we reuse a single instance so authStore state
- * (JWT + user model) persists across navigations.
- *
- * On the server (SSR / RSC) every request gets a fresh instance
- * because there is no single "user" — the auth token comes from cookies.
+ * - **Browser**: use `/pb` — Next.js rewrites proxy this to the real
+ *   PocketBase server, avoiding mixed-content (HTTPS → HTTP) blocks.
+ * - **Server (SSR/RSC)**: hit PocketBase directly since there is no
+ *   mixed-content restriction server-side.
  */
+function getPocketBaseUrl(): string {
+  if (typeof window !== "undefined") {
+    // Browser: same-origin proxy path
+    return "/pb";
+  }
+  // Server: direct connection
+  return (
+    process.env.POCKETBASE_INTERNAL_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    "http://127.0.0.1:8090"
+  );
+}
+
 function createPocketBase(): PocketBase {
-  return new PocketBase(POCKETBASE_URL);
+  return new PocketBase(getPocketBaseUrl());
 }
 
 let clientInstance: PocketBase | null = null;
