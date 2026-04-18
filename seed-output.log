@@ -48,3 +48,23 @@
   [groq→RU] batch 21-25 of 783
   ✓ [groq→RU] saved 5
   [groq→RU] batch 26-30 of 783
+  ✓ [groq→RU] saved 5
+  [groq→RU] batch 31-35 of 783
+  ✓ [groq→RU] saved 5
+  [groq→RU] batch 36-40 of 783
+  ✓ [groq→RU] saved 5
+  [groq→RU] batch 41-45 of 783
+  ✗ [groq→RU] failed (Expected ',' or ']' after array element in JSON at position 3879 (line 82 column 7)). Retrying in 4s…
+  ✗✗ [groq→RU] giving up on batch: Unbalanced JSON in response
+  [groq→RU] batch 46-50 of 783
+  ✗ [groq→RU] failed (Unbalanced JSON in response). Retrying in 4s…
+  ✓ [groq→RU] saved 5
+  [groq→RU] batch 51-55 of 783
+  ✓ [groq→RU] saved 5
+  [groq→RU] batch 56-60 of 783
+  ✓ [groq→RU] saved 5
+  [groq→RU] batch 61-65 of 783
+  ✓ [groq→RU] saved 5
+  [groq→RU] batch 66-70 of 783
+  ✓ [groq→RU] saved 5
+  [groq→RU] batch 71-75 of 783

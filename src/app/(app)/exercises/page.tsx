@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { getAllExercises, getFilterOptions } from "@/lib/exercise-library";
 import { BrandNoiseOverlay } from "@/components/layout/BrandNoiseOverlay";
 import { ExerciseLibrary } from "./ExerciseLibrary";
