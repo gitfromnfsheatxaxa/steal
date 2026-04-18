@@ -2,7 +2,7 @@
 > my-frontend-app@0.1.0 seed:translations
 > node --env-file=.env.local scripts/seed-exercise-translations.mjs
 
-→ Providers: gemini/gemini-2.5-flash-lite (batch=20) | groq/llama-3.1-8b-instant (batch=5)
+→ Providers: gemini/gemini-1.5-flash (batch=20) | groq/llama-3.1-8b-instant (batch=5)
 ✓ PocketBase authed
 → Fetching exercises from https://fork-ivory-chi.vercel.app/api/v1…
 ✓ Got 1500 exercises
@@ -12,18 +12,30 @@
 ─── [gemini→RU] 783/1500 pending ───
   [gemini→RU] batch 1-20 of 783
 
-─── [groq→UZ] 1495/1500 pending ───
-  [groq→UZ] batch 1-5 of 1495
+─── [groq→UZ] 1485/1500 pending ───
+  [groq→UZ] batch 1-5 of 1485
+  ✗ [gemini→RU] failed (models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent). Retrying in 4s…
   ✗ [groq→UZ] failed (Unbalanced JSON in response). Retrying in 4s…
-  ✗ [gemini→RU] failed (Failed after 3 attempts. Last error: You exceeded your current quota, please check your plan and bil). Retrying in 65s…
-  ✓ [groq→UZ] saved 5
-  [groq→UZ] batch 6-10 of 1495
-  ✗ [groq→UZ] failed (Expected ',' or ']' after array element in JSON at position 1217 (line 1 column 1218)). Retrying in 4s…
-  ✗✗ [gemini→RU] giving up on batch: Failed after 3 attempts. Last error: You exceeded your current quota, please check your plan and billing details. For mo
+  ✗✗ [gemini→RU] giving up on batch: models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to
   [gemini→RU] batch 21-40 of 783
-  ✗ [gemini→RU] failed (Failed after 3 attempts. Last error: You exceeded your current quota, please check your plan and bil). Retrying in 65s…
-  ✗✗ [groq→UZ] giving up on batch: Unexpected token ']', ..." berdi.",
-],
-"exerci"... is not valid JSON
-  [groq→UZ] batch 11-15 of 1495
-  ✗ [groq→UZ] failed (Unbalanced JSON in response). Retrying in 4s…
+  ✗ [gemini→RU] failed (models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent). Retrying in 4s…
+
+⚠ gemini dead for ru — falling back to groq
+
+─── [groq→RU] 783/1500 pending ───
+  [groq→RU] batch 1-5 of 783
+  ✗✗ [groq→UZ] giving up on batch: Expected ',' or ']' after array element in JSON at position 527 (line 15 column 7)
+  [groq→UZ] batch 6-10 of 1485
+  ✗ [groq→RU] failed (Expected ',' or ']' after array element in JSON at position 5095 (line 73 column 173)). Retrying in 4s…
+  ✗ [groq→UZ] rate limit hit — switching provider immediately
+
+⚠ groq dead for uz — falling back to gemini
+
+─── [gemini→UZ] 1485/1500 pending ───
+  [gemini→UZ] batch 1-20 of 1485
+  ✗ [gemini→UZ] failed (models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent). Retrying in 4s…
+  ✗✗ [gemini→UZ] giving up on batch: models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to
+  [gemini→UZ] batch 21-40 of 1485
+  ✗✗ [groq→RU] giving up on batch: Unbalanced JSON in response
+  [groq→RU] batch 6-10 of 783
+  ✗ [gemini→UZ] failed (models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent). Retrying in 4s…

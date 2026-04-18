@@ -327,12 +327,13 @@ try {
 }
 
 async function upsert(row) {
+  const opts = { requestKey: null }; // disable auto-cancellation for parallel upserts
   try {
     const existing = await pb.collection("exercise_translations")
-      .getFirstListItem(`exerciseExtId="${row.exerciseExtId}" && locale="${row.locale}"`);
-    await pb.collection("exercise_translations").update(existing.id, row);
+      .getFirstListItem(`exerciseExtId="${row.exerciseExtId}" && locale="${row.locale}"`, opts);
+    await pb.collection("exercise_translations").update(existing.id, row, opts);
   } catch {
-    await pb.collection("exercise_translations").create(row);
+    await pb.collection("exercise_translations").create(row, opts);
   }
 }
 

@@ -51,7 +51,9 @@
       "Bash(tasklist /fi \"imagename eq node.exe\" /fo csv)",
       "Bash(kill 2231)",
       "Bash(echo \"Started PID $!\")",
-      "Bash(awk '{print $1}')"
+      "Bash(awk '{print $1}')",
+      "Bash(kill 2342)",
+      "Bash(echo \"PID $!\")"
     ]
   }
 }
