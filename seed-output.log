@@ -39,3 +39,12 @@
   ✗✗ [groq→RU] giving up on batch: Unbalanced JSON in response
   [groq→RU] batch 6-10 of 783
   ✗ [gemini→UZ] failed (models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent). Retrying in 4s…
+✗ All providers exhausted for uz. Re-run tomorrow.
+  ✓ [groq→RU] saved 5
+  [groq→RU] batch 11-15 of 783
+  ✓ [groq→RU] saved 5
+  [groq→RU] batch 16-20 of 783
+  ✓ [groq→RU] saved 5
+  [groq→RU] batch 21-25 of 783
+  ✓ [groq→RU] saved 5
+  [groq→RU] batch 26-30 of 783
