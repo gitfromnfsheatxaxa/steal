@@ -68,3 +68,27 @@
   [groq→RU] batch 66-70 of 783
   ✓ [groq→RU] saved 5
   [groq→RU] batch 71-75 of 783
+  ✓ [groq→RU] saved 5
+  [groq→RU] batch 76-80 of 783
+  ✗ [groq→RU] failed (Expected double-quoted property name in JSON at position 3834 (line 83 column 113)). Retrying in 4s…
+  ✓ [groq→RU] saved 5
+  [groq→RU] batch 81-85 of 783
+  ✗ [groq→RU] failed (Unbalanced JSON in response). Retrying in 4s…
+  ✗✗ [groq→RU] giving up on batch: Expected ',' or ']' after array element in JSON at position 2639 (line 70 column 7)
+  [groq→RU] batch 86-90 of 783
+  ✓ [groq→RU] saved 5
+  [groq→RU] batch 91-95 of 783
+  ✗ [groq→RU] failed (Expected ',' or ']' after array element in JSON at position 1769 (line 28 column 215)). Retrying in 4s…
+  ✓ [groq→RU] saved 5
+  [groq→RU] batch 96-100 of 783
+  ✓ [groq→RU] saved 5
+  [groq→RU] batch 101-105 of 783
+  ✗ [groq→RU] failed (Expected ',' or ']' after array element in JSON at position 3708 (line 58 column 283)). Retrying in 4s…
+  ✓ [groq→RU] saved 5
+  [groq→RU] batch 106-110 of 783
+  ✗ [groq→RU] failed (Unexpected token ']', ..."ная нерв",],
+    "in"... is not valid JSON). Retrying in 4s…
+  ✗✗ [groq→RU] giving up on batch: Expected ',' or ']' after array element in JSON at position 2864 (line 70 column 105)
+  [groq→RU] batch 111-115 of 783
+  ✓ [groq→RU] saved 5
+  [groq→RU] batch 116-120 of 783

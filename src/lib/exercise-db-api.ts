@@ -8,9 +8,18 @@
  * No auth headers — the self-hosted instance is public.
  */
 
-const BASE_URL =
-  process.env.NEXT_PUBLIC_EXERCISEDB_URL || "http://localhost:3001/api/v1";
+// const BASE_URL =
+//   process.env.NEXT_PUBLIC_EXERCISEDB_URL || "http://localhost:3001/api/v1";
+// i commented it because vercel gave an issue
 
+const BASE_URL = process.env.NEXT_PUBLIC_EXERCISEDB_URL;
+
+if (!BASE_URL) {
+  throw new Error(
+    "NEXT_PUBLIC_EXERCISEDB_URL environment variable is not set. " +
+    "Please add it in Vercel Dashboard > Settings > Environment Variables."
+  );
+}
 export interface ExerciseV2 {
   exerciseId: string;
   name: string;
