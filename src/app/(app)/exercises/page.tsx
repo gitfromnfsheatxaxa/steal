@@ -1,17 +1,21 @@
-import { getFilterOptions } from "@/lib/exercise-library";
+import { getAllExercises, getFilterOptions } from "@/lib/exercise-library";
 import { BrandNoiseOverlay } from "@/components/layout/BrandNoiseOverlay";
 import { ExerciseLibrary } from "./ExerciseLibrary";
+
+export const revalidate = 3600;
 
 export const metadata = {
   title: "Exercise Library | Steal Therapy",
 };
 
 export default async function ExercisesPage() {
-  const filters = await getFilterOptions();
+  const [filters, all] = await Promise.all([
+    getFilterOptions(),
+    getAllExercises(),
+  ]);
 
   return (
     <div className="space-y-6 py-6">
-      {/* ── Hero Header ─────────────────────────────────────────────────────── */}
       <div className="border-b border-[#2a2a2a] pb-4 relative overflow-hidden">
         <BrandNoiseOverlay />
         <div className="relative z-10 flex items-start justify-between gap-4 flex-wrap">
@@ -28,7 +32,7 @@ export default async function ExercisesPage() {
                 className="stamp text-[8px] text-[#e53e00] tracking-widest"
                 style={{ fontFamily: "var(--font-mono, monospace)" }}
               >
-                {filters.bodyParts.length > 0 ? "LOADED" : "READY"}
+                {all.length > 0 ? "LOADED" : "READY"}
               </span>
             </div>
             <h1
@@ -51,13 +55,12 @@ export default async function ExercisesPage() {
               className="font-data text-xl font-bold tabular-nums text-[#e53e00]"
               style={{ fontFamily: "var(--font-mono, monospace)" }}
             >
-              1,324
+              {all.length.toLocaleString()}
             </span>
           </div>
         </div>
       </div>
 
-      {/* ── Client island ───────────────────────────────────────────────────── */}
       <ExerciseLibrary filters={filters} />
     </div>
   );

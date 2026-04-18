@@ -714,6 +714,34 @@ button:active:not(:disabled),
   100% { transform: translateY(100vh); }
 }
 
+/* Custom scrollbar — brutal industrial style */
+.scrollbar-custom::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background: #525252;
+  border-radius: 2px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  background: #71717A;
+}
+
+/* Hide scrollbar utility */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .skeleton-steal {
     animation: none;

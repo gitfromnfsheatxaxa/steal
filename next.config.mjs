@@ -13,6 +13,14 @@ const nextConfig = {
         hostname: "raw.githubusercontent.com",
         pathname: "/hasaneyldrm/exercises-dataset/**",
       },
+      {
+        protocol: "https",
+        hostname: "static.exercisedb.dev",
+      },
+      {
+        protocol: "https",
+        hostname: "**.vercel.app",
+      },
     ],
   },
   // Proxy /pb/* → PocketBase so the browser never makes cross-origin HTTP

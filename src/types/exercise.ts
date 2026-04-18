@@ -24,18 +24,23 @@ export interface Exercise {
   category: ExerciseCategory;
   difficulty: ExerciseDifficulty;
   instructions: string;
-  alternatives: string[]; // exercise IDs
+  alternatives: string[];
   videoUrl: string | null;
   created: string;
   updated: string;
 }
 
-/** Exercise record from the static exercises dataset (hasaneyldrm/exercises-dataset). */
+/**
+ * Normalized exercise record surfaced to UI consumers.
+ * Shape is stable even after the underlying source API changes.
+ */
 export interface LibraryExercise {
   id: string;
+  exerciseId: string;
   name: string;
   slug: string;
   category: string;
+  difficulty: string;
   bodyPart: string;
   equipment: string;
   muscleGroup: string;
@@ -43,6 +48,10 @@ export interface LibraryExercise {
   target: string;
   instructions: string;
   steps: string[];
+  overview: string;
+  tips: string[];
+  variations: string[];
   image: string;
   gif: string;
+  videoUrl: string;
 }

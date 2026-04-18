@@ -1,0 +1,492 @@
+#!/usr/bin/env node
+/**
+ * Seed the PocketBase `exercise_translations` collection.
+ *
+ * Parallel mode  — when both GROQ_API_KEY and GEMINI_API_KEY are set,
+ *                  locale "ru" and locale "uz" run concurrently on separate
+ *                  providers, cutting total wall time roughly in half.
+ * Single mode    — falls back to sequential if only one key is present.
+ *
+ * Usage:
+ *   node --env-file=.env.local scripts/seed-exercise-translations.mjs
+ *
+ * Optional env overrides:
+ *   GROQ_MODEL=llama-3.1-8b-instant   (default)
+ *   GEMINI_MODEL=gemini-2.5-flash-lite (default)
+ *   LIMIT=50      — only first N exercises (smoke test)
+ *   LOCALES=ru    — comma-separated locales (default: ru,uz)
+ *   DELAY_MS=3000 — override per-batch delay for all providers
+ *
+ * Fully resumable — .seed-progress.json tracks per-locale completion.
+ */
+
+import PocketBase from "pocketbase";
+import { generateObject, generateText } from "ai";
+import { groq } from "@ai-sdk/groq";
+import { google } from "@ai-sdk/google";
+import { anthropic } from "@ai-sdk/anthropic";
+import { z } from "zod";
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
+
+// ── Environment ────────────────────────────────────────────────────────────────
+const PB_URL   = process.env.POCKETBASE_URL || process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8090";
+const PB_EMAIL = process.env.POCKETBASE_ADMIN_EMAIL;
+const PB_PASS  = process.env.POCKETBASE_ADMIN_PASSWORD;
+const EXDB_URL = process.env.NEXT_PUBLIC_EXERCISEDB_URL;
+const LIMIT    = process.env.LIMIT ? Number(process.env.LIMIT) : Infinity;
+const LOCALES  = (process.env.LOCALES || "ru,uz").split(",").map(s => s.trim()).filter(Boolean);
+
+if (!PB_EMAIL || !PB_PASS || !EXDB_URL) {
+  console.error("Missing required env: POCKETBASE_ADMIN_EMAIL / POCKETBASE_ADMIN_PASSWORD / NEXT_PUBLIC_EXERCISEDB_URL");
+  process.exit(1);
+}
+
+// ── Provider detection ─────────────────────────────────────────────────────────
+const GROQ_KEY   = process.env.GROQ_API_KEY;
+const GEMINI_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+const ANTHRO_KEY = process.env.ANTHROPIC_API_KEY;
+
+if (GEMINI_KEY && !process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+  process.env.GOOGLE_GENERATIVE_AI_API_KEY = GEMINI_KEY;
+}
+
+/**
+ * Provider descriptor:
+ *   useTextMode — Groq doesn't support json_schema; we use generateText + manual parse.
+ *   batchSize   — Groq 8B truncates on large batches; keep it at 5.
+ *   delayMs     — minimum ms between batches to stay under RPM limit.
+ */
+const PROVIDERS = [];
+if (GROQ_KEY) {
+  PROVIDERS.push({
+    name: "groq",
+    model: process.env.GROQ_MODEL ?? "llama-3.1-8b-instant",
+    batchSize: 5,
+    maxTokens: 8000,
+    delayMs: Number(process.env.DELAY_MS ?? 3000),
+    lastCall: 0,
+    useTextMode: true,
+  });
+}
+if (GEMINI_KEY) {
+  PROVIDERS.push({
+    name: "gemini",
+    model: process.env.GEMINI_MODEL ?? "gemini-2.5-flash-lite",
+    batchSize: 20,
+    maxTokens: undefined,
+    delayMs: Number(process.env.DELAY_MS ?? 3000),
+    lastCall: 0,
+    useTextMode: false,
+  });
+}
+if (!PROVIDERS.length && ANTHRO_KEY) {
+  PROVIDERS.push({
+    name: "anthropic",
+    model: "claude-sonnet-4-6",
+    batchSize: 20,
+    maxTokens: undefined,
+    delayMs: Number(process.env.DELAY_MS ?? 2000),
+    lastCall: 0,
+    useTextMode: false,
+  });
+}
+
+if (!PROVIDERS.length) {
+  console.error("No AI keys found. Set GROQ_API_KEY and/or GEMINI_API_KEY.");
+  process.exit(1);
+}
+
+// Put the larger-batch provider first so it handles locale[0] (ru) — better quality.
+PROVIDERS.sort((a, b) => b.batchSize - a.batchSize);
+console.log(`→ Providers: ${PROVIDERS.map(p => `${p.name}/${p.model} (batch=${p.batchSize})`).join(" | ")}`);
+
+// ── Zod schema ─────────────────────────────────────────────────────────────────
+const itemSchema = z.object({
+  exerciseExtId:   z.string(),
+  name:            z.string(),
+  overview:        z.string().default(""),
+  bodyPart:        z.string().default(""),
+  equipment:       z.string().default(""),
+  target:          z.string().default(""),
+  muscleGroup:     z.string().default(""),
+  category:        z.string().default(""),
+  difficulty:      z.string().default(""),
+  secondaryMuscles: z.array(z.string()).default([]),
+  instructions:    z.array(z.string()).default([]),
+  exerciseTips:    z.array(z.string()).default([]),
+  variations:      z.array(z.string()).default([]),
+});
+const translationSchema = z.object({ translations: z.array(itemSchema) });
+
+// ── System prompts ─────────────────────────────────────────────────────────────
+const SYSTEM_PROMPTS = {
+  ru: `Ты — профессиональный переводчик фитнес-контента с английского на русский язык. Используй живой, профессиональный язык фитнес-индустрии, понятный посетителям спортивных залов.
+
+═══ АБСОЛЮТНЫЕ ПРАВИЛА ═══
+• Отвечай СТРОГО JSON-массивом — ни markdown, ни тройные апострофы, ни объяснений, ни слов до или после JSON.
+• Переводи КАЖДОЕ поле для КАЖДОГО упражнения без исключения.
+• Если поле пустое в оригинале — оставь пустую строку или пустой массив.
+• Сохраняй РОВНО столько элементов в массивах, сколько в оригинале.
+• НЕ пропускай ни одно упражнение из входного списка.
+
+═══ КАК ПЕРЕВОДИТЬ КАЖДОЕ ПОЛЕ ═══
+name           → Официальное русское название: «Жим штанги лёжа», «Подтягивания», «Приседания со штангой».
+overview       → Краткое описание упражнения (2-4 предложения), что оно развивает и для кого подходит.
+bodyPart       → Часть тела: «грудь», «спина», «ноги», «плечи», «руки», «пресс», «ягодицы» и т.д.
+equipment      → Оборудование: «штанга», «гантели», «гиря», «тренажёр», «эспандер», «вес тела» и т.д.
+target         → Целевая мышца: «большая грудная», «широчайшая мышца спины», «квадрицепс» и т.д.
+muscleGroup    → Группа мышц (аналогично target).
+category       → «силовые», «кардио», «гибкость», «функциональные», «изометрические» и т.д.
+difficulty     → «начинающий», «средний уровень», «продвинутый».
+secondaryMuscles → Массив вторичных мышц (каждая строкой).
+instructions   → Массив шагов. Каждый шаг — отдельная строка. Формат: «Шаг 1: ...», «Шаг 2: ...». Переводи каждый шаг полностью.
+exerciseTips   → Массив советов и предостережений от типичных ошибок. Каждый совет — отдельная строка.
+variations     → Массив вариантов и модификаций упражнения. Каждый вариант — отдельная строка.
+
+═══ ФОРМАТ ОТВЕТА ═══
+[
+  {
+    "exerciseExtId": "...",
+    "name": "...",
+    "overview": "...",
+    "bodyPart": "...",
+    "equipment": "...",
+    "target": "...",
+    "muscleGroup": "...",
+    "category": "...",
+    "difficulty": "...",
+    "secondaryMuscles": ["..."],
+    "instructions": ["Шаг 1: ...", "Шаг 2: ..."],
+    "exerciseTips": ["..."],
+    "variations": ["..."]
+  }
+]`,
+
+  uz: `Siz ingliz tilidan o'zbek tiliga (lotin yozuvi) fitness kontentini tarjima qiluvchi professional tarjimonasiz. Sport zallariga qatnaydiganlar uchun tushunarli, jonli va professional til ishlating.
+
+═══ MUTLAQ QOIDALAR ═══
+• FAQAT JSON massiv bilan javob bering — markdown yo'q, uchta tirnoq yo'q, tushuntirish yo'q, JSON dan oldin yoki keyin hech qanday matn yo'q.
+• Har bir mashq uchun BARCHA maydonlarni tarjima qiling, istisnosiz.
+• Agar asl nusxada maydon bo'sh bo'lsa — bo'sh satr yoki bo'sh massiv qoldiring.
+• Massivlardagi elementlar sonini asl nusxadagidek SAQLANG.
+• Kiritilgan ro'yxatdagi birorta mashqni o'tkazib yubormang.
+
+═══ HAR BIR MAYDONNI QANDAY TARJIMA QILISH ═══
+name           → Rasmiy o'zbek nomi: «Yotib shtanga ko'tarish», «Turnikda tortilish», «Shtanga bilan o'tirish».
+overview       → Mashqning qisqacha tavsifi (2-4 jumla): nima rivojlantiradi va kimlar uchun mos.
+bodyPart       → Tana qismi: «ko'krak», «orqa», «oyoqlar», «yelkalar», «qo'llar», «qorin», «dumba» va h.k.
+equipment      → Jihozlar: «shtanga», «hantellar», «girya», «trenajer», «rezina», «o'z tana og'irligi» va h.k.
+target         → Asosiy mushak: «katta ko'krak mushagi», «keng orqa mushagi», «to'rt boshli mushak» va h.k.
+muscleGroup    → Mushak guruhi (target bilan o'xshash).
+category       → «kuch», «kardio», «egiluvchanlik», «funksional», «izometrik» va h.k.
+difficulty     → «boshlang'ich», «o'rta daraja», «yuqori daraja».
+secondaryMuscles → Ikkinchi darajali mushaklar massivi (har biri alohida satr).
+instructions   → Qadamlar massivi. Har bir qadam alohida satr. Format: «1-qadam: ...», «2-qadam: ...». Har bir qadamni to'liq tarjima qiling.
+exerciseTips   → Maslahatlar va keng tarqalgan xatolar haqida ogohlantirish massivi. Har biri alohida satr.
+variations     → Mashqning variantlari va modifikatsiyalari massivi. Har biri alohida satr.
+
+═══ JAVOB FORMATI ═══
+[
+  {
+    "exerciseExtId": "...",
+    "name": "...",
+    "overview": "...",
+    "bodyPart": "...",
+    "equipment": "...",
+    "target": "...",
+    "muscleGroup": "...",
+    "category": "...",
+    "difficulty": "...",
+    "secondaryMuscles": ["..."],
+    "instructions": ["1-qadam: ...", "2-qadam: ..."],
+    "exerciseTips": ["..."],
+    "variations": ["..."]
+  }
+]`,
+};
+
+// ── Source payload builder ─────────────────────────────────────────────────────
+function toSourcePayload(e) {
+  return {
+    exerciseExtId:   e.exerciseId,
+    name:            e.name,
+    overview:        e.overview || "",
+    bodyPart:        (e.bodyParts || [])[0] || "",
+    equipment:       (e.equipments || [])[0] || "",
+    target:          (e.targetMuscles || [])[0] || "",
+    muscleGroup:     (e.targetMuscles || [])[0] || "",
+    category:        e.category || "",
+    difficulty:      e.difficulty || "",
+    secondaryMuscles: e.secondaryMuscles || [],
+    instructions:    e.instructions || [],
+    exerciseTips:    e.exerciseTips || [],
+    variations:      e.variations || [],
+  };
+}
+
+// ── Robust JSON extraction ─────────────────────────────────────────────────────
+function extractFirstJSON(text) {
+  // Strip markdown code fences
+  const s = text.replace(/```(?:json)?\s*/gi, "").replace(/```/g, "");
+  const oi = s.indexOf("{"), ai = s.indexOf("[");
+  const start = oi === -1 ? ai : ai === -1 ? oi : Math.min(oi, ai);
+  if (start === -1) throw new Error("No JSON found in response");
+  const open = s[start], close = open === "{" ? "}" : "]";
+  let depth = 0, inStr = false, esc = false;
+  for (let i = start; i < s.length; i++) {
+    const c = s[i];
+    if (esc)        { esc = false; continue; }
+    if (c === "\\") { esc = true;  continue; }
+    if (c === '"')  { inStr = !inStr; continue; }
+    if (inStr)      continue;
+    if (c === open) depth++;
+    else if (c === close) { depth--; if (depth === 0) return s.slice(start, i + 1); }
+  }
+  throw new Error("Unbalanced JSON in response");
+}
+
+function parseTranslations(raw) {
+  const arr = Array.isArray(raw) ? raw
+    : Array.isArray(raw.translations) ? raw.translations
+    : Array.isArray(raw.data)         ? raw.data
+    : Object.values(raw).find(Array.isArray);
+  if (!arr) throw new Error("No translations array found in response");
+  return z.array(itemSchema).parse(arr);
+}
+
+// ── Translation core ───────────────────────────────────────────────────────────
+function buildModel(provider) {
+  if (provider.name === "groq")      return groq(provider.model);
+  if (provider.name === "gemini")    return google(provider.model);
+  if (provider.name === "anthropic") return anthropic(provider.model);
+  throw new Error(`Unknown provider: ${provider.name}`);
+}
+
+async function translateBatch(batch, locale, provider) {
+  const payload = batch.map(toSourcePayload);
+  const prompt =
+    `Translate the following ${batch.length} exercises into ${locale}. ` +
+    `Match each exercise by its exerciseExtId. Translate EVERY field fully.\n\n` +
+    JSON.stringify(payload, null, 0);
+
+  if (provider.useTextMode) {
+    // Groq: no json_schema support → generateText + manual parse
+    const { text } = await generateText({
+      model: buildModel(provider),
+      maxTokens: provider.maxTokens,
+      system: SYSTEM_PROMPTS[locale],
+      prompt,
+    });
+    const json = extractFirstJSON(text);
+    return parseTranslations(JSON.parse(json));
+  }
+
+  // Gemini / Anthropic: structured output via generateObject
+  const { object } = await generateObject({
+    model: buildModel(provider),
+    schema: translationSchema,
+    system: SYSTEM_PROMPTS[locale],
+    prompt,
+  });
+  return object.translations;
+}
+
+// ── Rate-limit-aware wrapper ───────────────────────────────────────────────────
+// Serialise ALL calls per-provider through a promise chain so parallel locales
+// that share a provider never fire simultaneously and always respect delayMs.
+const providerQueues = new WeakMap();
+
+async function throttledTranslate(batch, locale, provider) {
+  if (!providerQueues.has(provider)) providerQueues.set(provider, Promise.resolve());
+
+  let resolve_;
+  const slot = new Promise(r => { resolve_ = r; });
+  const prev = providerQueues.get(provider);
+  providerQueues.set(provider, slot);
+
+  await prev; // wait for previous call to finish
+  const now = Date.now();
+  const wait = provider.delayMs - (now - provider.lastCall);
+  if (wait > 0) await new Promise(r => setTimeout(r, wait));
+  provider.lastCall = Date.now();
+  try {
+    return await translateBatch(batch, locale, provider);
+  } finally {
+    resolve_(); // release the next queued call
+  }
+}
+
+// ── PocketBase ─────────────────────────────────────────────────────────────────
+const pb = new PocketBase(PB_URL);
+try {
+  await pb.collection("_superusers").authWithPassword(PB_EMAIL, PB_PASS);
+  console.log("✓ PocketBase authed");
+} catch (err) {
+  console.error("✗ PocketBase auth failed:", err.message);
+  process.exit(1);
+}
+
+async function upsert(row) {
+  try {
+    const existing = await pb.collection("exercise_translations")
+      .getFirstListItem(`exerciseExtId="${row.exerciseExtId}" && locale="${row.locale}"`);
+    await pb.collection("exercise_translations").update(existing.id, row);
+  } catch {
+    await pb.collection("exercise_translations").create(row);
+  }
+}
+
+// ── Exercise fetch ─────────────────────────────────────────────────────────────
+async function fetchAllExercises() {
+  const all = [];
+  const pageSize = 100; // API max
+  let offset = 0;
+  while (all.length < LIMIT) {
+    const url = `${EXDB_URL}/exercises?limit=${pageSize}&offset=${offset}`;
+    const res = await fetch(url, { headers: { accept: "application/json" } });
+    if (!res.ok) throw new Error(`exercisedb-api ${res.status} ${res.statusText}`);
+    const body = await res.json();
+    const items = Array.isArray(body) ? body : (body.data || []);
+    if (!items.length) break;
+    all.push(...items);
+    if (items.length < pageSize) break;
+    offset += pageSize;
+  }
+  return all.slice(0, LIMIT);
+}
+
+console.log(`→ Fetching exercises from ${EXDB_URL}…`);
+const exercises = await fetchAllExercises();
+console.log(`✓ Got ${exercises.length} exercises`);
+
+// ── Progress ───────────────────────────────────────────────────────────────────
+const PROGRESS_FILE = ".seed-progress.json";
+let progress = existsSync(PROGRESS_FILE)
+  ? JSON.parse(readFileSync(PROGRESS_FILE, "utf8"))
+  : { done: {} };
+
+function saveProgress() {
+  writeFileSync(PROGRESS_FILE, JSON.stringify(progress, null, 2));
+}
+
+class ProviderDeadError extends Error {}
+
+// ── Locale processing ──────────────────────────────────────────────────────────
+async function processLocale(locale, provider) {
+  if (!SYSTEM_PROMPTS[locale]) {
+    console.warn(`! No system prompt for "${locale}", skipping`);
+    return;
+  }
+  progress.done[locale] ||= {};
+
+  const pending = exercises.filter(e => !progress.done[locale][e.exerciseId]);
+  const tag = `[${provider.name}→${locale.toUpperCase()}]`;
+  console.log(`\n─── ${tag} ${pending.length}/${exercises.length} pending ───`);
+
+  let consecutiveFails = 0;
+
+  for (let i = 0; i < pending.length; i += provider.batchSize) {
+    const batch = pending.slice(i, i + provider.batchSize);
+    console.log(`  ${tag} batch ${i + 1}-${i + batch.length} of ${pending.length}`);
+
+    let translations;
+    try {
+      translations = await throttledTranslate(batch, locale, provider);
+      if (translations.length < batch.length) {
+        throw new Error(`Incomplete batch: got ${translations.length}/${batch.length} translations`);
+      }
+      consecutiveFails = 0;
+    } catch (err) {
+      const isRateLimit = /rate.?limit|quota|429/i.test(err.message);
+
+      // Any rate-limit from Groq likely means daily quota — switch immediately.
+      if (isRateLimit && provider.useTextMode) {
+        console.error(`  ✗ ${tag} rate limit hit — switching provider immediately`);
+        throw new ProviderDeadError(`${provider.name} quota exhausted`);
+      }
+
+      const waitMs = isRateLimit ? 65_000 : 4_000;
+      console.warn(`  ✗ ${tag} failed (${err.message.slice(0, 100)}). Retrying in ${waitMs / 1000}s…`);
+      await new Promise(r => setTimeout(r, waitMs));
+      try {
+        translations = await throttledTranslate(batch, locale, provider);
+        if (translations.length < batch.length) {
+          throw new Error(`Incomplete batch: got ${translations.length}/${batch.length} translations`);
+        }
+        consecutiveFails = 0;
+      } catch (err2) {
+        consecutiveFails++;
+        if (consecutiveFails >= 2) throw new ProviderDeadError(`${provider.name} quota exhausted`);
+        console.error(`  ✗✗ ${tag} giving up on batch: ${err2.message.slice(0, 120)}`);
+        continue;
+      }
+    }
+
+    let saved = 0;
+    for (const t of translations) {
+      const row = {
+        exerciseExtId:   t.exerciseExtId,
+        locale,
+        name:            t.name,
+        overview:        t.overview,
+        bodyPart:        t.bodyPart,
+        equipment:       t.equipment,
+        target:          t.target,
+        muscleGroup:     t.muscleGroup,
+        category:        t.category,
+        difficulty:      t.difficulty,
+        secondaryMuscles: (t.secondaryMuscles || []).join("\n"),
+        instructions:    (t.instructions || []).join("\n"),
+        exerciseTips:    (t.exerciseTips || []).join("\n"),
+        variations:      (t.variations || []).join("\n"),
+      };
+      try {
+        await upsert(row);
+        progress.done[locale][t.exerciseExtId] = true;
+        saved++;
+      } catch (err) {
+        console.error(`  ✗ upsert ${t.exerciseExtId}: ${err.message}`);
+      }
+    }
+    saveProgress();
+    console.log(`  ✓ ${tag} saved ${saved}`);
+  }
+
+  console.log(`\n✓ ${tag} done`);
+}
+
+// ── Main ───────────────────────────────────────────────────────────────────────
+async function runLocale(locale, providerIndex = 0, tried = new Set()) {
+  tried.add(providerIndex);
+  const provider = PROVIDERS[providerIndex];
+  if (!provider) {
+    console.error(`✗ No working provider left for ${locale}`);
+    return;
+  }
+  try {
+    await processLocale(locale, provider);
+  } catch (err) {
+    if (err instanceof ProviderDeadError) {
+      const fallbackIdx = PROVIDERS.findIndex((_, i) => !tried.has(i));
+      if (fallbackIdx !== -1) {
+        console.warn(`\n⚠ ${provider.name} dead for ${locale} — falling back to ${PROVIDERS[fallbackIdx].name}`);
+        await runLocale(locale, fallbackIdx, tried);
+      } else {
+        console.error(`✗ All providers exhausted for ${locale}. Re-run tomorrow.`);
+      }
+    } else {
+      throw err;
+    }
+  }
+}
+
+if (PROVIDERS.length >= 2 && LOCALES.length >= 2) {
+  // Assign one provider per locale — largest-batch provider handles locale[0] (ru).
+  console.log(`\n→ PARALLEL mode: ${LOCALES.map((l, i) => `${l}→${PROVIDERS[i % PROVIDERS.length].name}`).join(", ")}`);
+  await Promise.all(LOCALES.map((locale, i) => runLocale(locale, i % PROVIDERS.length)));
+} else {
+  console.log(`\n→ SEQUENTIAL mode: ${PROVIDERS[0].name}`);
+  for (const locale of LOCALES) await runLocale(locale, 0);
+}
+
+console.log("\n✓ Seeding complete.");

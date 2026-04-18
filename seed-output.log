@@ -1,0 +1,29 @@
+
+> my-frontend-app@0.1.0 seed:translations
+> node --env-file=.env.local scripts/seed-exercise-translations.mjs
+
+→ Providers: gemini/gemini-2.5-flash-lite (batch=20) | groq/llama-3.1-8b-instant (batch=5)
+✓ PocketBase authed
+→ Fetching exercises from https://fork-ivory-chi.vercel.app/api/v1…
+✓ Got 1500 exercises
+
+→ PARALLEL mode: ru→gemini, uz→groq
+
+─── [gemini→RU] 783/1500 pending ───
+  [gemini→RU] batch 1-20 of 783
+
+─── [groq→UZ] 1495/1500 pending ───
+  [groq→UZ] batch 1-5 of 1495
+  ✗ [groq→UZ] failed (Unbalanced JSON in response). Retrying in 4s…
+  ✗ [gemini→RU] failed (Failed after 3 attempts. Last error: You exceeded your current quota, please check your plan and bil). Retrying in 65s…
+  ✓ [groq→UZ] saved 5
+  [groq→UZ] batch 6-10 of 1495
+  ✗ [groq→UZ] failed (Expected ',' or ']' after array element in JSON at position 1217 (line 1 column 1218)). Retrying in 4s…
+  ✗✗ [gemini→RU] giving up on batch: Failed after 3 attempts. Last error: You exceeded your current quota, please check your plan and billing details. For mo
+  [gemini→RU] batch 21-40 of 783
+  ✗ [gemini→RU] failed (Failed after 3 attempts. Last error: You exceeded your current quota, please check your plan and bil). Retrying in 65s…
+  ✗✗ [groq→UZ] giving up on batch: Unexpected token ']', ..." berdi.",
+],
+"exerci"... is not valid JSON
+  [groq→UZ] batch 11-15 of 1495
+  ✗ [groq→UZ] failed (Unbalanced JSON in response). Retrying in 4s…

@@ -1,12 +1,16 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { LibraryExercise } from "@/types/exercise";
 import { getAllExercises } from "@/lib/exercise-library";
+import { useI18n } from "@/components/providers/I18nProvider";
+import { useExercisesBatchTranslation } from "@/hooks/useExerciseTranslation";
+import { applyTranslationToLibraryExercise } from "@/lib/exercise-translate";
+import { tBodyPart, tEquipment, tMuscle } from "@/lib/exercise-taxonomy";
 
 interface FilterOptions {
   bodyParts: string[];
@@ -19,7 +23,8 @@ interface Props {
   filters: FilterOptions;
 }
 
-// ── Skeleton tile ─────────────────────────────────────────────────────────────
+const PAGINATION_SIZE = 20;
+
 function TileSkeleton() {
   return (
     <div className="border border-[#2a2a2a] bg-[#0a0a0a] overflow-hidden">
@@ -35,17 +40,13 @@ function TileSkeleton() {
   );
 }
 
-// ── Exercise tile ─────────────────────────────────────────────────────────────
 function ExerciseTile({ exercise }: { exercise: LibraryExercise }) {
   return (
     <Link
       href={`/exercises/${exercise.slug}`}
       className="group border border-[#2a2a2a] bg-[#0a0a0a] overflow-hidden block transition-all duration-150 hover:-translate-y-0.5 hover:border-[#e53e00]/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#e53e00]"
-      style={{
-        boxShadow: "0 0 0 0 transparent",
-      }}
+      style={{ boxShadow: "0 0 0 0 transparent" }}
     >
-      {/* Thumbnail */}
       <div className="relative aspect-square w-full bg-[#111] overflow-hidden">
         {exercise.image ? (
           <Image
@@ -69,7 +70,6 @@ function ExerciseTile({ exercise }: { exercise: LibraryExercise }) {
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/60 to-transparent pointer-events-none group-hover:opacity-0 transition-opacity duration-150" />
       </div>
 
-      {/* Info */}
       <div className="p-3">
         <p
           className="font-data text-[11px] font-bold uppercase tracking-widest text-[#e5e5e5] leading-tight mb-2 line-clamp-2 group-hover:text-[#e53e00] transition-colors"
@@ -94,7 +94,6 @@ function ExerciseTile({ exercise }: { exercise: LibraryExercise }) {
   );
 }
 
-// ── Filter chip ───────────────────────────────────────────────────────────────
 function FilterChip({
   label,
   active,
@@ -108,11 +107,12 @@ function FilterChip({
     <button
       onClick={onClick}
       className={cn(
-        "shrink-0 px-3 py-1.5 font-data text-[10px] font-semibold uppercase tracking-widest transition-all border",
+        "shrink-0 px-3 py-1.5 font-data text-[10px] font-semibold uppercase tracking-widest transition-all border relative overflow-hidden",
         active
           ? "border-[#e53e00] text-[#e53e00] bg-[#e53e00]/10"
           : "border-[#2a2a2a] text-[#71717A] hover:border-[#525252] hover:text-[#a3a3a3]",
       )}
+      style={{ borderLeft: active ? "3px solid #e53e00" : "3px solid transparent" }}
       aria-pressed={active}
     >
       {label}
@@ -120,48 +120,84 @@ function FilterChip({
   );
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
 export function ExerciseLibrary({ filters }: Props) {
-  const [exercises, setExercises] = useState<LibraryExercise[] | null>(null);
+  const { language } = useI18n();
+  const [allExercises, setAllExercises] = useState<LibraryExercise[] | null>(
+    null,
+  );
+  const [displayCount, setDisplayCount] = useState(PAGINATION_SIZE);
   const [rawQ, setRawQ] = useState("");
   const [q, setQ] = useState("");
   const [bodyPart, setBodyPart] = useState("");
   const [equipment, setEquipment] = useState("");
   const [target, setTarget] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Load exercises on mount via shared cache in exercise-library.ts
   useEffect(() => {
-    getAllExercises().then((data) => {
-      setExercises(data);
-    });
+    getAllExercises()
+      .then((data) => {
+        setAllExercises(data);
+        setIsLoading(false);
+      })
+      .catch(() => setIsLoading(false));
   }, []);
 
-  // Debounce search query
   const handleQueryChange = useCallback((val: string) => {
     setRawQ(val);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => setQ(val.trim()), 150);
   }, []);
 
-  const filtered = useMemo(() => {
-    if (!exercises) return null;
+  const filteredExercises = useMemo(() => {
+    if (!allExercises) return [];
     const lowerQ = q.toLowerCase();
-    return exercises.filter((ex) => {
+    return allExercises.filter((ex) => {
       if (lowerQ && !ex.name.toLowerCase().includes(lowerQ)) return false;
       if (bodyPart && ex.bodyPart !== bodyPart) return false;
       if (equipment && ex.equipment !== equipment) return false;
       if (target && ex.target !== target) return false;
       return true;
     });
-  }, [exercises, q, bodyPart, equipment, target]);
+  }, [allExercises, q, bodyPart, equipment, target]);
 
-  const isLoading = exercises === null;
+  useEffect(() => {
+    setDisplayCount(PAGINATION_SIZE);
+  }, [q, bodyPart, equipment, target]);
+
+  const displayedSlice = useMemo(
+    () => filteredExercises.slice(0, displayCount),
+    [filteredExercises, displayCount],
+  );
+
+  const visibleExtIds = useMemo(
+    () => displayedSlice.map((ex) => ex.exerciseId),
+    [displayedSlice],
+  );
+
+  const { data: translations } = useExercisesBatchTranslation(visibleExtIds);
+
+  const displayedExercises = useMemo(() => {
+    if (language === "en") return displayedSlice;
+    return displayedSlice.map((ex) => {
+      const t = translations.get(ex.exerciseId);
+      const merged = applyTranslationToLibraryExercise(ex, t);
+      return {
+        ...merged,
+        bodyPart:
+          t?.bodyPart || tBodyPart(ex.bodyPart, language) || ex.bodyPart,
+        equipment:
+          t?.equipment || tEquipment(ex.equipment, language) || ex.equipment,
+        target: t?.target || tMuscle(ex.target, language) || ex.target,
+      };
+    });
+  }, [displayedSlice, translations, language]);
+
+  const hasMore = displayedSlice.length < filteredExercises.length;
 
   return (
     <div className="space-y-4">
-      {/* ── Search bar ──────────────────────────────────────────────────────── */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#525252] pointer-events-none" />
         <input
@@ -174,10 +210,12 @@ export function ExerciseLibrary({ filters }: Props) {
         />
       </div>
 
-      {/* ── Filter chips ────────────────────────────────────────────────────── */}
       <div className="space-y-2">
-        {/* Body Part */}
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none" role="group" aria-label="Filter by body part">
+        <div
+          className="flex gap-2 overflow-x-auto pb-2 scrollbar-custom"
+          role="group"
+          aria-label="Filter by body part"
+        >
           <FilterChip
             label="ALL"
             active={bodyPart === ""}
@@ -186,15 +224,18 @@ export function ExerciseLibrary({ filters }: Props) {
           {filters.bodyParts.map((bp) => (
             <FilterChip
               key={bp}
-              label={bp}
+              label={tBodyPart(bp, language).toUpperCase()}
               active={bodyPart === bp}
               onClick={() => setBodyPart(bodyPart === bp ? "" : bp)}
             />
           ))}
         </div>
 
-        {/* Equipment */}
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none" role="group" aria-label="Filter by equipment">
+        <div
+          className="flex gap-2 overflow-x-auto pb-2 scrollbar-custom"
+          role="group"
+          aria-label="Filter by equipment"
+        >
           <FilterChip
             label="ANY EQUIP."
             active={equipment === ""}
@@ -203,15 +244,18 @@ export function ExerciseLibrary({ filters }: Props) {
           {filters.equipment.map((eq) => (
             <FilterChip
               key={eq}
-              label={eq}
+              label={tEquipment(eq, language).toUpperCase()}
               active={equipment === eq}
               onClick={() => setEquipment(equipment === eq ? "" : eq)}
             />
           ))}
         </div>
 
-        {/* Target */}
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none" role="group" aria-label="Filter by target muscle">
+        <div
+          className="flex gap-2 overflow-x-auto pb-2 scrollbar-custom"
+          role="group"
+          aria-label="Filter by target muscle"
+        >
           <FilterChip
             label="ALL MUSCLES"
             active={target === ""}
@@ -220,7 +264,7 @@ export function ExerciseLibrary({ filters }: Props) {
           {filters.targets.map((t) => (
             <FilterChip
               key={t}
-              label={t}
+              label={tMuscle(t, language).toUpperCase()}
               active={target === t}
               onClick={() => setTarget(target === t ? "" : t)}
             />
@@ -228,28 +272,26 @@ export function ExerciseLibrary({ filters }: Props) {
         </div>
       </div>
 
-      {/* ── Result count ────────────────────────────────────────────────────── */}
-      {!isLoading && filtered !== null && (
+      {!isLoading && allExercises !== null && (
         <div className="flex items-center gap-2">
           <div className="h-px flex-1 bg-[#1a1a1a]" />
           <span
             className="stamp text-[9px] text-[#525252] tracking-widest"
             style={{ fontFamily: "var(--font-mono, monospace)" }}
           >
-            {filtered.length} RESULTS
+            {displayedSlice.length} / {filteredExercises.length} RESULTS
           </span>
           <div className="h-px flex-1 bg-[#1a1a1a]" />
         </div>
       )}
 
-      {/* ── Grid ────────────────────────────────────────────────────────────── */}
       {isLoading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {Array.from({ length: 12 }).map((_, i) => (
             <TileSkeleton key={i} />
           ))}
         </div>
-      ) : filtered !== null && filtered.length === 0 ? (
+      ) : displayedExercises.length === 0 ? (
         <div
           className="border border-[#2a2a2a] bg-[#0a0a0a] flex flex-col items-center justify-center py-20 gap-4"
           style={{ borderLeft: "3px solid #525252" }}
@@ -268,11 +310,25 @@ export function ExerciseLibrary({ filters }: Props) {
           </span>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-          {(filtered ?? []).map((ex) => (
-            <ExerciseTile key={ex.id} exercise={ex} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {displayedExercises.map((ex) => (
+              <ExerciseTile key={ex.id} exercise={ex} />
+            ))}
+          </div>
+
+          {hasMore && (
+            <div className="flex justify-center">
+              <button
+                onClick={() => setDisplayCount((c) => c + PAGINATION_SIZE)}
+                className="px-6 py-3 border border-[#e53e00] bg-[#0a0a0a] text-[#e53e00] font-data text-[10px] font-semibold uppercase tracking-widest hover:bg-[#e53e00] hover:text-white transition-all relative overflow-hidden"
+                style={{ borderLeft: "3px solid #e53e00" }}
+              >
+                LOAD MORE
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

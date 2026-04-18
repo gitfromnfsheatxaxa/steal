@@ -1,14 +1,73 @@
+import {
+  fetchExercises,
+  getExerciseById,
+  searchExercisesByName,
+  type ExerciseV2,
+} from "@/lib/exercise-db-api";
 import type { LibraryExercise } from "@/types/exercise";
 
-let _cache: Promise<LibraryExercise[]> | null = null;
+const PAGE_SIZE = 100; // API max page size
+const MAX_PAGES = 40;
+
+function slugify(input: string): string {
+  return input
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function first<T>(arr: T[] | undefined, fallback = ""): T | string {
+  return arr && arr.length > 0 ? arr[0] : fallback;
+}
+
+export function toLibraryExercise(ex: ExerciseV2): LibraryExercise {
+  const instructions = Array.isArray(ex.instructions) ? ex.instructions : [];
+  // The self-hosted fork only ships `gifUrl`; reuse it as the static image.
+  const image = ex.imageUrl || ex.gifUrl || "";
+  return {
+    id: ex.exerciseId,
+    exerciseId: ex.exerciseId,
+    name: ex.name,
+    slug: slugify(ex.name),
+    category: ex.category ?? "",
+    difficulty: ex.difficulty ?? "",
+    bodyPart: String(first(ex.bodyParts, "")),
+    equipment: String(first(ex.equipments, "")),
+    muscleGroup: String(first(ex.targetMuscles, "")),
+    target: String(first(ex.targetMuscles, "")),
+    secondaryMuscles: ex.secondaryMuscles ?? [],
+    instructions: instructions.join(" "),
+    steps: instructions,
+    overview: ex.overview ?? "",
+    tips: ex.exerciseTips ?? [],
+    variations: ex.variations ?? [],
+    image,
+    gif: ex.gifUrl || image,
+    videoUrl: ex.videoUrl ?? "",
+  };
+}
+
+let _allCache: Promise<LibraryExercise[]> | null = null;
+
+async function fetchAllPaginated(): Promise<LibraryExercise[]> {
+  const all: LibraryExercise[] = [];
+  for (let page = 0; page < MAX_PAGES; page++) {
+    const chunk = await fetchExercises(PAGE_SIZE, page * PAGE_SIZE);
+    if (!chunk.length) break;
+    all.push(...chunk.map(toLibraryExercise));
+    if (chunk.length < PAGE_SIZE) break;
+  }
+  return all;
+}
 
 export function getAllExercises(): Promise<LibraryExercise[]> {
-  if (!_cache) {
-    _cache = import("@/data/exercises.json").then(
-      (m) => (m.default ?? m) as LibraryExercise[],
-    );
+  if (!_allCache) {
+    _allCache = fetchAllPaginated().catch((err) => {
+      _allCache = null;
+      throw err;
+    });
   }
-  return _cache;
+  return _allCache;
 }
 
 function normalize(str: string): string {
@@ -20,25 +79,30 @@ const MIN_TOKEN_LENGTH = 4;
 export async function findExerciseByName(
   name: string,
 ): Promise<LibraryExercise | null> {
+  if (!name) return null;
+
+  // Fast path: API search endpoint — cheap and deduplicated by the HTTP cache.
+  try {
+    const hits = await searchExercisesByName(name);
+    if (hits && hits.length > 0) {
+      return toLibraryExercise(hits[0]);
+    }
+  } catch {
+    // Fall through to fuzzy match over the full list.
+  }
+
   const exercises = await getAllExercises();
   const normalizedInput = normalize(name);
 
-  // 1. Exact slug match
-  const slugTarget = name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
+  const slugTarget = slugify(name);
   const bySlug = exercises.find((ex) => ex.slug === slugTarget);
   if (bySlug) return bySlug;
 
-  // 2. Normalized name equality
-  const byName = exercises.find((ex) => normalize(ex.name) === normalizedInput);
+  const byName = exercises.find(
+    (ex) => normalize(ex.name) === normalizedInput,
+  );
   if (byName) return byName;
 
-  // 3. Longest shared normalized token match
-  // Split on word boundaries in the *original* input (before normalization collapses spaces),
-  // then normalize each token individually. Without this, "Barbell Row" becomes the single
-  // token "barbellrow" which never matches any dataset entry.
   const inputTokens = name
     .toLowerCase()
     .split(/[^a-z0-9]+/)
@@ -49,7 +113,6 @@ export async function findExerciseByName(
 
   let bestScore = 0;
   let bestMatch: LibraryExercise | null = null;
-
   for (const ex of exercises) {
     const exNorm = normalize(ex.name);
     let score = 0;
@@ -61,8 +124,25 @@ export async function findExerciseByName(
       bestMatch = ex;
     }
   }
-
   return bestScore >= MIN_TOKEN_LENGTH ? bestMatch : null;
+}
+
+export async function findExerciseBySlug(
+  slug: string,
+): Promise<LibraryExercise | null> {
+  const list = await getAllExercises();
+  return list.find((ex) => ex.slug === slug) ?? null;
+}
+
+export async function findExerciseById(
+  exerciseId: string,
+): Promise<LibraryExercise | null> {
+  try {
+    const ex = await getExerciseById(exerciseId);
+    return ex ? toLibraryExercise(ex) : null;
+  } catch {
+    return null;
+  }
 }
 
 export interface SearchOptions {
@@ -78,7 +158,6 @@ export async function searchExercises(
 ): Promise<LibraryExercise[]> {
   const exercises = await getAllExercises();
   const q = opts.q?.toLowerCase();
-
   return exercises.filter((ex) => {
     if (q && !ex.name.toLowerCase().includes(q)) return false;
     if (opts.bodyPart && ex.bodyPart !== opts.bodyPart) return false;
@@ -96,11 +175,17 @@ export async function getFilterOptions(): Promise<{
   targets: string[];
 }> {
   const exercises = await getAllExercises();
-
-  const bodyParts = [...new Set(exercises.map((ex) => ex.bodyPart).filter(Boolean))].sort();
-  const equipment = [...new Set(exercises.map((ex) => ex.equipment).filter(Boolean))].sort();
-  const muscleGroups = [...new Set(exercises.map((ex) => ex.muscleGroup).filter(Boolean))].sort();
-  const targets = [...new Set(exercises.map((ex) => ex.target).filter(Boolean))].sort();
-
+  const bodyParts = [
+    ...new Set(exercises.map((ex) => ex.bodyPart).filter(Boolean)),
+  ].sort();
+  const equipment = [
+    ...new Set(exercises.map((ex) => ex.equipment).filter(Boolean)),
+  ].sort();
+  const muscleGroups = [
+    ...new Set(exercises.map((ex) => ex.muscleGroup).filter(Boolean)),
+  ].sort();
+  const targets = [
+    ...new Set(exercises.map((ex) => ex.target).filter(Boolean)),
+  ].sort();
   return { bodyParts, equipment, muscleGroups, targets };
 }

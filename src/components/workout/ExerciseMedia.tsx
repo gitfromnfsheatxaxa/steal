@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Play, Pause, ExternalLink, ImageOff } from "lucide-react";
-import type { LibraryExercise } from "@/types/exercise";
 import { findExerciseByName } from "@/lib/exercise-library";
 import { cn } from "@/lib/utils";
+import type { LibraryExercise } from "@/types/exercise";
+import { useExerciseTranslation } from "@/hooks/useExerciseTranslation";
+import { applyTranslationToLibraryExercise } from "@/lib/exercise-translate";
 
 interface Props {
   exerciseName: string;
@@ -17,7 +19,7 @@ interface Props {
 type LoadState = "loading" | "found" | "not-found";
 
 export function ExerciseMedia({ exerciseName, size = "card", className }: Props) {
-  const [match, setMatch] = useState<LibraryExercise | null>(null);
+  const [baseMatch, setBaseMatch] = useState<LibraryExercise | null>(null);
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [playing, setPlaying] = useState(false);
 
@@ -28,7 +30,7 @@ export function ExerciseMedia({ exerciseName, size = "card", className }: Props)
 
     findExerciseByName(exerciseName).then((result) => {
       if (cancelled) return;
-      setMatch(result);
+      setBaseMatch(result);
       setLoadState(result ? "found" : "not-found");
     });
 
@@ -37,7 +39,13 @@ export function ExerciseMedia({ exerciseName, size = "card", className }: Props)
     };
   }, [exerciseName]);
 
-  // ── Thumb size ──────────────────────────────────────────────────────────────
+  const { data: translation } = useExerciseTranslation(baseMatch?.exerciseId);
+
+  const match = useMemo(() => {
+    if (!baseMatch) return null;
+    return applyTranslationToLibraryExercise(baseMatch, translation ?? null);
+  }, [baseMatch, translation]);
+
   if (size === "thumb") {
     if (loadState === "loading") {
       return (
@@ -85,7 +93,6 @@ export function ExerciseMedia({ exerciseName, size = "card", className }: Props)
     );
   }
 
-  // ── Card / Hero sizes ───────────────────────────────────────────────────────
   const isHero = size === "hero";
 
   if (loadState === "loading") {
@@ -126,10 +133,8 @@ export function ExerciseMedia({ exerciseName, size = "card", className }: Props)
         className,
       )}
     >
-      {/* Media container */}
       <div className="relative w-full h-full">
         {playing ? (
-          // GIF — plain img to bypass next/image optimization
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={match.gif}
@@ -147,7 +152,6 @@ export function ExerciseMedia({ exerciseName, size = "card", className }: Props)
           />
         )}
 
-        {/* Play / Pause overlay button — bottom-right */}
         <button
           type="button"
           onClick={() => setPlaying((p) => !p)}
@@ -162,7 +166,6 @@ export function ExerciseMedia({ exerciseName, size = "card", className }: Props)
         </button>
       </div>
 
-      {/* Tutorial link strip */}
       <div className="border-t border-[#2a2a2a] px-3 py-1.5 flex items-center justify-between bg-[#0a0a0a]">
         <span className="font-data text-[9px] uppercase tracking-widest text-[#525252]">
           Tutorial

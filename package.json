@@ -7,10 +7,14 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "fetch:exercises": "node scripts/fetch-exercises.mjs"
+    "fetch:exercises": "node scripts/fetch-exercises.mjs",
+    "seed:translations": "node --env-file=.env.local scripts/seed-exercise-translations.mjs",
+    "apply:translation-schema": "node --env-file=.env.local scripts/apply-translation-schema.mjs"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.69",
+    "@ai-sdk/google": "^3.0.64",
+    "@ai-sdk/groq": "^3.0.35",
     "@ai-sdk/openai": "^3.0.52",
     "@hookform/resolvers": "^3.10.0",
     "@tanstack/react-query": "^5.62.11",

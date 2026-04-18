@@ -26,7 +26,32 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(node *)",
       "Bash(echo \"Exit code: $?\")",
-      "Bash(echo \"Exit: $?\")"
+      "Bash(echo \"Exit: $?\")",
+      "WebFetch(domain:exercisedb-api.vercel.app)",
+      "WebFetch(domain:api.exercisedb.dev)",
+      "WebFetch(domain:docs.exercisedb.dev)",
+      "WebSearch",
+      "WebFetch(domain:www.exercisedb.dev)",
+      "WebFetch(domain:edb-docs.up.railway.app)",
+      "WebFetch(domain:v2.exercisedb.io)",
+      "WebFetch(domain:static.exercisedb.dev)",
+      "WebFetch(domain:docs.ascendapi.com)",
+      "WebFetch(domain:fork-ivory-chi.vercel.app)",
+      "Bash(LIMIT=5 npm run seed:translations)",
+      "Bash(taskkill /F /IM node.exe)",
+      "Bash(LIMIT=3 npm run seed:translations)",
+      "Bash(LIMIT=3 LOCALES=ru npm run seed:translations)",
+      "Bash(LIMIT=271 LOCALES=ru npm run seed:translations)",
+      "Bash(LIMIT=271 LOCALES=ru DEBUG_RAW=1 npm run seed:translations)",
+      "Bash(LIMIT=271 LOCALES=ru DEBUG_RAW=1 node --env-file=.env.local scripts/seed-exercise-translations.mjs)",
+      "Bash(LIMIT=271 LOCALES=ru node --env-file=.env.local scripts/seed-exercise-translations.mjs)",
+      "Bash(LIMIT=20 node --env-file=.env.local scripts/seed-exercise-translations.mjs)",
+      "Bash(LIMIT=10 node *)",
+      "Bash(echo \"PID: $!\")",
+      "Bash(tasklist /fi \"imagename eq node.exe\" /fo csv)",
+      "Bash(kill 2231)",
+      "Bash(echo \"Started PID $!\")",
+      "Bash(awk '{print $1}')"
     ]
   }
 }
