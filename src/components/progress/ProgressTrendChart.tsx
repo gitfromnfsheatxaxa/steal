@@ -11,8 +11,8 @@ import {
 
 interface ProgressTrendData {
   week: string;
-  avgWeight: number;
-  avgReps: number;
+  maxE1RM: number;
+  avgRpe: number;
   totalSets: number;
 }
 
@@ -30,9 +30,6 @@ export function ProgressTrendChart({ data }: ProgressTrendChartProps) {
       </div>
     );
   }
-
-  const avgWeightTrend = data.map(d => ({ ...d, value: d.avgWeight }));
-  const avgRepsTrend = data.map(d => ({ ...d, value: d.avgReps }));
 
   return (
     <div className="border border-[#2a2a2a] bg-[#0a0a0a] p-3">
@@ -59,6 +56,7 @@ export function ProgressTrendChart({ data }: ProgressTrendChartProps) {
               tick={{ fontSize: 9, fill: "#10b981", fontFamily: "var(--font-mono, monospace)" }}
               axisLine={{ stroke: "#2a2a2a", strokeWidth: 1 }}
               tickLine={{ stroke: "#2a2a2a", strokeWidth: 1 }}
+              domain={[0, 10]}
               width={35}
             />
             <Tooltip
@@ -76,8 +74,8 @@ export function ProgressTrendChart({ data }: ProgressTrendChartProps) {
                     <div style={{ color: "#e53e00", textTransform: "uppercase", fontWeight: 700, marginBottom: "4px" }}>
                       {d.week}
                     </div>
-                    <div style={{ color: "#e53e00" }}>Avg Weight: {d.avgWeight.toFixed(1)} kg</div>
-                    <div style={{ color: "#10b981" }}>Avg Reps: {d.avgReps.toFixed(1)}</div>
+                    <div style={{ color: "#e53e00" }}>Max e1RM: {d.maxE1RM.toFixed(1)} kg</div>
+                    <div style={{ color: "#10b981" }}>Avg RPE: {d.avgRpe.toFixed(1)} / 10</div>
                     <div style={{ color: "#a3a3a3" }}>Total Sets: {d.totalSets}</div>
                   </div>
                 );
@@ -86,7 +84,7 @@ export function ProgressTrendChart({ data }: ProgressTrendChartProps) {
             <Line
               yAxisId="left"
               type="monotone"
-              dataKey="avgWeight"
+              dataKey="maxE1RM"
               stroke="#e53e00"
               strokeWidth={2}
               dot={{ fill: "#e53e00", r: 3 }}
@@ -95,7 +93,7 @@ export function ProgressTrendChart({ data }: ProgressTrendChartProps) {
             <Line
               yAxisId="right"
               type="monotone"
-              dataKey="avgReps"
+              dataKey="avgRpe"
               stroke="#10b981"
               strokeWidth={2}
               dot={{ fill: "#10b981", r: 3 }}
@@ -108,11 +106,11 @@ export function ProgressTrendChart({ data }: ProgressTrendChartProps) {
       <div className="flex items-center justify-center gap-6 mt-3 pt-3 border-t border-[#2a2a2a]">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-[#e53e00]" />
-          <span className="font-data text-[9px] uppercase tracking-widest text-[#71717A]">Avg Weight (kg)</span>
+          <span className="font-data text-[9px] uppercase tracking-widest text-[#71717A]">Max e1RM (kg)</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-[#10b981]" />
-          <span className="font-data text-[9px] uppercase tracking-widest text-[#71717A]">Avg Reps</span>
+          <span className="font-data text-[9px] uppercase tracking-widest text-[#71717A]">Avg RPE</span>
         </div>
       </div>
     </div>

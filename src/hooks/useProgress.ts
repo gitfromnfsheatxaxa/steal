@@ -54,7 +54,7 @@ export function useProgressData() {
 
           const setsResponse = await pb
             .collection("session_sets")
-            .getList<SessionSet>(1, 5000, { filter });
+            .getList<SessionSet>(1, 5000, { filter, expand: "exercise" });
 
           allSets = setsResponse.items;
           console.log("[useProgressData] Sets fetched:", allSets.length);
@@ -291,7 +291,8 @@ export function useMuscleDistribution() {
     const muscleVolumes = new Map<string, number>();
 
     for (const set of allSets) {
-      const exerciseName = set.exercise?.toLowerCase() || '';
+      const expandedName = (set as unknown as { expand?: { exercise?: { name?: string } } }).expand?.exercise?.name;
+      const exerciseName = expandedName?.toLowerCase() || '';
       const volume = set.weight * set.reps;
 
       let matchedMuscle = 'other';
@@ -323,11 +324,15 @@ export function useMuscleDistribution() {
     };
 
     const result = Array.from(muscleVolumes.entries())
-      .map(([muscle, volume]) => ({
-        name: muscleDisplayNames[muscle] || muscle.toUpperCase(),
-        value: volume,
-        count: muscleCounts.get(muscle) || 0,
-      }))
+      .map(([muscle, volumeSum]) => {
+        const count = muscleCounts.get(muscle) || 0;
+        return {
+          name: muscleDisplayNames[muscle] || muscle.toUpperCase(),
+          value: count,
+          volume: volumeSum,
+          count,
+        };
+      })
       .sort((a, b) => b.value - a.value);
 
     console.log('[useMuscleDistribution] Muscle data:', result);
@@ -387,11 +392,14 @@ export function usePersonalRecords(): PersonalRecord[] {
       }
 
       if (bestSet) {
-        // Use the exercise ID as the name (it's typically the exercise name in the DB)
-        // This can be enhanced by fetching exercise details if needed
+        type WithExpand = { expand?: { exercise?: { name?: string } } };
+        const exerciseName =
+          (exerciseSets
+            .find((s) => (s as unknown as WithExpand).expand?.exercise?.name) as unknown as WithExpand | undefined)
+            ?.expand?.exercise?.name ?? exerciseId;
         records.push({
           exerciseId,
-          exerciseName: exerciseId, // This will show the exercise ID/name
+          exerciseName,
           weight: bestSet.weight,
           reps: bestSet.reps,
           date: bestSet.created,

@@ -20,7 +20,13 @@
       "Bash(sed 's/\"\\)//g')",
       "Bash(curl:*)",
       "Bash(python3 -c \"import sys,json; data=json.load\\(sys.stdin\\); [print\\(c['name'], '- status values:', next\\(\\(f['options'].get\\('values','?'\\) for f in c.get\\('fields',[]\\) if f['name']=='status'\\), 'no status field'\\)\\) for c in data.get\\('items',[]\\)]\")",
-      "Bash(taskkill //F //IM node.exe)"
+      "Bash(taskkill //F //IM node.exe)",
+      "Bash(gh api *)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(node *)",
+      "Bash(echo \"Exit code: $?\")",
+      "Bash(echo \"Exit: $?\")"
     ]
   }
 }

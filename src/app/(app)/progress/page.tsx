@@ -344,12 +344,9 @@ export default function ProgressPage() {
         volume: Math.round(data.volume),
         avgRpe: data.rpeCount > 0 ? data.rpeSum / data.rpeCount : 0,
         sessions: data.sessions,
+        ts: data.ts,
       }))
-      .sort((a, b) => {
-        const dateA = new Date(a.week + ", 2024").getTime();
-        const dateB = new Date(b.week + ", 2024").getTime();
-        return dateA - dateB;
-      })
+      .sort((a, b) => a.ts - b.ts)
       .slice(-8);
   }, [sessions, allSets]);
 
@@ -357,61 +354,36 @@ export default function ProgressPage() {
   const progressTrendData = useMemo(() => {
     if (!sessions || !allSets || sessions.length === 0) return [];
 
-    // Group sets by week and exercise
-    const weekExerciseData = new Map<string, Map<string, { weights: number[]; reps: number[]; sets: number }>>();
-    
+    const weekMap = new Map<string, { maxE1RM: number; rpeSum: number; rpeCount: number; totalSets: number }>();
+
+    const sessionWeek = new Map<string, string>();
     for (const session of sessions) {
       const d = new Date(session.completedAt ?? session.startedAt);
       const weekStart = new Date(d);
       weekStart.setDate(d.getDate() - d.getDay());
-      const weekKey = weekStart.toISOString().slice(0, 10);
-      
-      if (!weekExerciseData.has(weekKey)) {
-        weekExerciseData.set(weekKey, new Map());
-      }
-      
-      const weekData = weekExerciseData.get(weekKey)!;
-      
-      // Find sets for this session
-      const sessionSets = allSets.filter(s => s.session === session.id);
-      for (const set of sessionSets) {
-        if (!set.exercise) continue;
-        if (!weekData.has(set.exercise)) {
-          weekData.set(set.exercise, { weights: [], reps: [], sets: 0 });
-        }
-        const exData = weekData.get(set.exercise)!;
-        exData.weights.push(set.weight);
-        exData.reps.push(set.reps);
-        exData.sets++;
-      }
+      weekStart.setHours(0, 0, 0, 0);
+      sessionWeek.set(session.id, weekStart.toISOString().slice(0, 10));
     }
 
-    // Aggregate to weekly averages
-    return Array.from(weekExerciseData.entries())
-      .map(([week, exMap]) => {
-        let totalWeight = 0;
-        let totalReps = 0;
-        let totalSets = 0;
-        
-        for (const [, data] of exMap.entries()) {
-          totalWeight += data.weights.reduce((a, b) => a + b, 0);
-          totalReps += data.reps.reduce((a, b) => a + b, 0);
-          totalSets += data.sets;
-        }
-        
-        const totalDataPoints = totalSets;
-        return {
-          week: new Date(week).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-          avgWeight: totalDataPoints > 0 ? totalWeight / totalDataPoints : 0,
-          avgReps: totalDataPoints > 0 ? totalReps / totalDataPoints : 0,
-          totalSets,
-        };
-      })
-      .sort((a, b) => {
-        const dateA = new Date(a.week + ", 2024").getTime();
-        const dateB = new Date(b.week + ", 2024").getTime();
-        return dateA - dateB;
-      })
+    for (const set of allSets) {
+      const weekKey = sessionWeek.get(set.session);
+      if (!weekKey) continue;
+      const e1rm = estimate1RM(set.weight, set.reps);
+      const entry = weekMap.get(weekKey) ?? { maxE1RM: 0, rpeSum: 0, rpeCount: 0, totalSets: 0 };
+      if (e1rm > entry.maxE1RM) entry.maxE1RM = e1rm;
+      if (set.rpe > 0) { entry.rpeSum += set.rpe; entry.rpeCount++; }
+      entry.totalSets++;
+      weekMap.set(weekKey, entry);
+    }
+
+    return Array.from(weekMap.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([weekKey, data]) => ({
+        week: new Date(weekKey).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+        maxE1RM: Math.round(data.maxE1RM * 10) / 10,
+        avgRpe: data.rpeCount > 0 ? Math.round((data.rpeSum / data.rpeCount) * 10) / 10 : 0,
+        totalSets: data.totalSets,
+      }))
       .slice(-8);
   }, [sessions, allSets]);
 
@@ -454,9 +426,9 @@ export default function ProgressPage() {
   // -- Muscle pie chart data (percentage distribution) --
   const musclePieData = useMemo(() => {
     if (!muscleData || muscleData.length === 0) return [];
-    
-    const totalVolume = muscleData.reduce((sum: number, d: { value: number }) => sum + d.value, 0);
-    if (totalVolume === 0) return [];
+
+    const totalSets = muscleData.reduce((sum: number, d: { value: number }) => sum + d.value, 0);
+    if (totalSets === 0) return [];
 
     const colors = [
       "#e53e00", "#10b981", "#3b82f6", "#f59e0b", "#ef4444",
@@ -464,10 +436,10 @@ export default function ProgressPage() {
       "#6366f1", "#6b7280"
     ];
 
-    return muscleData.slice(0, 12).map((d: { name: string; value: number }, index: number) => ({
+    return muscleData.slice(0, 12).map((d: { name: string; value: number; volume: number }, index: number) => ({
       muscle: d.name,
-      percentage: (d.value / totalVolume) * 100,
-      volume: d.value,
+      percentage: (d.value / totalSets) * 100,
+      volume: d.volume,
       color: colors[index % colors.length],
     }));
   }, [muscleData]);
@@ -699,9 +671,9 @@ export default function ProgressPage() {
           <div className="border border-card-border bg-card p-3 relative overflow-hidden">
             <BrandNoiseOverlay />
             <div className="relative z-10">
-              <PanelHeader 
+              <PanelHeader
                 label={t("progress.PROGRESS_TREND")}
-                sub={t("progress.WEIGHT_VS_REPS")} 
+                sub="e1RM vs RPE"
                 panelNum="06"
               />
               <ProgressTrendChart data={progressTrendData} />
@@ -716,9 +688,9 @@ export default function ProgressPage() {
         <div className="border border-card-border bg-card p-3 relative overflow-hidden">
           <BrandNoiseOverlay />
           <div className="relative z-10">
-            <PanelHeader 
+            <PanelHeader
               label={t("progress.CONTACT_MATRIX")}
-              sub={t("progress.LAST_26_WEEKS")}
+              sub={`YEAR ${new Date().getFullYear()}`}
               panelNum="07"
             />
             <div className="overflow-x-auto">
@@ -775,7 +747,7 @@ export default function ProgressPage() {
               sub={t("progress.PERSONAL_RECORDS")} 
               panelNum="10"
             />
-            <PRWall records={personalRecords.slice(0, 6)} />
+            <PRWall records={personalRecords.slice(0, 3)} />
           </div>
         </div>
       </div>

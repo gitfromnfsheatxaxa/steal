@@ -7,6 +7,7 @@ import { usePlanDays, usePlanCompletedSessions } from "@/hooks/usePlans";
 import { BrandNoiseOverlay } from "@/components/layout/BrandNoiseOverlay";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ExerciseMedia } from "@/components/workout/ExerciseMedia";
 import { Calendar, Dumbbell, CheckCircle2, Target, Clock, ChevronRight, Lock } from "lucide-react";
 import type { WorkoutPlan, PlanDay } from "@/types/plan";
 import { DAYS_OF_WEEK } from "@/lib/constants";
@@ -57,6 +58,8 @@ function ExerciseListPanel({ dayId }: { dayId: string }) {
             key={ex.id}
             className="flex items-center gap-2 py-1 px-2 hover:bg-[#1a1a1a] transition-colors group"
           >
+            {/* Thumb navigates to exercise detail; rest of row is non-interactive */}
+            <ExerciseMedia exerciseName={exName} size="thumb" className="shrink-0" />
             <span className="font-data text-[8px] text-[#525252] w-4 shrink-0">
               {String(i + 1).padStart(2, "0")}
             </span>

@@ -20,7 +20,6 @@ interface TooltipState {
   label: string;
 }
 
-const WEEKS = 26;
 const DAYS = 7;
 const CELL_SIZE = 10;
 const GAP = 2;
@@ -52,7 +51,7 @@ export function CalendarHeatmap({ sessions }: CalendarHeatmapProps) {
     label: "",
   });
 
-  const { grid, monthLabels, maxVolume } = useMemo(() => {
+  const { grid, monthLabels, maxVolume, weeks } = useMemo(() => {
     // Build a map of date-string -> { volume, count }
     const dayMap = new Map<string, { volume: number; count: number }>();
 
@@ -67,20 +66,30 @@ export function CalendarHeatmap({ sessions }: CalendarHeatmapProps) {
       });
     }
 
-    // Determine the grid start: go back 26 weeks from today,
-    // aligned to the same day-of-week as today
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayDow = today.getDay(); // 0=Sun
+    // Grid spans Jan 1 – Dec 31 of the current year,
+    // padded to full Sunday-aligned weeks.
+    const currentYear = new Date().getFullYear();
 
-    // Start of grid: 26 weeks back, beginning of that week (Sunday)
-    const gridStart = new Date(today);
-    gridStart.setDate(today.getDate() - WEEKS * 7 - todayDow);
+    const jan1 = new Date(currentYear, 0, 1);
+    jan1.setHours(0, 0, 0, 0);
+    const dec31 = new Date(currentYear, 11, 31);
+    dec31.setHours(0, 0, 0, 0);
+
+    // First Sunday on or before Jan 1
+    const gridStart = new Date(jan1);
+    gridStart.setDate(jan1.getDate() - jan1.getDay());
+
+    // Last Saturday on or after Dec 31
+    const gridEnd = new Date(dec31);
+    gridEnd.setDate(dec31.getDate() + (6 - dec31.getDay()));
+
+    const totalDays = Math.round((gridEnd.getTime() - gridStart.getTime()) / 86400000) + 1;
+    const weeks = totalDays / 7;
 
     let maxVol = 0;
     const cells: { date: Date; volume: number; count: number }[][] = [];
 
-    for (let w = 0; w < WEEKS; w++) {
+    for (let w = 0; w < weeks; w++) {
       const week: { date: Date; volume: number; count: number }[] = [];
       for (let d = 0; d < DAYS; d++) {
         const date = new Date(gridStart);
@@ -96,7 +105,7 @@ export function CalendarHeatmap({ sessions }: CalendarHeatmapProps) {
     // Build month labels: find the first week where a new month starts
     const labels: { weekIndex: number; label: string }[] = [];
     let lastMonth = -1;
-    for (let w = 0; w < WEEKS; w++) {
+    for (let w = 0; w < weeks; w++) {
       const month = cells[w][0].date.getMonth();
       if (month !== lastMonth) {
         labels.push({ weekIndex: w, label: formatMonthLabel(cells[w][0].date) });
@@ -104,7 +113,7 @@ export function CalendarHeatmap({ sessions }: CalendarHeatmapProps) {
       }
     }
 
-    return { grid: cells, monthLabels: labels, maxVolume: maxVol };
+    return { grid: cells, monthLabels: labels, maxVolume: maxVol, weeks };
   }, [sessions]);
 
   const colWidth = CELL_SIZE + GAP;
@@ -136,7 +145,7 @@ export function CalendarHeatmap({ sessions }: CalendarHeatmapProps) {
     setTooltip((t) => ({ ...t, visible: false }));
   }
 
-  const svgWidth = leftOffset + WEEKS * colWidth;
+  const svgWidth = leftOffset + weeks * colWidth;
   const svgHeight = topOffset + DAYS * rowHeight;
 
   return (

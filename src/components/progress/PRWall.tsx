@@ -182,7 +182,7 @@ export function PRWall({ records, className }: PRWallProps) {
       `}</style>
       <div
         className={cn(
-          "grid grid-cols-1 sm:grid-cols-2 gap-2",
+          "grid grid-cols-1 sm:grid-cols-3 gap-2",
           className
         )}
         role="list"

@@ -29,3 +29,20 @@ export interface Exercise {
   created: string;
   updated: string;
 }
+
+/** Exercise record from the static exercises dataset (hasaneyldrm/exercises-dataset). */
+export interface LibraryExercise {
+  id: string;
+  name: string;
+  slug: string;
+  category: string;
+  bodyPart: string;
+  equipment: string;
+  muscleGroup: string;
+  secondaryMuscles: string[];
+  target: string;
+  instructions: string;
+  steps: string[];
+  image: string;
+  gif: string;
+}

@@ -23,6 +23,7 @@ const navLinks = [
   { href: "/programs", label: "navbar.PROGRAMS" },
   { href: "/plans", label: "navbar.PLANS" },
   { href: "/progress", label: "navbar.PROGRESS" },
+  { href: "/exercises", label: "navbar.LIBRARY" },
 ] as const;
 
 /** UTC clock — updates every second, tabular-nums mono */

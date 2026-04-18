@@ -261,7 +261,42 @@ export default function WorkoutSessionPage({
         await queryClient.invalidateQueries({ queryKey: ["activePlan", currentUserId] });
         await queryClient.invalidateQueries({ queryKey: ["plans", currentUserId] });
         await queryClient.invalidateQueries({ queryKey: ["streakData"] });
-        
+        if (planDay?.plan) {
+          await queryClient.invalidateQueries({ queryKey: ["planCompletedDays", planDay.plan] });
+        }
+
+        // Advance currentWeek if all days in this week are now completed
+        if (planDay?.plan) {
+          try {
+            const planRecord = await pb.collection("workout_plans").getOne<{ id: string; currentWeek: number; durationWeeks: number }>(planDay.plan);
+            const finishedWeek = planDay.week;
+
+            if (finishedWeek === planRecord.currentWeek && planRecord.currentWeek < planRecord.durationWeeks) {
+              const weekDays = await pb.collection("plan_days").getFullList<{ id: string }>({
+                filter: `plan="${planDay.plan}" && week=${finishedWeek}`,
+                fields: "id",
+              });
+
+              const completedSessions = await pb.collection("workout_sessions").getFullList<{ planDay: string }>({
+                filter: `plan="${planDay.plan}" && user="${currentUserId}" && status="completed"`,
+                fields: "planDay",
+              });
+
+              const completedPlanDayIds = new Set(completedSessions.map((s) => s.planDay));
+              const allDaysComplete = weekDays.every((d) => completedPlanDayIds.has(d.id));
+
+              if (allDaysComplete) {
+                await pb.collection("workout_plans").update(planDay.plan, { currentWeek: planRecord.currentWeek + 1 });
+                await queryClient.invalidateQueries({ queryKey: ["plans", currentUserId] });
+                await queryClient.invalidateQueries({ queryKey: ["activePlan", currentUserId] });
+                toast.success(`Week ${planRecord.currentWeek + 1} unlocked!`);
+              }
+            }
+          } catch (err) {
+            console.warn("[WEEK ADVANCE]", err);
+          }
+        }
+
         setShowSummary(true);
         toast.success(t("workout.SESSION_SAVED"));
       }

@@ -11,6 +11,7 @@ const en: TranslationData = {
     PROGRAMS: "PROGRAMS",
     PLANS: "MY PLANS",
     PROGRESS: "PROGRESS",
+    LIBRARY: "LIBRARY",
     OPERATOR: "OPERATOR",
     SETTINGS: "SETTINGS",
     SIGN_OUT: "SIGN OUT",
@@ -25,6 +26,7 @@ const en: TranslationData = {
     PLANS: "PLANS",
     TRAIN: "TRAIN",
     STATS: "STATS",
+    LIBRARY: "LIBRARY",
     GEAR: "GEAR",
   },
   // ── Landing page ──
@@ -385,6 +387,7 @@ const ru: TranslationData = {
     PROGRAMS: "ПРОГРАММЫ",
     PLANS: "МОИ ПЛАНЫ",
     PROGRESS: "ПРОГРЕСС",
+    LIBRARY: "БИБЛИОТЕКА",
     OPERATOR: "ОПЕРАТОР",
     SETTINGS: "НАСТРОЙКИ",
     SIGN_OUT: "ВЫХОД",
@@ -395,8 +398,10 @@ const ru: TranslationData = {
   bottomNav: {
     HOME: "ГЛАВНАЯ",
     PROGRAMS: "ПРОГРАММЫ",
+    PLANS: "ПЛАНЫ",
     TRAIN: "ТРЕНИРОВКА",
     STATS: "СТАТИСТИКА",
+    LIBRARY: "БИБЛИОТЕКА",
     GEAR: "ПРОФИЛЬ",
   },
   landing: {
@@ -743,6 +748,7 @@ const uz: TranslationData = {
     PROGRAMS: "DASTURLAR",
     PLANS: "REJALARIM",
     PROGRESS: "JARAYON",
+    LIBRARY: "KUTUBXONA",
     OPERATOR: "OPERATOR",
     SETTINGS: "SOZLAMALAR",
     SIGN_OUT: "CHIQISH",
@@ -753,8 +759,10 @@ const uz: TranslationData = {
   bottomNav: {
     HOME: "BOSH SAHIFA",
     PROGRAMS: "DASTURLAR",
+    PLANS: "REJALAR",
     TRAIN: "MASHQ",
     STATS: "STATISTIKA",
+    LIBRARY: "KUTUBXONA",
     GEAR: "PROFIL",
   },
   landing: {

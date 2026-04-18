@@ -8,6 +8,11 @@ const nextConfig = {
         hostname: "34.56.67.158",
         port: "8090",
       },
+      {
+        protocol: "https",
+        hostname: "raw.githubusercontent.com",
+        pathname: "/hasaneyldrm/exercises-dataset/**",
+      },
     ],
   },
   // Proxy /pb/* → PocketBase so the browser never makes cross-origin HTTP

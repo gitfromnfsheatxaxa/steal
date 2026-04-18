@@ -1,9 +1,10 @@
 "use client";
 
 import { SetRow } from "./SetRow";
+import { ExerciseMedia } from "./ExerciseMedia";
 import type { ActiveSetInput } from "@/types/session";
 import { formatDuration } from "@/lib/utils";
-import { Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { Clock, ChevronDown, ChevronUp, BookOpen } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/components/providers/I18nProvider";
@@ -37,6 +38,7 @@ export function ExerciseCard({
 }: ExerciseCardProps) {
   const { t } = useI18n();
   const [collapsed, setCollapsed] = useState(false);
+  const [mediaOpen, setMediaOpen] = useState(isActive);
   const targetReps = repsMin === repsMax ? `${repsMin}` : `${repsMin}–${repsMax}`;
   const allComplete = completedSets.length >= sets;
 
@@ -85,16 +87,44 @@ export function ExerciseCard({
           </div>
         </div>
 
-        {collapsed ? (
-          <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
-        ) : (
-          <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground" />
-        )}
+        <div className="flex items-center gap-1 shrink-0">
+          {/* Tutorial toggle */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setMediaOpen((o) => !o);
+            }}
+            aria-label={mediaOpen ? "Hide tutorial" : "Show tutorial"}
+            className={cn(
+              "flex items-center gap-1 px-2 py-1 font-data text-[9px] uppercase tracking-widest border transition-colors",
+              mediaOpen
+                ? "border-[#e53e00]/50 text-[#e53e00] bg-[#e53e00]/10"
+                : "border-[#2a2a2a] text-muted-foreground hover:border-[#e53e00]/30",
+            )}
+          >
+            <BookOpen className="h-3 w-3" />
+            Tutorial
+          </button>
+
+          {collapsed ? (
+            <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+          ) : (
+            <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground" />
+          )}
+        </div>
       </button>
 
       {/* Body */}
       {!collapsed && (
         <div className="border-t border-border">
+          {/* Exercise media (tutorial) */}
+          {mediaOpen && (
+            <div className="p-3 border-b border-border bg-[#0a0a0a]">
+              <ExerciseMedia exerciseName={exerciseName} size="card" />
+            </div>
+          )}
+
           {/* Coach note */}
           {notes?.trim() && (
             <div className="border-b border-border bg-[#1a1a1a] px-4 py-2">

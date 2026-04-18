@@ -33,8 +33,8 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "STEAL — Forge Your Steel",
-    template: "%s | STEAL",
+    default: "STEEL — Forge Your Steel",
+    template: "%s | STEEL",
   },
   description: "No excuses. No hand-holding. Build something real.",
   manifest: "/manifest.webmanifest",

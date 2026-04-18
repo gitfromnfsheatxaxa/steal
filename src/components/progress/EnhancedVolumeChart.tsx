@@ -53,6 +53,7 @@ export function EnhancedVolumeChart({ data }: EnhancedVolumeChartProps) {
               tickLine={{ stroke: "#2a2a2a", strokeWidth: 1 }}
               tickFormatter={(v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`)}
               width={35}
+              domain={[0, (dataMax: number) => dataMax * 1.15]}
             />
             <Tooltip
               cursor={{ fill: "#1a1a1a" }}
@@ -92,18 +93,20 @@ export function EnhancedVolumeChart({ data }: EnhancedVolumeChartProps) {
                 );
               }}
             />
-            <ReferenceLine
-              y={avgVolume}
-              stroke="#e53e00"
-              strokeDasharray="4 4"
-              label={{ 
-                value: "AVG", 
-                position: "insideTopRight", 
-                fill: "#e53e00",
-                fontSize: 9,
-                fontFamily: "var(--font-mono, monospace)"
-              }}
-            />
+            {data.length >= 2 && (
+              <ReferenceLine
+                y={avgVolume}
+                stroke="#e53e00"
+                strokeDasharray="4 4"
+                label={{
+                  value: "AVG",
+                  position: "insideTopRight",
+                  fill: "#e53e00",
+                  fontSize: 9,
+                  fontFamily: "var(--font-mono, monospace)"
+                }}
+              />
+            )}
             <Bar
               dataKey="volume"
               radius={0}
