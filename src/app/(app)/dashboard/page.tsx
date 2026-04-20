@@ -268,8 +268,8 @@ function ActiveMissionPanel({ planId, t }: { planId: string; t: (path: string) =
         .filter((id): id is string => !!id) || []
     );
 
-    // Find the first uncompleted session
-    return sortedDays.find(d => !completedPlanDayIds.has(d.id)) || sortedDays[0];
+    // Find the first uncompleted session; null means program is fully complete
+    return sortedDays.find(d => !completedPlanDayIds.has(d.id)) ?? null;
   }, [days, sessions]);
 
   const { data: exercises, isLoading: exLoading } = usePlanExercises(
@@ -288,6 +288,17 @@ function ActiveMissionPanel({ planId, t }: { planId: string; t: (path: string) =
   }
 
   if (!nextSessionDay) {
+    if (days && days.length > 0) {
+      return (
+        <div className="flex flex-col gap-3 py-2">
+          <div className="flex items-center gap-2 text-[#10b981]">
+            <CheckCircle2 className="h-4 w-4" />
+            <span className="font-data text-sm font-bold uppercase tracking-widest">{t("dashboard.PROGRAM_COMPLETE")}</span>
+          </div>
+          <p className="stamp text-[10px] text-[#525252]">{t("dashboard.ALL_SESSIONS_COMPLETED")}</p>
+        </div>
+      );
+    }
     return (
       <p className="stamp text-[10px] text-[#525252]">{t("dashboard.NO_TRAINING_DAYS_CONFIGURED")}</p>
     );
@@ -727,6 +738,7 @@ export default function DashboardPage() {
   const personalRecords = usePersonalRecords();
   const { data: allSets } = useAllSets();
   const { data: sessions } = useSessions();
+  const { data: planDays } = usePlanDays(activePlan?.id);
   const { t } = useI18n();
 
   const firstName = (user?.name?.split(" ")[0] ?? "OPERATOR").toUpperCase();
@@ -743,6 +755,22 @@ export default function DashboardPage() {
     monthStart.setHours(0, 0, 0, 0);
     return personalRecords.filter((pr) => new Date(pr.date) >= monthStart).length;
   }, [personalRecords]);
+
+  // Derive displayed week from the first uncompleted session — never stale
+  const displayWeek = useMemo(() => {
+    if (!planDays || !activePlan) return activePlan?.currentWeek ?? 1;
+    const completedIds = new Set(
+      sessions
+        ?.filter(s => s.plan === activePlan.id)
+        .map(s => s.planDay)
+        .filter((id): id is string => !!id) ?? []
+    );
+    const sorted = [...planDays].sort((a, b) =>
+      a.week !== b.week ? a.week - b.week : a.dayOfWeek - b.dayOfWeek
+    );
+    const nextDay = sorted.find(d => !completedIds.has(d.id));
+    return nextDay?.week ?? activePlan.currentWeek;
+  }, [planDays, sessions, activePlan]);
 
   // Debug: log sessions data
   useEffect(() => {
@@ -842,7 +870,7 @@ export default function DashboardPage() {
                     {activePlan.title}
                   </h2>
                   <p className="stamp text-[9px] text-[#525252] mt-1">
-                    WK {activePlan.currentWeek} / {activePlan.durationWeeks} — {activePlan.goalType?.replace(/_/g, " ")}
+                    WK {displayWeek} / {activePlan.durationWeeks} — {activePlan.goalType?.replace(/_/g, " ")}
                   </p>
                 </div>
                 <div className="h-px bg-[#1a1a1a]" />

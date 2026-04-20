@@ -35,7 +35,7 @@ export function useProgressData() {
         // Fetch all sessions (no filter to avoid PocketBase filter issues)
         const sessionsResponse = await pb
           .collection("workout_sessions")
-          .getList<WorkoutSession>(1, 200);
+          .getList<WorkoutSession>(1, 200, { expand: "planDay" });
 
         console.log("[useProgressData] Total sessions in DB:", sessionsResponse.totalItems);
 

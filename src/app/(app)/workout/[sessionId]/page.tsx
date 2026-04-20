@@ -256,11 +256,10 @@ export default function WorkoutSessionPage({
         });
         
         // Invalidate all relevant queries to refresh UI
-        await queryClient.invalidateQueries({ queryKey: ["sessions", currentUserId] });
-        await queryClient.invalidateQueries({ queryKey: ["allSets", currentUserId] });
+        await queryClient.invalidateQueries({ queryKey: ["progressData", currentUserId] });
         await queryClient.invalidateQueries({ queryKey: ["activePlan", currentUserId] });
         await queryClient.invalidateQueries({ queryKey: ["plans", currentUserId] });
-        await queryClient.invalidateQueries({ queryKey: ["streakData"] });
+        await queryClient.invalidateQueries({ queryKey: ["planDaySession", sessionId, currentUserId] });
         if (planDay?.plan) {
           await queryClient.invalidateQueries({ queryKey: ["planCompletedDays", planDay.plan] });
         }

@@ -92,6 +92,51 @@ src/
 - Format: `["https://example.com/image1.jpg", "https://example.com/image2.jpg"]`
 - Frontend: `PlanImageCarousel` component auto-slides through images
 
+### plan_templates — Embedded Multilingual Structure
+
+The `structure` JSON field stores all 3 locales inline — no separate translation table:
+
+```json
+{
+  "slug": "arnold",
+  "locales": {
+    "en": { "title": "...", "description": "...", "overview": {...}, "days": [...], "guidelines": {...} },
+    "ru": { ... },
+    "uz": { ... }
+  }
+}
+```
+
+`useProgramTemplates()` (`src/hooks/useProgramTemplates.ts`) reads `useI18n().language` and uses TanStack Query `select` to remap the cached raw records to the active locale — **one PB fetch, zero extra requests on language switch**.
+
+The `listRule`/`viewRule` for `plan_templates` must be empty (`""`) because `/programs` is a public route. If set to `@request.auth.id != ""`, unauthenticated visitors get an empty list silently.
+
+### exercise_translations Collection
+
+Seeded via `scripts/seed-exercise-translations.mjs`. Each row: `{ exerciseExtId, locale, name, overview, bodyPart, equipment, target, ... }`. The hook `useExercisesBatchTranslation` batches up to 80 IDs per PB filter call. Requires auth (`listRule: @request.auth.id != ""`).
+
+### Week Progression Logic
+
+`workout_plans.currentWeek` advances in `src/app/(app)/workout/[sessionId]/page.tsx` after a session completes:
+1. Load all `plan_days` for the finished week
+2. Load all `workout_sessions` for those days with `status="completed"`
+3. If every day has a completed session → `currentWeek += 1`
+
+Only days where `planDay.week === plan.currentWeek` are shown as active in the dashboard. Future weeks are "locked" in the UI (not enforced in DB).
+
+### Known Quirk: useProgress Fetches All Sessions
+
+`useProgress.ts` calls `getList(1, 200)` **without a user filter** then filters in JS. This is a workaround for PocketBase SDK auto-cancellation issues with filters. Do not "fix" it to use a server-side filter without testing — it will break the auto-cancel protection.
+
+### PocketBase Proxy
+
+Browser requests go to `/pb/*` which Next.js (`next.config.mjs`) proxies to `POCKETBASE_INTERNAL_URL`. Server-side (SSR) calls hit PocketBase directly. Never hardcode the PocketBase URL on the client side.
+
+### Zustand Stores
+
+- `src/stores/workout-store.ts` — active session state (sets logged, timer, current exercise). Persisted to `localStorage` so in-progress workouts survive page refresh.
+- `src/stores/ui-store.ts` — ephemeral UI toggles (sidebar open, modal state).
+
 ## Product Rules
 
 - Distinctive UI — no generic "AI slop" layouts. Prefer Server Components; only reach for `"use client"` when you need interactivity, browser APIs, or a client-only library.
@@ -112,6 +157,10 @@ src/
 | `npx shadcn@latest add <component>` | Add a shadcn/ui component into `src/components/ui/` |
 | `./pocketbase/pocketbase migrate` | Run PocketBase migrations |
 | `./pocketbase/pocketbase serve` | Start PocketBase server |
+| `node --env-file=.env.local scripts/seed-exercise-translations.mjs` | Seed EN→RU/UZ exercise translations into PocketBase |
+| `node --env-file=.env.local scripts/seed-legends-programs.mjs` | Seed 7 legend programs (EN/RU/UZ) into `plan_templates` |
+
+Both seed scripts are **resumable** — they write progress to `.seed-progress.json` and `.legends-cache.json` respectively. Re-running after a failure skips completed records.
 
 Lint is not wired up yet — add `next lint` or an ESLint flat config in a follow-up if/when needed.
 

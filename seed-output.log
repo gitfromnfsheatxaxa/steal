@@ -1,94 +1,463 @@
-
-> my-frontend-app@0.1.0 seed:translations
-> node --env-file=.env.local scripts/seed-exercise-translations.mjs
-
-→ Providers: gemini/gemini-1.5-flash (batch=20) | groq/llama-3.1-8b-instant (batch=5)
+→ Providers: gemini/gemini-2.0-flash (batch=20) | cerebras-ru/qwen-3-235b-a22b-instruct-2507 (batch=20) | cerebras-uz/qwen-3-235b-a22b-instruct-2507 (batch=20) | cerebras/qwen-3-235b-a22b-instruct-2507 (batch=20) | groq-ru/llama-3.1-8b-instant (batch=5) | groq/llama-3.1-8b-instant (batch=5) | groq-uz/llama-3.1-8b-instant (batch=5)
 ✓ PocketBase authed
 → Fetching exercises from https://fork-ivory-chi.vercel.app/api/v1…
 ✓ Got 1500 exercises
 
-→ PARALLEL mode: ru→gemini, uz→groq
+→ PARALLEL mode: ru→cerebras-ru, uz→cerebras-uz
 
-─── [gemini→RU] 783/1500 pending ───
-  [gemini→RU] batch 1-20 of 783
+─── [cerebras-ru→RU] 470/1500 pending ───
+  [cerebras-ru→RU] batch 1-20 of 470
 
-─── [groq→UZ] 1485/1500 pending ───
-  [groq→UZ] batch 1-5 of 1485
-  ✗ [gemini→RU] failed (models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent). Retrying in 4s…
+─── [cerebras-uz→UZ] 241/1500 pending ───
+  [cerebras-uz→UZ] batch 1-20 of 241
+  ✗ [cerebras-uz→UZ] daily quota exhausted — switching provider immediately
+
+⚠ cerebras-uz dead for uz — falling back to gemini
+
+─── [gemini→UZ] 241/1500 pending ───
+  [gemini→UZ] batch 1-20 of 241
+  ✗ [cerebras-ru→RU] daily quota exhausted — switching provider immediately
+
+⚠ cerebras-ru dead for ru — falling back to gemini
+
+─── [gemini→RU] 470/1500 pending ───
+  [gemini→RU] batch 1-20 of 470
+  ✗ [gemini→UZ] daily quota exhausted — switching provider immediately
+
+⚠ gemini dead for uz — falling back to cerebras-ru
+
+─── [cer  ✓ [cerebras-ru→RU] saved 20
+  [cerebras-ru→RU] batch 81-100 of 530
+  ✗ [cerebras-ru→RU] failed (Cerebras 429: {"message":"Tokens per minute limit exceeded - too many tokens processed.","type":"too). Retrying in 65s…
+  ✗✗ [gemini→UZ] giving up on batch: Failed after 3 attempts. Last error: You exceeded your current quota, please check your plan and billing details. For mo
+  [gemini→UZ] batch 21-40 of 241
+  ✗ [gemini→UZ] failed (Failed after 3 attempts. Last error: You exceeded your current quota, please check your plan and bil). Retrying in 65s…
+  ✓ [cerebras-ru→RU] saved 20
+  [cerebras-ru→RU] batch 101-120 of 530
+  ✗✗ [gemini→UZ] giving up on batch: Failed after 3 attempts. Last error: You exceeded your current quota, please check your plan and billing details. For mo
+  [gemini→UZ] batch 41-60 of 241
+  ✓ [cerebras-ru→RU] saved 20
+  [cerebras-ru→RU] batch 121-140 of 530
+  ✗ [cerebras-ru→RU] failed (Cerebras 429: {"message":"Tokens per minute limit exceeded - too many tokens processed.","type":"too). Retrying in 65s…
+  ✗ [gemini→UZ] failed (Failed after 3 attempts. Last error: You exceeded your current quota, please check your plan and bil). Retrying in 65s…
+  ✗✗ [gemini→UZ] giving up on batch: Failed after 3 attempts. Last error: You exceeded your current quota, please check your plan and billing details. For mo
+  [gemini→UZ] batch 61-80 of 241
+  ✓ [cerebras-ru→RU] saved 20
+  [cerebras-ru→RU] batch 141-160 of 530
+  ✗ [cerebras-ru→RU] failed (Cerebras 429: {"message":"Tokens per minute limit exceeded - too many tokens processed.","type":"too). Retrying in 65s…
+  ✗ [gemini→UZ] failed (Failed after 3 attempts. Last error: You exceeded your current quota, please check your plan and bil). Retrying in 65s…
+  ✗✗ [gemini→UZ] giving up on batch: Failed after 3 attempts. Last error: You exceeded your current quota, please check your plan and billing details. For mo
+  [gemini→UZ] batch 81-100 of 241
+  ✓ [cerebras-ru→RU] saved 20
+  [cerebras-ru→RU] batch 161-180 of 530
+  ✗ [cerebras-ru→RU] failed (Cerebras 429: {"message":"Tokens per minute limit exceeded - too many tokens processed.","type":"too). Retrying in 65s…
+  ✗ [gemini→UZ] failed (Failed after 3 attempts. Last error: You exceeded your current quota, please check your plan and bil). Retrying in 65s…
+  ✗✗ [gemini→UZ] giving up on batch: Failed after 3 attempts. Last error: You exceeded your current quota, please check your plan and billin  ✗ [groq-ru→UZ] failed ([
+  {
+    "code": "invalid  ✗ [gemini→UZ] failed (Failed after 3 attempts. Last error: You exceeded your current quot  ✓ [groq-ru→RU] saved 5
+  [groq-ru→RU] batch 26-30 of 450
+  ✗✗ [groq-ru→UZ] giving up on batch: Unbalanced JSON in response
+  [groq-ru→UZ] batch 16-20 of 201
+  ✓ [groq-ru→RU] saved 5
+  [groq-ru→RU] batch 31-35 of 450
+  ✗ [groq-ru→UZ] failed (Unbalanced JSON in response). Retrying in 4s…
+  ✗ [groq-ru→RU] failed (Expected ',' or ']' after array element in JSON at position 1842 (line 37 column 5)). Retrying in 4s…
+  ✗✗ [groq-ru→UZ] giving up on batch: Unbalanced JSON in response
+  [groq-ru→UZ] batch 21-25 of 201
+  ✓ [groq-ru→RU] saved 5
+  [groq-ru→RU] batch 36-40 of 450
+  ✓ [groq-ru→UZ] saved 5
+  [groq-ru→UZ] batch 26-30 of 201
+  ✗ [groq-ru→RU] failed (Unbalanced JSON in response). Retrying in 4s…
+  ✗ [groq-ru→UZ] failed (Unbalanced JSON in response). Retrying in 4s…
+  ✓ [groq-ru→RU] saved 5
+  [groq-ru→RU] batch 41-45 of 450
+  ✗✗ [groq-ru→UZ] giving up on batch: Unexpected token ']', ..."b oling.",], "exerci"... is not valid JSON
+  [groq-ru→UZ] batch 31-35 of 201
+  ✓ [groq-ru→RU] saved 5
+  [groq-ru→RU] batch 46-50 of 450
+  ✗ [groq-ru→UZ] failed (Unbalanced JSON in response). Retrying in 4s…
+  ✗ [groq-ru→RU] failed (Expected ',' or ']' after array element in JSON at position 1790 (line 40 column 7)). Retrying in 4s…
+  ✗✗ [groq-ru→UZ] giving up on batch: Unbalanced JSON in response
+  [groq-ru→UZ] batch 36-40 of 201
+  ✓ [groq-ru→RU] saved 5
+  [groq-ru→RU] batch 51-55 of 450
+  ✗ [groq-ru→UZ] failed (No JSON found in response). Retrying in 4s…
+  ✓ [groq-ru→RU] saved 5
+  [groq-ru→RU] batch 56-60 of 450
+  ✗✗ [groq-ru→UZ] giving up on batch: No JSON found in response
+  [groq-ru→UZ] batch 41-45 of 201
+  ✓ [groq-ru→RU] saved 5
+  [groq-ru→RU] batch 61-65 of 450
+  ✗ [groq-ru→UZ] failed (Bad escaped character in JSON at position 121 (line 4 column 49)). Retrying in 4s…
+  ✓ [groq-ru→RU] saved 5
+  [groq-ru→RU] batch 66-70 of 450
+  ✗✗ [groq-ru→UZ] giving up on batch: Expected double-quoted property name in JSON at position 87 (line 4 column 50)
+  [groq-ru→UZ] batch 46-50 of 201
+  ✓ [groq-ru→RU] saved 5
+  [groq-ru→RU] batch 71-75 of 450
+  ✗ [groq-ru→UZ] failed (Unbalanced JSON in response). Retrying in 4s…
+  ✗ [groq-ru→RU] failed (Expected ',' or '}' after property value in JSON at position 1066 (line 19 column 121)). Retrying in 4s…
+  ✗✗ [groq-ru→UZ] giving up on batch: [
+  {
+    "code": "invalid_type",
+    "expected": "string",
+    "received": "array",
+    "path": [
+      0,
+      "categ
+  [groq-ru→UZ] batch 51-55 of 201
+  ✓ [groq-ru→RU] saved 5
+  [groq-ru→RU] batch 76-80 of 450
+  ✗ [groq-ru→UZ] failed (No JSON found in response). Retrying in 4s…
+  ✓ [groq-ru→RU] saved 5
+  [groq-ru→RU] batch 81-85 of 450
+
+⚠ groq-ru dead for uz — falling back to groq
+
+─── [groq→UZ] 191/1500 pending ───
+  [groq→UZ] batch 1-5 of 191
+  ✗ [groq→UZ] failed (Expected ',' or ']' after array element in JSON at position 775 (line 17 column 7)). Retrying in 4s…
+  ✗✗ [groq→UZ] giving up on batch: Unexpected token ']', ..."o'chir.",
+],
+"exerci"... is not valid JSON
+  [groq→UZ] batch 6-10 of 191
+  ✗ [groq-ru→RU] failed (Unexpected token ']', ..."ием ног.",],
+    "ex"... is not valid JSON). Retrying in 4s…
+  ✗ [groq→UZ] failed (Expected double-quoted property name in JSON at position 386 (line 6 column 32)). Retrying in 4s…
+  ✗✗ [groq-ru→RU] giving up on batch: Expected ',' or ']' after array element in JSON at position 4349 (line 91 column 97)
+  [groq-ru→RU] batch 86-90 of 450
+  ✗✗ [groq→UZ] giving up on batch: Unbalanced JSON in response
+  [groq→UZ] batch 11-15 of 191
+  ✓ [groq-ru→RU] saved 5
+  [groq-ru→RU] batch 91-95 of 450
+  ✗ [groq→UZ] failed (No JSON found in response). Retrying in 4s…
+  ✓ [groq-ru→RU] saved 5
+  [groq-ru→RU] batch 96-100 of 450
+  ✓ [groq→UZ] saved 5
+  [groq→UZ] batch 16-20 of 191
+  ✗ [groq-ru→RU] failed ([
+  {
+    "code": "invalid_type",
+    "expected": "string",
+    "received": "array",
+    "path": [
+ ). Retrying in 4s…
   ✗ [groq→UZ] failed (Unbalanced JSON in response). Retrying in 4s…
-  ✗✗ [gemini→RU] giving up on batch: models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to
-  [gemini→RU] batch 21-40 of 783
-  ✗ [gemini→RU] failed (models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent). Retrying in 4s…
+  ✗✗ [groq→UZ] giving up on batch: Failed after 3 attempts. Last error: Rate limit reached for model `llama-3.1-8b-instant` in organization `org_01kpgqrqta
+  [groq→UZ] batch 21-25 of 191
+  ✓ [groq-ru→RU] saved 5
+  [groq-ru→RU] batch 101-105 of 450
+  ✗ [groq→UZ] daily quota exhausted — switching provider immediately
 
-⚠ gemini dead for ru — falling back to groq
+⚠ groq dead for uz — falling back to groq-uz
 
-─── [groq→RU] 783/1500 pending ───
-  [groq→RU] batch 1-5 of 783
-  ✗✗ [groq→UZ] giving up on batch: Expected ',' or ']' after array element in JSON at position 527 (line 15 column 7)
-  [groq→UZ] batch 6-10 of 1485
-  ✗ [groq→RU] failed (Expected ',' or ']' after array element in JSON at position 5095 (line 73 column 173)). Retrying in 4s…
-  ✗ [groq→UZ] rate limit hit — switching provider immediately
-
-⚠ groq dead for uz — falling back to gemini
-
-─── [gemini→UZ] 1485/1500 pending ───
-  [gemini→UZ] batch 1-20 of 1485
-  ✗ [gemini→UZ] failed (models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent). Retrying in 4s…
-  ✗✗ [gemini→UZ] giving up on batch: models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to
-  [gemini→UZ] batch 21-40 of 1485
-  ✗✗ [groq→RU] giving up on batch: Unbalanced JSON in response
-  [groq→RU] batch 6-10 of 783
-  ✗ [gemini→UZ] failed (models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent). Retrying in 4s…
+─── [groq-uz→UZ] 186/1500 pending ───
+  [groq-uz→UZ] batch 1-5 of 186
+  ⚠ [groq-uz→UZ] partial: got 1/5 — saving what we have
+  ✓ [groq-uz→UZ] saved 1
+  [groq-uz→UZ] batch 6-10 of 186
+  ✗ [groq-uz→UZ] failed (Unbalanced JSON in response). Retrying in 4s…
+  ✓ [groq-ru→RU] saved 5
+  [groq-ru→RU] batch 106-110 of 450
+  ✗✗ [groq-uz→UZ] giving up on batch: No JSON found in response
+  [groq-uz→UZ] batch 11-15 of 186
+  ✗ [groq-ru→RU] failed (Unexpected token ']', ..." руки.",
+ ],
+ "exerc"... is not valid JSON). Retrying in 4s…
+  ✗ [groq-uz→UZ] failed (Unexpected token ']', ..."lang.",
+  ],
+  "exer"... is not valid JSON). Retrying in 4s…
+  ✗✗ [groq-ru→RU] giving up on batch: Unbalanced JSON in response
+  [groq-ru→RU] batch 111-115 of 450
+  ⚠ [groq-uz→UZ] partial: got 2/5 — saving what we have
+  ✓ [groq-uz→UZ] saved 2
+  [groq-uz→UZ] batch 16-20 of 186
+  ✗ [groq-ru→RU] failed (Unbalanced JSON in response). Retrying in 4s…
+  ✓ [groq-ru→RU] saved 5
+  [groq-ru→RU] batch 116-120 of 450
+  ✗ [groq-uz→UZ] daily quota exhausted — switching provider immediately
 ✗ All providers exhausted for uz. Re-run tomorrow.
+  ✓ [groq-ru→RU] saved 5
+  [groq-ru→RU] batch 121-125 of 450
+  ✗ [groq-ru→RU] failed (Expected ':' after property name in JSON at position 2860 (line 43 column 283)). Retrying in 4s…
+  ✗✗ [groq-ru→RU] giving up on batch: Unbalanced JSON in response
+  [groq-ru→RU] batch 126-130 of 450
+  ✓ [groq-ru→RU] saved 5
+  [groq-ru→RU] batch 131-135 of 450
+  ✓ [groq-ru→RU] saved 5
+  [groq-ru→RU] batch 136-140 of 450
+  ✗ [groq-ru→RU] daily quota exhausted — switching provider immediately
+
+⚠ groq-ru dead for ru — falling back to groq
+
+─── [groq→RU] 335/1500 pending ───
+  [groq→RU] batch 1-5 of 335
   ✓ [groq→RU] saved 5
-  [groq→RU] batch 11-15 of 783
-  ✓ [groq→RU] saved 5
-  [groq→RU] batch 16-20 of 783
-  ✓ [groq→RU] saved 5
-  [groq→RU] batch 21-25 of 783
-  ✓ [groq→RU] saved 5
-  [groq→RU] batch 26-30 of 783
-  ✓ [groq→RU] saved 5
-  [groq→RU] batch 31-35 of 783
-  ✓ [groq→RU] saved 5
-  [groq→RU] batch 36-40 of 783
-  ✓ [groq→RU] saved 5
-  [groq→RU] batch 41-45 of 783
-  ✗ [groq→RU] failed (Expected ',' or ']' after array element in JSON at position 3879 (line 82 column 7)). Retrying in 4s…
-  ✗✗ [groq→RU] giving up on batch: Unbalanced JSON in response
-  [groq→RU] batch 46-50 of 783
-  ✗ [groq→RU] failed (Unbalanced JSON in response). Retrying in 4s…
-  ✓ [groq→RU] saved 5
-  [groq→RU] batch 51-55 of 783
-  ✓ [groq→RU] saved 5
-  [groq→RU] batch 56-60 of 783
-  ✓ [groq→RU] saved 5
-  [groq→RU] batch 61-65 of 783
-  ✓ [groq→RU] saved 5
-  [groq→RU] batch 66-70 of 783
-  ✓ [groq→RU] saved 5
-  [groq→RU] batch 71-75 of 783
-  ✓ [groq→RU] saved 5
-  [groq→RU] batch 76-80 of 783
-  ✗ [groq→RU] failed (Expected double-quoted property name in JSON at position 3834 (line 83 column 113)). Retrying in 4s…
-  ✓ [groq→RU] saved 5
-  [groq→RU] batch 81-85 of 783
-  ✗ [groq→RU] failed (Unbalanced JSON in response). Retrying in 4s…
-  ✗✗ [groq→RU] giving up on batch: Expected ',' or ']' after array element in JSON at position 2639 (line 70 column 7)
-  [groq→RU] batch 86-90 of 783
-  ✓ [groq→RU] saved 5
-  [groq→RU] batch 91-95 of 783
-  ✗ [groq→RU] failed (Expected ',' or ']' after array element in JSON at position 1769 (line 28 column 215)). Retrying in 4s…
-  ✓ [groq→RU] saved 5
-  [groq→RU] batch 96-100 of 783
-  ✓ [groq→RU] saved 5
-  [groq→RU] batch 101-105 of 783
-  ✗ [groq→RU] failed (Expected ',' or ']' after array element in JSON at position 3708 (line 58 column 283)). Retrying in 4s…
-  ✓ [groq→RU] saved 5
-  [groq→RU] batch 106-110 of 783
-  ✗ [groq→RU] failed (Unexpected token ']', ..."ная нерв",],
-    "in"... is not valid JSON). Retrying in 4s…
-  ✗✗ [groq→RU] giving up on batch: Expected ',' or ']' after array element in JSON at position 2864 (line 70 column 105)
-  [groq→RU] batch 111-115 of 783
-  ✓ [groq→RU] saved 5
-  [groq→RU] batch 116-120 of 783
+  [groq→RU] batch 6-10 of 335
+  ✗ [groq→RU] daily quota exhausted — switching provider immediately
+
+⚠ groq dead for ru — falling back to groq-uz
+
+─── [groq-uz→RU] 330/1500 pending ───
+  [groq-uz→RU] batch 1-5 of 330
+  ✓ [groq-uz→RU] saved 5
+  [groq-uz→RU] batch 6-10 of 330
+  ✓ [groq-uz→RU] saved 5
+  [groq-uz→RU] batch 11-15 of 330
+  ✗ [groq-uz→RU] daily quota exhausted — switching provider immediately
+✗ All providers exhausted for ru. Re-run tomorrow.
+
+✓ Seeding complete.
+ed (Cerebras 429: {"message":"Tokens per minute limit exceeded - too many tokens processed.","type":"too). Retrying in 65s…
+  ✗✗ [cerebras-ru→RU] giving up on batch: Cerebras 429: {"message":"Tokens per minute limit exceeded - too many tokens processed.","type":"too_many_tokens_error",
+  [cerebras-ru→RU] batch 441-460 of 530
+  ✗ [cerebras-ru→RU] failed (Cerebras 429: {"message":"Tokens per minute limit exceeded - too many tokens processed.","type":"too). Retrying in 65s…
+  ✗✗ [cerebras-ru→UZ] giving up on batch: Cerebras 429: {"message":"Tokens per minute limit exceeded - too many tokens processed.","type":"too_many_tokens_error",
+  [cerebras-ru→UZ] batch 241-241 of 241
+  ✗ [cerebras-ru→UZ] failed (Cerebras 429: {"message":"Tokens per minute limit exceeded - too many tokens processed.","type":"too). Retrying in 65s…
+  ✓ [cerebras-ru→RU] saved 20
+  [cerebras-ru→RU] batch 461-480 of 530
+  ✗ [cerebras-ru→RU] failed (Cerebras 429: {"message":"Tokens p  ✓ [cerebras-ru→RU] saved 20
+  [cerebras-ru→RU] batch 421-440 of 550
+  ✗ [cerebras-ru→RU] failed (Expected ',' or '}' after property value in JSON at position 13638 (line 351 column 30)). Retrying in 4s…
+  ✗✗ [cerebras-ru→RU] giving up on batch: Cerebras 429: {"messa  ✓ [cerebras-ru→RU] saved 20
+  [cerebras-ru→RU] batch 481-500 of 530
+  ✓ [cerebras-ru→RU] saved 20
+  [cerebras-ru→RU] batch 501-520 of 530
+  ✗ [cerebras-ru→RU] failed (Cerebras 429: {"message":"Tokens per minute limit exceeded - too many tokens processed.","type":"too). Retrying   ✓ [cer  ✗✗ [cerebras-ru→RU] giving up on batch: Cerebras 429: {"message":"We're experiencing high traffic right now! Please try again soon.","type":"too_many_requests_e
+  [cerebras-ru→RU] batch 521-530 of 530
+  ✗ [cer  ✗✗ [cerebras-ru→RU] giving up on batch: Cerebras 429: {"message":"Tokens per minute limit exceeded - too many tokens processed.","type":"  ✓ [cerebras-ru→RU] saved 10
+
+✓ [cerebras-ru→RU] done
+
+✓ Seeding complete.
+�RU] failed (Cerebras 429: {"message":"Tokens per minute limit exceeded - too many tokens processed.","type":"too). Retrying in 65s…
+  ✗✗ [cerebras-ru→RU] giving up on batch: Cerebras 429: {"message":"We're experiencing high traffic right now! Please try again soon.","type":"too_many_requests_e
+  [cerebras-ru→RU] batch 501-520 of 550
+  ✗ [cerebras-ru→RU] failed (Cerebras 429: {"message":"Tokens per minute limit exceeded - too many tokens processed.","type":"too). Retrying in 65s…
+  ✗✗ [cerebras-ru→RU] giving up on batch: Cerebras 429: {"message":"We're experiencing high traffic right now! Please try again soon.","type":"too_many_requests_e
+  [cerebras-ru→RU] batch 521-540 of 550
+  ✗ [cerebras-ru→RU] failed (Cerebras 429: {"message":"Tokens per minute limit exceeded - too many tokens processed.","type":"too). Retrying in 65s…
+  ✗✗ [cerebras-ru→RU] giving up on batch: Cerebras 429: {"message":"Tokens per minute limit exceeded - too many tokens processed.","type":"too_many_tokens_error",
+  [cerebras-ru→RU] batch 541-550 of 550
+  ✗ [cerebras-ru→RU] failed (Cerebras 429: {"message":"Tokens per minute limit exceeded - too many tokens processed.","type":"too). Retrying in 65s…
+  ✓ [cerebras-ru→RU] saved 10
+
+✓ [cerebras-ru→RU] done
+
+✓ Seeding complete.
+
+→ SEQUENTIAL mode: gemini
+
+─── [gemini→UZ] 191/1500 pending ───
+  [gemini→UZ] batch 1-20 of 191
+  ✗ [gemini→UZ] daily quota exhausted — switching provider immediately
+
+⚠ gemini dead for uz — falling back to cerebras-ru
+
+─── [cerebras-ru→UZ] 191/1500 pending ───
+  [cerebras-ru→UZ] batch 1-20 of 191
+  ✓ [cerebras-ru→UZ] saved 20
+  [cerebras-ru→UZ] batch 21-40 of 191
+  ✓ [cerebras-ru→UZ] saved 20
+  [cerebras-ru→UZ] batch 41-60 of 191
+  ✗ [cerebras-ru→UZ] daily quota exhausted — switching provider immediately
+
+⚠ cerebras-ru dead for uz — falling back to cerebras-uz
+
+─── [cerebras-uz→UZ] 151/1500 pending ───
+  [cerebras-uz→UZ] batch 1-20 of 151
+  ✓ [cerebras-uz→UZ] saved 20
+  [cerebras-uz→UZ] batch 21-40 of 151
+  ✗ [cerebras-uz→UZ] daily quota exhausted — switching provider immediately
+
+⚠ cerebras-uz dead for uz — falling back to cerebras
+
+─── [cerebras→UZ] 131/1500 pending ───
+  [cerebras→UZ] batch 1-20 of 131
+  ✗ [cerebras→UZ] failed (Cerebras 429: {"message":"We're experiencing high traffic right now! Please try again soon.","type":). Retrying in 65s…
+  ✗✗ [cerebras→UZ] giving up on batch: Cerebras 429: {"message":"Tokens per day limit exceeded - too many tokens processed.","type":"too_many_tokens_error","pa
+  [cerebras→UZ] batch 21-40 of 131
+  ✗ [cerebras→UZ] daily quota exhausted — switching provider immediately
+
+⚠ cerebras dead for uz — falling back to groq-ru
+
+─── [groq-ru→UZ] 131/1500 pending ───
+  [groq-ru→UZ] batch 1-5 of 131
+  ✗ [groq-ru→UZ] daily quota exhausted — switching provider immediately
+
+⚠ groq-ru dead for uz — falling back to groq
+
+─── [groq→UZ] 131/1500 pending ───
+  [groq→UZ] batch 1-5 of 131
+  ✗ [groq→UZ] failed ([
+  {
+    "code": "invalid_type",
+    "expected": "string",
+    "received": "array",
+    "path": [
+ ). Retrying in 4s…
+  ✗✗ [groq→UZ] giving up on batch: Failed after 3 attempts. Last error: Rate limit reached for model `llama-3.1-8b-instant` in organization `org_01kpgqrqta
+  [groq→UZ] batch 6-10 of 131
+  ✗ [groq→UZ] daily quota exhausted — switching provider immediately
+
+⚠ groq dead for uz — falling back to groq-uz
+
+─── [groq-uz→UZ] 131/1500 pending ───
+  [groq-uz→UZ] batch 1-5 of 131
+  ✗ [groq-uz→UZ] failed (Expected ':' after property name in JSON at position 34 (line 1 column 35)). Retrying in 4s…
+  ✓ [groq-uz→UZ] saved 5
+  [groq-uz→UZ] batch 6-10 of 131
+  ✗ [groq-uz→UZ] failed ([
+  {
+    "code": "invalid_type",
+    "expected": "string",
+    "received": "undefined",
+    "path":). Retrying in 4s…
+  ✗✗ [groq-uz→UZ] giving up on batch: Unbalanced JSON in response
+  [groq-uz→UZ] batch 11-15 of 131
+  ✗ [groq-uz→UZ] failed (Expected ',' or ']' after array element in JSON at position 826 (line 13 column 144)). Retrying in 4s…
+  ⚠ [groq-uz→UZ] partial: got 1/5 — saving what we have
+  ✓ [groq-uz→UZ] saved 1
+  [groq-uz→UZ] batch 16-20 of 131
+  ✗ [groq-uz→UZ] failed (Unbalanced JSON in response). Retrying in 4s…
+  ✗✗ [groq-uz→UZ] giving up on batch: Unbalanced JSON in response
+  [groq-uz→UZ] batch 21-25 of 131
+  ✗ [groq-uz→UZ] failed (Unbalanced JSON in response). Retrying in 4s…
+  ✗✗ [groq-uz→UZ] giving up on batch: Failed after 3 attempts. Last error: Rate limit reached for model `llama-3.1-8b-instant` in organization `org_01kpj7swy9
+  [groq-uz→UZ] batch 26-30 of 131
+  ✗ [groq-uz→UZ] failed (Unbalanced JSON in response). Retrying in 4s…
+  ✗✗ [groq-uz→UZ] giving up on batch: [
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "string",
+    "path": [
+      0
+    ],
+    "
+  [groq-uz→UZ] batch 31-35 of 131
+  ✓ [groq-uz→UZ] saved 5
+  [groq-uz→UZ] batch 36-40 of 131
+  ✗ [groq-uz→UZ] failed (Unexpected token ']', ..."im.",
+    ],
+    "ex"... is not valid JSON). Retrying in 4s…
+  ✗✗ [groq-uz→UZ] giving up on batch: Expected ':' after property name in JSON at position 3182 (line 71 column 35)
+  [groq-uz→UZ] batch 41-45 of 131
+  ✗ [groq-uz→UZ] failed ([
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "string",
+    "path": [
+). Retrying in 4s…
+  ✗✗ [groq-uz→UZ] giving up on batch: Unbalanced JSON in response
+  [groq-uz→UZ] batch 46-50 of 131
+  ✗ [groq-uz→UZ] failed (Unbalanced JSON in response). Retrying in 4s…
+dead for uz — falling back to cerebras
+
+─── [cerebras→UZ] 106/1500 pending ───
+  [cerebras→UZ] batch 1-20 of 106
+  ✗ [cerebras→UZ] daily quota exhausted — switching provider immediately
+
+⚠ cerebras dead for uz — falling back to groq-ru
+
+─── [groq-ru→UZ] 106/1500 pending ───
+  [groq-ru→UZ] batch 1-5 of 106
+  ✗ [groq-ru→UZ] failed (Unbalanced JSON in response). Retrying in 4s…
+  ✗✗ [groq-ru→UZ] giving up on batch: Unbalanced JSON in response
+  [groq-ru→UZ] batch 6-10 of 106
+  ✗ [groq-ru→UZ] failed (Expected ',' or ']' after array element in JSON at position 701 (line 14 column 5)). Retrying in 4s…
+  ✗✗ [groq-ru→UZ] giving up on batch: Bad escaped character in JSON at position 1594 (line 1 column 1595)
+  [groq-ru→UZ] batch 11-15 of 106
+  ✗ [groq-ru→UZ] failed (Unbalanced JSON in response). Retrying in 4s…
+  ✓ [groq-ru→UZ] saved 5
+  [groq-ru→UZ] batch 16-20 of 106
+  ✗ [groq-ru→UZ] daily quota exhausted — switching provider immediately
+
+⚠ groq-ru dead for uz — falling back to groq
+
+─── [groq→UZ] 101/1500 pending ───
+  [groq→UZ] batch 1-5 of 101
+  ✗ [groq→UZ] daily quota exhausted — switching provider immediately
+
+⚠ groq dead for uz — falling back to groq-uz
+
+─── [groq-uz→UZ] 101/1500 pending ───
+  [groq-uz→UZ] batch 1-5 of 101
+  ✗ [groq-uz→UZ] daily quota exhausted — switching provider immediately
+✗ All providers exhausted for uz. Re-run tomorrow.
+
+✓ Seeding complete.
+ras-ru→UZ] 183/1500 pending ───
+  [cerebras-ru→UZ] batch 1-20 of 183
+  ✓ [cerebras-ru→UZ] saved 20
+  [cerebras-ru→UZ] batch 21-40 of 183
+  ✓ [cerebras-ru→UZ] saved 20
+  [cerebras-ru→UZ] batch 41-60 of 183
+  ✓ [cerebras-ru→UZ] saved 20
+  [cerebras-ru→UZ] batch 61-80 of 183
+  ✗ [cerebras-ru→UZ] daily quota exhausted — switching provider immediately
+
+⚠ cerebras-ru dead for uz — falling back to cerebras-uz
+
+─── [cerebras-uz→UZ] 123/1500 pending ───
+  [cerebras-uz→UZ] batch 1-20 of 123
+  ✗ [cerebras-uz→UZ] daily quota exhausted — switching provider immediately
+
+⚠ cerebras-uz dead for uz — falling back to cerebras
+
+─── [cerebras→UZ] 123/1500 pending ───
+  [cerebras→UZ] batch 1-20 of 123
+  ✗ [cerebras→UZ] daily quota exhausted — switching provider immediately
+
+⚠ cerebras dead for uz — falling back to groq-ru
+
+─── [groq-ru→UZ] 123/1500 pending ───
+  [groq-ru→UZ] batch 1-5 of 123
+  ✗ [groq-ru→UZ] failed ([
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "string",
+    "path": [
+). Retrying in 4s…
+  ✗✗ [groq-ru→UZ] giving up on batch: [
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "string",
+    "path": [
+      0
+    ],
+    "
+  [groq-ru→UZ] batch 6-10 of 123
+  ✗ [groq-ru→UZ] failed ([
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "string",
+    "path": [
+). Retrying in 4s…
+  ✗✗ [groq-ru→UZ] giving up on batch: [
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "string",
+    "path": [
+      0
+    ],
+    "
+  [groq-ru→UZ] batch 11-15 of 123
+  ✗ [groq-ru→UZ] failed ([
+  {
+    "code": "invalid_type",
+    "expected": "object",
+    "received": "string",
+    "path": [
+). Retrying in 4s…
+  ✗✗ [groq-ru→UZ] giving up on batch: Unexpected token ']', ..."ng.",
+    ],
+    "ex"... is not valid JSON
+  [groq-ru→UZ] batch 16-20 of 123

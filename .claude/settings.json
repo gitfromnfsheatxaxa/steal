@@ -1,4 +1,14 @@
-﻿{
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs kill *)",
+      "Bash(kill 8349)",
+      "Bash(kill 8541)",
+      "Bash(kill 8628)",
+      "Bash(echo \"exit:$?\")",
+      "Bash(LOCALES=uz node --env-file=.env.local scripts/seed-exercise-translations.mjs)"
+    ]
+  },
   "hooks": {
     "PreToolUse": [
       {
