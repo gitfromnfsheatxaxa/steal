@@ -610,7 +610,6 @@ export function ManualPlanForm() {
             const ex = day.exercises[i];
             await pb.collection("plan_exercises").create({
               planDay: savedDay.id,
-              exercise: ex.exerciseId ?? "",
               name: ex.name ?? "",
               order: i + 1,
               sets: ex.sets,

@@ -4,10 +4,11 @@ import Link from "next/link";
 import { usePlans } from "@/hooks/usePlans";
 import { PlanCard } from "@/components/plans/PlanCard";
 import { TemplateGrid } from "@/components/plans/TemplateGrid";
+import { SessionHistory } from "@/components/plans/SessionHistory";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Pencil } from "lucide-react";
+import { Plus, Pencil, Zap } from "lucide-react";
 import { useI18n } from "@/components/providers/I18nProvider";
 
 export default function PlansPage() {
@@ -29,6 +30,16 @@ export default function PlansPage() {
         <div className="flex items-center gap-2">
           <Button
             asChild
+            variant="outline"
+            className="rounded-none border-[#e53e00] font-data text-xs font-bold uppercase tracking-widest text-[#e53e00] hover:bg-[#e53e00] hover:text-white"
+          >
+            <Link href="/workout/quick">
+              <Zap className="mr-2 h-3 w-3" />
+              {t("quickWorkout.TITLE")}
+            </Link>
+          </Button>
+          <Button
+            asChild
             className="rounded-none bg-[#e53e00] font-data text-xs font-bold uppercase tracking-widest text-white hover:bg-[#ff4500]"
           >
             <Link href="/plans/create">
@@ -46,6 +57,12 @@ export default function PlansPage() {
             className="rounded-none font-data text-xs uppercase tracking-widest data-[state=active]:bg-[#e53e00] data-[state=active]:text-white"
           >
             {t("plans.MY_PROGRAMS")}
+          </TabsTrigger>
+          <TabsTrigger
+            value="sessions"
+            className="rounded-none font-data text-xs uppercase tracking-widest data-[state=active]:bg-[#e53e00] data-[state=active]:text-white"
+          >
+            {t("plans.SESSIONS")}
           </TabsTrigger>
           <TabsTrigger
             value="templates"
@@ -81,6 +98,10 @@ export default function PlansPage() {
               </div>
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="sessions" className="mt-4">
+          <SessionHistory />
         </TabsContent>
 
         <TabsContent value="templates" className="mt-4">
