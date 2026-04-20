@@ -26,15 +26,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { DAYS_OF_WEEK, MUSCLE_GROUPS } from "@/lib/constants";
-import { Plus, X, ChevronDown, ChevronUp, Save, Loader2 } from "lucide-react";
+import { MUSCLE_GROUPS } from "@/lib/constants";
+import { Plus, X, ChevronDown, ChevronUp, Save, Loader2, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/components/providers/I18nProvider";
+import { ExercisePickerModal } from "@/components/plans/ExercisePickerModal";
+import type { LibraryExercise } from "@/types/exercise";
+import Image from "next/image";
 
 // ─── Zod schema ──────────────────────────────────────────────────────────────
 
 const exerciseSchema = z.object({
   name: z.string().min(1, "Exercise name required"),
+  exerciseId: z.string().optional(),
+  exerciseImage: z.string().optional(),
   sets: z.number().min(1).max(20),
   repsMin: z.number().min(1).max(100),
   repsMax: z.number().min(1).max(100),
@@ -104,6 +109,16 @@ function ExerciseRow({
   t: (key: string) => string;
 }) {
   const base = `days.${dayIndex}.exercises.${index}` as const;
+  const [pickerOpen, setPickerOpen] = useState(false);
+
+  const selectedName = form.watch(`${base}.name`);
+  const selectedImage = form.watch(`${base}.exerciseImage`);
+
+  const handlePick = (ex: LibraryExercise) => {
+    form.setValue(`${base}.name`, ex.name, { shouldValidate: true });
+    form.setValue(`${base}.exerciseId`, ex.exerciseId);
+    form.setValue(`${base}.exerciseImage`, ex.gif || ex.image);
+  };
 
   return (
     <div className="space-y-3 border border-border bg-[#0d0d0d] p-3">
@@ -121,22 +136,64 @@ function ExerciseRow({
         </button>
       </div>
 
-      {/* Name */}
+      {/* Exercise picker trigger */}
       <FormField
         control={form.control}
         name={`${base}.name`}
-        render={({ field }) => (
+        render={({ fieldState }) => (
           <FormItem>
             <FormControl>
-              <Input
-                placeholder={t("planForm.EXERCISE_PLACEHOLDER")}
-                className="rounded-none border-border bg-input font-data text-sm"
-                {...field}
-              />
+              <button
+                type="button"
+                onClick={() => setPickerOpen(true)}
+                className={cn(
+                  "w-full flex items-center gap-3 border bg-input text-left transition-colors hover:border-[#e53e00]/60",
+                  fieldState.error ? "border-destructive" : "border-border",
+                )}
+              >
+                {selectedImage ? (
+                  <div className="relative h-14 w-14 shrink-0 overflow-hidden bg-[#111]">
+                    <Image
+                      src={selectedImage}
+                      alt={selectedName || ""}
+                      fill
+                      className="object-cover"
+                      sizes="56px"
+                      unoptimized={selectedImage.endsWith(".gif")}
+                    />
+                  </div>
+                ) : (
+                  <div className="h-14 w-14 shrink-0 flex items-center justify-center bg-[#111] border-r border-border">
+                    <Search className="h-4 w-4 text-[#525252]" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0 px-2 py-2">
+                  {selectedName ? (
+                    <>
+                      <p className="font-data text-[11px] font-bold uppercase tracking-wide text-[#e5e5e5] truncate">
+                        {selectedName}
+                      </p>
+                      <p className="font-data text-[9px] uppercase tracking-widest text-[#e53e00] mt-0.5">
+                        {t("planForm.CHANGE_EXERCISE")}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="font-data text-[11px] uppercase tracking-widest text-[#525252]">
+                      {t("planForm.SELECT_EXERCISE")}
+                    </p>
+                  )}
+                </div>
+              </button>
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
+      />
+
+      <ExercisePickerModal
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onSelect={handlePick}
       />
 
       {/* Sets / Reps / RPE */}
@@ -310,6 +367,8 @@ function DayEditor({
 
   const defaultExercise: ExerciseValues = {
     name: "",
+    exerciseId: "",
+    exerciseImage: "",
     sets: 3,
     repsMin: 8,
     repsMax: 12,
@@ -374,13 +433,13 @@ function DayEditor({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="rounded-none border-border bg-card">
-                      {DAYS_OF_WEEK.map((d, i) => (
+                      {(["MON","TUE","WED","THU","FRI","SAT","SUN"] as const).map((key, i) => (
                         <SelectItem
                           key={i + 1}
                           value={String(i + 1)}
                           className="font-data text-sm uppercase tracking-wide"
                         >
-                          {d}
+                          {t(`daysOfWeek.${key}`)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -441,7 +500,7 @@ function DayEditor({
                             : "border-border text-muted-foreground hover:border-[#e53e00]/40",
                         )}
                       >
-                        {mg.label}
+                        {t(`muscles.${mg.value.toUpperCase()}`)}
                       </button>
                     );
                   })}
@@ -493,7 +552,7 @@ export function ManualPlanForm() {
     label: "",
     focus: [],
     exercises: [
-      { name: "", sets: 3, repsMin: 8, repsMax: 12, rpeTarget: 8, restSeconds: 90, notes: "" },
+      { name: "", exerciseId: "", exerciseImage: "", sets: 3, repsMin: 8, repsMax: 12, rpeTarget: 8, restSeconds: 90, notes: "" },
     ],
   };
 
@@ -551,7 +610,7 @@ export function ManualPlanForm() {
             const ex = day.exercises[i];
             await pb.collection("plan_exercises").create({
               planDay: savedDay.id,
-              exercise: "",
+              exercise: ex.exerciseId ?? "",
               name: ex.name ?? "",
               order: i + 1,
               sets: ex.sets,

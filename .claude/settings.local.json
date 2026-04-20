@@ -62,7 +62,8 @@
       "Bash(LOCALES=uz GEMINI_API_KEY=\"\" GOOGLE_GENERATIVE_AI_API_KEY=\"\" CEREBRAS_API_KEY_RU=\"\" CEREBRAS_API_KEY_UZ=\"\" GROQ_API_KEY=\"\" GROQ_API_KEY_RU=\"\" GROQ_API_KEY_UZ=\"\" node *)",
       "Bash(LOCALES=ru GEMINI_API_KEY=\"\" GOOGLE_GENERATIVE_AI_API_KEY=\"\" CEREBRAS_API_KEY=\"\" CEREBRAS_API_KEY_RU=\"\" CEREBRAS_API_KEY_UZ=\"\" GROQ_API_KEY_RU=\"\" GROQ_API_KEY_UZ=\"\" node *)",
       "Bash(xargs ls *)",
-      "Bash(grep -v \"^$\")"
+      "Bash(grep -v \"^$\")",
+      "Bash(xargs grep *)"
     ]
   }
 }

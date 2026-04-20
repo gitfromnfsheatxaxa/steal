@@ -108,7 +108,7 @@ export function PlanCard({ plan }: PlanCardProps) {
                     handleToggleStatus();
                   }}
                   disabled={isTogglingStatus}
-                  title={plan.status === "active" ? "Pause program" : "Resume program"}
+                  title={plan.status === "active" ? t("plans.PAUSE_PROGRAM") : t("plans.RESUME_PROGRAM")}
                 >
                   {plan.status === "active" ? (
                     <Pause className="h-3.5 w-3.5" />
@@ -129,7 +129,7 @@ export function PlanCard({ plan }: PlanCardProps) {
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
-                Week {plan.currentWeek}/{plan.durationWeeks}
+                {t("plans.WEEK")} {plan.currentWeek}/{plan.durationWeeks}
               </span>
               {plan.goalType && (
                 <span className="flex items-center gap-1">

@@ -7,8 +7,10 @@ import { cn } from "@/lib/utils";
 import { type LegendProgram } from "@/data/legend-programs";
 import { ProgramDetail } from "@/components/programs/ProgramDetail";
 import { useProgramTemplates } from "@/hooks/useProgramTemplates";
+import { useI18n } from "@/components/providers/I18nProvider";
 
 export default function ProgramsPage() {
+  const { t } = useI18n();
   const { data: programs, isLoading, isError } = useProgramTemplates();
   const [selectedProgram, setSelectedProgram] = useState<LegendProgram | null>(null);
 
@@ -31,11 +33,11 @@ export default function ProgramsPage() {
             className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-[#e5e5e5]"
             style={{ fontFamily: "var(--font-heading, system-ui)" }}
           >
-            LEGEND PROGRAMS
+            {t("programs.LEGEND_TITLE")}
           </h1>
         </div>
         <p className="mt-2 max-w-xl text-sm text-[#71717A]">
-          Train like the greatest bodybuilders of all time. Seven legendary philosophies, seven paths to greatness.
+          {t("programs.LEGEND_SUBTITLE")}
         </p>
       </div>
 
@@ -44,7 +46,7 @@ export default function ProgramsPage() {
         <div className="flex flex-col items-center justify-center py-24 gap-4">
           <Loader2 className="h-6 w-6 animate-spin text-[#e53e00]" />
           <p className="font-data text-[10px] uppercase tracking-widest text-[#525252]">
-            Loading programs…
+            {t("programs.LOADING")}
           </p>
         </div>
       )}
@@ -55,10 +57,10 @@ export default function ProgramsPage() {
           <AlertTriangle className="h-5 w-5 shrink-0 text-[#e53e00] mt-0.5" />
           <div>
             <p className="font-data text-[10px] font-bold uppercase tracking-widest text-[#e53e00] mb-1">
-              Failed to load programs
+              {t("programs.LOAD_ERROR")}
             </p>
             <p className="font-data text-[9px] text-[#71717A]">
-              Could not connect to the server. Check your connection and try again.
+              {t("programs.LOAD_ERROR_DESC")}
             </p>
           </div>
         </div>
@@ -68,7 +70,7 @@ export default function ProgramsPage() {
       {!isLoading && !isError && programs?.length === 0 && (
         <div className="border border-[#2a2a2a] bg-[#0a0a0a] p-12 text-center">
           <p className="font-data text-[10px] uppercase tracking-widest text-[#525252]">
-            No programs found
+            {t("programs.NO_PROGRAMS_FOUND")}
           </p>
         </div>
       )}
@@ -133,14 +135,14 @@ export default function ProgramsPage() {
                     <div className="flex items-center gap-2">
                       <Calendar className="h-3 w-3 text-[#e53e00]" />
                       <div>
-                        <p className="font-data text-[8px] uppercase tracking-widest text-[#525252]">Frequency</p>
+                        <p className="font-data text-[8px] uppercase tracking-widest text-[#525252]">{t("programs.FREQUENCY")}</p>
                         <p className="font-data text-[10px] text-[#a3a3a3]">{program.frequency}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <Clock className="h-3 w-3 text-[#e53e00]" />
                       <div>
-                        <p className="font-data text-[8px] uppercase tracking-widest text-[#525252]">Session</p>
+                        <p className="font-data text-[8px] uppercase tracking-widest text-[#525252]">{t("programs.SESSION")}</p>
                         <p className="font-data text-[10px] text-[#a3a3a3]">{program.sessionLength}</p>
                       </div>
                     </div>
@@ -151,7 +153,7 @@ export default function ProgramsPage() {
                 <div className="border-t border-[#2a2a2a] p-3">
                   <div className="flex items-center justify-between">
                     <span className="font-data text-[10px] uppercase tracking-widest text-[#e53e00]">
-                      View Program
+                      {t("programs.VIEW_PROGRAM")}
                     </span>
                     <ChevronRight className="h-3 w-3 text-[#e53e00] transition-transform group-hover:translate-x-1" />
                   </div>
@@ -165,7 +167,7 @@ export default function ProgramsPage() {
             <div className="flex items-center gap-4 mb-6">
               <div className="h-px flex-1 bg-[#2a2a2a]" />
               <span className="font-data text-[10px] uppercase tracking-widest text-[#71717A]">
-                PROGRAM COMPARISON
+                {t("programs.COMPARISON")}
               </span>
               <div className="h-px flex-1 bg-[#2a2a2a]" />
             </div>
@@ -174,10 +176,10 @@ export default function ProgramsPage() {
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-[#2a2a2a]">
-                    <th className="p-3 font-data text-[9px] uppercase tracking-widest text-[#71717A]">Program</th>
-                    <th className="p-3 font-data text-[9px] uppercase tracking-widest text-[#71717A]">Days/Wk</th>
-                    <th className="p-3 font-data text-[9px] uppercase tracking-widest text-[#71717A]">Split</th>
-                    <th className="p-3 font-data text-[9px] uppercase tracking-widest text-[#71717A]">Best For</th>
+                    <th className="p-3 font-data text-[9px] uppercase tracking-widest text-[#71717A]">{t("programs.TABLE_PROGRAM")}</th>
+                    <th className="p-3 font-data text-[9px] uppercase tracking-widest text-[#71717A]">{t("programs.TABLE_DAYS_WK")}</th>
+                    <th className="p-3 font-data text-[9px] uppercase tracking-widest text-[#71717A]">{t("programs.TABLE_SPLIT")}</th>
+                    <th className="p-3 font-data text-[9px] uppercase tracking-widest text-[#71717A]">{t("programs.TABLE_BEST_FOR")}</th>
                   </tr>
                 </thead>
                 <tbody>

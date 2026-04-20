@@ -18,6 +18,7 @@ import { useI18n } from "@/components/providers/I18nProvider";
 // ─── Exercise List Panel ─────────────────────────────────────────────────────
 function ExerciseListPanel({ dayId }: { dayId: string }) {
   const pb = getPocketBase();
+  const { t } = useI18n();
   const { data: exercises, isLoading } = useQuery({
     queryKey: ["planExercises", dayId],
     queryFn: async () => {
@@ -45,7 +46,7 @@ function ExerciseListPanel({ dayId }: { dayId: string }) {
 
   if (!exercises || exercises.length === 0) {
     return (
-      <p className="font-data text-[9px] text-[#525252]">NO EXERCISES CONFIGURED</p>
+      <p className="font-data text-[9px] text-[#525252]">{t("plans.NO_EXERCISES_CONFIGURED")}</p>
     );
   }
 
@@ -74,7 +75,7 @@ function ExerciseListPanel({ dayId }: { dayId: string }) {
       })}
       {exercises.length > 5 && (
         <p className="font-data text-[8px] text-[#525252] pl-6">
-          +{exercises.length - 5} MORE
+          +{exercises.length - 5} {t("plans.MORE_EXERCISES")}
         </p>
       )}
     </div>
@@ -93,6 +94,7 @@ function DayCard({
   isCompleted: boolean;
   isLocked: boolean;
 }) {
+  const { t } = useI18n();
   return (
     <div
       className={cn(
@@ -146,7 +148,7 @@ function DayCard({
                 <CheckCircle2 className="h-3.5 w-3.5 text-[#10b981]" />
               </div>
               <span className="font-data text-[9px] font-bold uppercase tracking-widest text-[#10b981]">
-                COMPLETED
+                {t("plans.COMPLETED")}
               </span>
             </div>
           ) : isLocked ? (
@@ -154,14 +156,14 @@ function DayCard({
               <div className="bg-[#2a2a2a] p-1 rounded-sm">
                 <Lock className="h-3.5 w-3.5 text-[#525252]" />
               </div>
-              <span className="font-data text-[9px] text-[#525252]">LOCKED</span>
+              <span className="font-data text-[9px] text-[#525252]">{t("plans.LOCKED")}</span>
             </div>
           ) : (
             <div className="flex items-center gap-1.5">
               <div className="bg-[#e53e00]/10 p-1 rounded-sm">
                 <Clock className="h-3.5 w-3.5 text-[#e53e00]" />
               </div>
-              <span className="font-data text-[9px] font-bold uppercase tracking-widest text-[#e53e00]">READY</span>
+              <span className="font-data text-[9px] font-bold uppercase tracking-widest text-[#e53e00]">{t("plans.READY")}</span>
             </div>
           )}
         </div>
@@ -174,7 +176,7 @@ function DayCard({
           <div className="flex items-center gap-2 mb-2">
             <Target className="h-3 w-3 text-[#525252]" />
             <span className="font-data text-[9px] uppercase tracking-widest text-[#525252]">
-              EXERCISES
+              {t("plans.EXERCISES_LABEL")}
             </span>
           </div>
           <ExerciseListPanel dayId={day.id} />
@@ -183,17 +185,17 @@ function DayCard({
         {/* Action row */}
         <div className="flex items-center justify-between pt-3 border-t border-[#1a1a1a]">
           <span className="font-data text-[9px] text-[#525252]">
-            {day.week} WEEK
+            {t("plans.WEEK")} {day.week}
           </span>
           {isCompleted ? (
             <span className="font-data text-[9px] font-bold uppercase tracking-widest text-[#10b981]">
               <CheckCircle2 className="inline h-3.5 w-3.5 mr-1" />
-              DONE
+              {t("plans.DONE")}
             </span>
           ) : isLocked ? (
             <span className="font-data text-[9px] text-[#525252]">
               <Lock className="inline h-3 w-3 mr-1" />
-              LOCKED
+              {t("plans.LOCKED")}
             </span>
           ) : (
             <Button
@@ -201,7 +203,7 @@ function DayCard({
               className="rounded-none bg-[#e53e00] font-data text-[10px] font-bold uppercase tracking-widest text-white hover:bg-[#ff4500] h-8 px-3"
             >
               <Link href={`/workout/${day.id}`}>
-                START
+                {t("plans.START")}
                 <ChevronRight className="ml-1 h-3 w-3" />
               </Link>
             </Button>

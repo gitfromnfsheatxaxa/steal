@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import type { LibraryExercise } from "@/types/exercise";
 import { getAllExercises } from "@/lib/exercise-library";
 import { useI18n } from "@/components/providers/I18nProvider";
-import { useExercisesBatchTranslation } from "@/hooks/useExerciseTranslation";
+import { useExercisesBatchTranslation, useAllExerciseTranslationNames } from "@/hooks/useExerciseTranslation";
 import { applyTranslationToLibraryExercise } from "@/lib/exercise-translate";
 import { tBodyPart, tEquipment, tMuscle } from "@/lib/exercise-taxonomy";
 
@@ -40,7 +40,7 @@ function TileSkeleton() {
   );
 }
 
-function ExerciseTile({ exercise }: { exercise: LibraryExercise }) {
+function ExerciseTile({ exercise, noImgLabel }: { exercise: LibraryExercise; noImgLabel: string }) {
   return (
     <Link
       href={`/exercises/${exercise.slug}`}
@@ -63,7 +63,7 @@ function ExerciseTile({ exercise }: { exercise: LibraryExercise }) {
               className="stamp text-[#525252] text-[9px] tracking-widest"
               style={{ fontFamily: "var(--font-mono, monospace)" }}
             >
-              NO IMG
+              {noImgLabel}
             </span>
           </div>
         )}
@@ -121,7 +121,8 @@ function FilterChip({
 }
 
 export function ExerciseLibrary({ filters }: Props) {
-  const { language } = useI18n();
+  const { language, t } = useI18n();
+  const translationNames = useAllExerciseTranslationNames();
   const [allExercises, setAllExercises] = useState<LibraryExercise[] | null>(
     null,
   );
@@ -154,13 +155,18 @@ export function ExerciseLibrary({ filters }: Props) {
     if (!allExercises) return [];
     const lowerQ = q.toLowerCase();
     return allExercises.filter((ex) => {
-      if (lowerQ && !ex.name.toLowerCase().includes(lowerQ)) return false;
+      if (lowerQ) {
+        const translatedName = translationNames.get(ex.exerciseId)?.toLowerCase();
+        const matchesEn = ex.name.toLowerCase().includes(lowerQ);
+        const matchesTranslated = translatedName?.includes(lowerQ) ?? false;
+        if (!matchesEn && !matchesTranslated) return false;
+      }
       if (bodyPart && ex.bodyPart !== bodyPart) return false;
       if (equipment && ex.equipment !== equipment) return false;
       if (target && ex.target !== target) return false;
       return true;
     });
-  }, [allExercises, q, bodyPart, equipment, target]);
+  }, [allExercises, q, bodyPart, equipment, target, translationNames]);
 
   useEffect(() => {
     setDisplayCount(PAGINATION_SIZE);
@@ -204,7 +210,7 @@ export function ExerciseLibrary({ filters }: Props) {
           type="search"
           value={rawQ}
           onChange={(e) => handleQueryChange(e.target.value)}
-          placeholder="SEARCH EXERCISES..."
+          placeholder={t("library.SEARCH")}
           aria-label="Search exercises"
           className="w-full border border-[#2a2a2a] bg-[#0a0a0a] pl-10 pr-4 py-2.5 font-data text-[11px] uppercase tracking-widest text-[#e5e5e5] placeholder:text-[#525252] focus:outline-none focus:border-[#e53e00]/60 transition-colors"
         />
@@ -217,7 +223,7 @@ export function ExerciseLibrary({ filters }: Props) {
           aria-label="Filter by body part"
         >
           <FilterChip
-            label="ALL"
+            label={t("library.ALL")}
             active={bodyPart === ""}
             onClick={() => setBodyPart("")}
           />
@@ -237,7 +243,7 @@ export function ExerciseLibrary({ filters }: Props) {
           aria-label="Filter by equipment"
         >
           <FilterChip
-            label="ANY EQUIP."
+            label={t("library.ANY_EQUIP")}
             active={equipment === ""}
             onClick={() => setEquipment("")}
           />
@@ -257,7 +263,7 @@ export function ExerciseLibrary({ filters }: Props) {
           aria-label="Filter by target muscle"
         >
           <FilterChip
-            label="ALL MUSCLES"
+            label={t("library.ALL_MUSCLES")}
             active={target === ""}
             onClick={() => setTarget("")}
           />
@@ -279,7 +285,7 @@ export function ExerciseLibrary({ filters }: Props) {
             className="stamp text-[9px] text-[#525252] tracking-widest"
             style={{ fontFamily: "var(--font-mono, monospace)" }}
           >
-            {displayedSlice.length} / {filteredExercises.length} RESULTS
+            {displayedSlice.length} / {filteredExercises.length} {t("library.RESULTS")}
           </span>
           <div className="h-px flex-1 bg-[#1a1a1a]" />
         </div>
@@ -300,20 +306,20 @@ export function ExerciseLibrary({ filters }: Props) {
             className="stamp text-[14px] tracking-[0.3em] text-[#525252]"
             style={{ fontFamily: "var(--font-mono, monospace)" }}
           >
-            NO RESULTS
+            {t("library.NO_RESULTS")}
           </span>
           <span
             className="stamp text-[10px] text-[#71717A] tracking-[0.2em]"
             style={{ fontFamily: "var(--font-mono, monospace)" }}
           >
-            ADJUST FILTERS OR SEARCH TERM
+            {t("library.NO_RESULTS_DESC")}
           </span>
         </div>
       ) : (
         <>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {displayedExercises.map((ex) => (
-              <ExerciseTile key={ex.id} exercise={ex} />
+              <ExerciseTile key={ex.id} exercise={ex} noImgLabel={t("library.NO_IMG")} />
             ))}
           </div>
 
@@ -324,7 +330,7 @@ export function ExerciseLibrary({ filters }: Props) {
                 className="px-6 py-3 border border-[#e53e00] bg-[#0a0a0a] text-[#e53e00] font-data text-[10px] font-semibold uppercase tracking-widest hover:bg-[#e53e00] hover:text-white transition-all relative overflow-hidden"
                 style={{ borderLeft: "3px solid #e53e00" }}
               >
-                LOAD MORE
+                {t("library.LOAD_MORE")}
               </button>
             </div>
           )}

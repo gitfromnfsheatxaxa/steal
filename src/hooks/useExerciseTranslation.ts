@@ -87,6 +87,37 @@ export function useExercisesBatchTranslation(
 }
 
 /**
+ * Fetch ALL exercise names for the active language in one PocketBase call.
+ * Returns a Map<exerciseExtId, translatedName> used to power multilingual search.
+ * Short-circuits for English (no call needed).
+ */
+export function useAllExerciseTranslationNames(): Map<string, string> {
+  const { language } = useI18n();
+  const pb = getPocketBase();
+
+  const { data } = useQuery<Map<string, string>>({
+    queryKey: ["allExerciseTranslationNames", language],
+    enabled: language !== "en" && !!pb.authStore.isValid,
+    staleTime: 1000 * 60 * 60 * 24,
+    queryFn: async () => {
+      const records = await pb
+        .collection("exercise_translations")
+        .getFullList<{ exerciseExtId: string; name: string }>({
+          filter: `locale="${language}"`,
+          fields: "exerciseExtId,name",
+        });
+      const map = new Map<string, string>();
+      for (const r of records) {
+        if (r.name) map.set(r.exerciseExtId, r.name);
+      }
+      return map;
+    },
+  });
+
+  return data ?? new Map<string, string>();
+}
+
+/**
  * Convenience: server/helper lookup by locale string (for RSC renders
  * that read the active language from a cookie).
  */
