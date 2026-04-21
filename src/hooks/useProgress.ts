@@ -260,30 +260,30 @@ export function useMuscleDistribution() {
     if (!sessions || sessions.length === 0) return [];
     if (!allSets || allSets.length === 0) return [];
 
-    // Muscle group mapping based on exercise names
+    // Muscle group mapping based on exercise names - using broader keywords
     const MUSCLE_MAPPING: Record<string, string[]> = {
       // Chest
-      'chest': ['bench press', 'incline press', 'decline press', 'chest press', 'flye', 'fly', 'crossover', 'dumbbell press', 'barbell press'],
-      // Back
-      'back': ['row', 'pullup', 'pull-up', 'pulldown', 'lat pulldown', 'deadlift', 'barbell row', 'dumbbell row', 'cable row', 't-bar'],
+      'chest': ['bench', 'chest', 'fly', 'crossover', 'press'],
+      // Back  
+      'back': ['row', 'pullup', 'pull-up', 'pulldown', 'lat', 'deadlift', 'rear delt'],
       // Shoulders
-      'shoulder': ['overhead press', 'shoulder press', 'lateral raise', 'lateral', 'front raise', 'rear delt', 'rear fly', 'arnold press', 'military press'],
+      'shoulder': ['shoulder', 'overhead', 'lateral', 'front raise', 'arnold', 'military', 'delts'],
       // Biceps
-      'bicep': ['curl', 'bicep curl', 'hammer curl', 'preacher curl', 'concentration curl', 'incline curl', 'barbell curl', 'dumbbell curl'],
+      'bicep': ['curl', 'bicep', 'hammer curl', 'preacher'],
       // Triceps
-      'tricep': ['pushdown', 'extension', 'tricep extension', 'overhead extension', 'skull crusher', 'close grip', 'diamond pushup', 'dip'],
+      'tricep': ['pushdown', 'tricep', 'extension', 'skull crusher', 'close grip', 'dip'],
       // Quads
-      'quad': ['squat', 'leg press', 'leg extension', 'lunge', 'bulgarian', 'goblet squat', 'front squat', 'hack squat', 'sissy squat'],
+      'quad': ['squat', 'leg press', 'leg extension', 'lunge', 'bulgarian', 'goblet'],
       // Hamstrings
       'hamstring': ['leg curl', 'rdl', 'romanian', 'stiff leg', 'nordic', 'good morning'],
       // Glutes
-      'glute': ['hip thrust', 'glute bridge', 'cable kickback', 'frog pump', 'abductor'],
+      'glute': ['hip thrust', 'glute', 'kickback', 'abductor'],
       // Calves
-      'calf': ['calf raise', 'standing calf', 'seated calf', 'donkey calf'],
+      'calf': ['calf'],
       // Traps
-      'trap': ['shrug', 'trap bar', 'face pull', 'reverse fly'],
+      'trap': ['shrug', 'trap', 'face pull'],
       // Abs
-      'abs': ['plank', 'crunch', 'leg raise', 'cable crunch', 'hanging knee', 'ab wheel', 'russian twist'],
+      'abs': ['plank', 'crunch', 'leg raise', 'hanging knee', 'ab wheel', 'russian'],
     };
 
     // Count exercises per muscle group
@@ -291,8 +291,11 @@ export function useMuscleDistribution() {
     const muscleVolumes = new Map<string, number>();
 
     for (const set of allSets) {
+      // Try to get exercise name from expand first, otherwise use exercise ID
       const expandedName = (set as unknown as { expand?: { exercise?: { name?: string } } }).expand?.exercise?.name;
-      const exerciseName = expandedName?.toLowerCase() || '';
+      // Use the exercise field directly if expand is not available
+      const exerciseIdOrName = expandedName || set.exercise || '';
+      const exerciseName = exerciseIdOrName.toLowerCase();
       const volume = set.weight * set.reps;
 
       let matchedMuscle = 'other';
@@ -333,9 +336,10 @@ export function useMuscleDistribution() {
           count,
         };
       })
-      .sort((a, b) => b.value - a.value);
+      .sort((a, b) => b.volume - a.volume); // Sort by volume instead of count
 
     console.log('[useMuscleDistribution] Muscle data:', result);
+    console.log('[useMuscleDistribution] All sets count:', allSets.length);
     return result;
   }, [sessions, allSets]);
 }

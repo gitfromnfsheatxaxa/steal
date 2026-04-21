@@ -806,9 +806,9 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Main 3-col grid ──────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1.2fr_1fr] gap-[10px]">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-[10px]">
         {/* Active Mission */}
-        <div className="glass-acc forge-pulse fade-up fade-up-2 p-4 space-y-3">
+        <div className="glass-acc forge-pulse fade-up fade-up-2 p-4 space-y-3 min-h-[320px]">
           <div className="flex items-center gap-2 mb-1">
             <span className="font-data text-[8px] tracking-[0.2em] text-[#444] uppercase">{t("dashboard.MISSION_BRIEFING")}</span>
             <div className="h-px flex-1" style={{ background: "rgba(255,255,255,0.06)" }} />
@@ -855,24 +855,22 @@ export default function DashboardPage() {
         </div>
 
         {/* Week Schedule + Upcoming */}
-        <div className="flex flex-col gap-[8px]">
-          <div className="glass fade-up fade-up-3 p-3">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="font-data text-[8px] tracking-[0.2em] text-[#333] uppercase">Week {displayWeek}</span>
-              <div className="h-px flex-1" style={{ background: "rgba(255,255,255,0.06)" }} />
-            </div>
-            {activePlan ? (
-              <SessionHistoryPanel planId={activePlan.id} t={t} />
-            ) : (
-              <span className="font-data text-[10px] text-[#525252]">{t("dashboard.NO_ACTIVE_PROGRAM")}</span>
-            )}
+        <div className="glass fade-up fade-up-3 p-4 min-h-[320px]">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="font-data text-[8px] tracking-[0.2em] text-[#333] uppercase">Week {displayWeek}</span>
+            <div className="h-px flex-1" style={{ background: "rgba(255,255,255,0.06)" }} />
           </div>
+          {activePlan ? (
+            <SessionHistoryPanel planId={activePlan.id} t={t} />
+          ) : (
+            <span className="font-data text-[10px] text-[#525252]">{t("dashboard.NO_ACTIVE_PROGRAM")}</span>
+          )}
         </div>
 
         {/* Activity Log + Recent PRs */}
-        <div className="flex flex-col gap-[8px]">
-          <div className="glass fade-up fade-up-4 p-3 flex-1">
-            <div className="flex items-center gap-2 mb-2">
+        <div className="flex flex-col gap-[8px] min-h-[320px]">
+          <div className="glass fade-up fade-up-4 p-4 flex-1">
+            <div className="flex items-center gap-2 mb-3">
               <span className="font-data text-[8px] tracking-[0.2em] text-[#333] uppercase">{t("dashboard.ACTIVITY_LOG")}</span>
               <div className="h-px flex-1" style={{ background: "rgba(255,255,255,0.06)" }} />
               <Link href="/progress" className="font-data text-[8px] text-[#333] hover:text-[#C2410C] transition-colors">
@@ -881,8 +879,8 @@ export default function DashboardPage() {
             </div>
             <RecentFeed t={t} />
           </div>
-          <div className="glass fade-up fade-up-5 p-3">
-            <div className="flex items-center gap-2 mb-2">
+          <div className="glass fade-up fade-up-5 p-4">
+            <div className="flex items-center gap-2 mb-3">
               <span className="font-data text-[8px] tracking-[0.2em] text-[#333] uppercase">{t("dashboard.RECENT_PRS")}</span>
               <div className="h-px flex-1" style={{ background: "rgba(255,255,255,0.06)" }} />
               <Trophy className="h-3 w-3 text-[#444]" />

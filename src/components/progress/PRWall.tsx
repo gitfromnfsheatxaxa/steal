@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { Card } from "@/components/ui/card";
 import { Dumbbell, Trophy, BarChart3 } from "lucide-react";
 
 interface PRRecord {
@@ -21,19 +22,20 @@ export function PRWall({ prs, className }: PRWallProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setMounted(true), 200);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setMounted(true), 180);
+    return () => clearTimeout(timer);
   }, []);
 
-  // Sort by estimated1RM descending and take top 5
-  const sorted = [...prs].sort((a, b) => b.estimated1RM - a.estimated1RM).slice(0, 5);
+  const sortedPRs = [...prs]
+    .sort((a, b) => b.estimated1RM - a.estimated1RM)
+    .slice(0, 5);
 
-  if (sorted.length === 0) {
+  if (sortedPRs.length === 0) {
     return (
-      <div className={cn("glass p-8 text-center", className)}>
+      <Card className={cn("glass-card p-8 text-center", className)}>
         <div className="stamp text-xs tracking-widest text-[#525252]">PERSONAL RECORDS</div>
-        <p className="text-[#A3A3A3] mt-2 stamp text-[10px]">No PRs yet — keep forging</p>
-      </div>
+        <p className="text-[#A3A3A3] mt-3 text-sm">No PRs yet — keep forging steel</p>
+      </Card>
     );
   }
 
@@ -41,60 +43,73 @@ export function PRWall({ prs, className }: PRWallProps) {
     <>
       <style>{`
         @keyframes sparkPulse {
-          0%, 100% { opacity: 0.6; transform: scale(0.9); }
-          50% { opacity: 1; transform: scale(1.15) rotate(-5deg); }
+          0%, 100% { opacity: 0.7; transform: scale(0.9); }
+          50% { opacity: 1; transform: scale(1.2) rotate(-8deg); }
         }
-        .spark-anim { animation: sparkPulse 1.5s ease-in-out infinite; }
-        @media (prefers-reduced-motion: reduce) {
-          .spark-anim { animation: none; }
-        }
+        .spark-anim { animation: sparkPulse 1.4s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) { .spark-anim { animation: none; } }
       `}</style>
+
+      {/* DEBUG BADGE — remove after you confirm it works */}
+      <div className="mb-3 inline-block px-3 py-1 bg-[#22C55E] text-black text-[10px] font-mono tracking-widest">
+        ✅ NEW PR WALL v3 — TOP 5 BY e1RM
+      </div>
+
       <div className={cn("grid grid-cols-1 md:grid-cols-2 gap-4", className)}>
-        {sorted.map((pr, i) => {
+        {sortedPRs.map((pr, i) => {
           const Icon = i === 0 ? Trophy : i === 1 ? BarChart3 : Dumbbell;
-          const formatDate = (iso: string) => {
-            const d = new Date(iso);
+          const formatDate = (dateStr: string) => {
+            const d = new Date(dateStr);
             return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }).toUpperCase();
           };
+
           return (
-            <div
+            <Card
               key={pr.exerciseName}
-              className="group relative p-5 transition-all duration-300 hover:scale-[1.02]"
-              style={{
-                border: "1px solid rgba(255,255,255,0.06)",
-                background: "rgba(10,10,10,0.6)",
-                backdropFilter: "blur(20px)",
-                WebkitBackdropFilter: "blur(20px)",
-              }}
+              className="glass-card group relative overflow-hidden p-5 transition-all hover:scale-[1.02] hover:shadow-2xl"
             >
               {mounted && i < 2 && (
-                <div className="absolute top-2 right-2 spark-anim">
-                  <div className="w-3 h-3 rounded-full" style={{ background: "#22C55E", boxShadow: "0 0 12px #22C55E" }} />
+                <div className="absolute top-3 right-3 spark-anim">
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{ background: "#22C55E", boxShadow: "0 0 14px #22C55E, 0 0 24px #22C55E" }}
+                  />
                 </div>
               )}
+
               <div className="flex justify-between items-start">
                 <div>
                   <Icon className="h-6 w-6 text-[#22C55E] mb-2" />
                   <div className="stamp text-[10px] tracking-[0.2em] text-[#C8C8C8]">PERSONAL RECORD</div>
-                  <p className="font-bold text-lg text-[#E5E5E5] mt-1 uppercase">{pr.exerciseName}</p>
+                  <p className="font-bold text-lg text-[#E5E5E5] mt-1 uppercase tracking-tight">
+                    {pr.exerciseName}
+                  </p>
                 </div>
+
                 <div className="text-right">
-                  <span className="text-4xl font-mono font-bold text-[#22C55E] tabular-nums">{pr.estimated1RM}</span>
-                  <span className="text-xs text-[#A3A3A3] block">{pr.weight}kg × {pr.reps}</span>
+                  <div className="flex items-end gap-1 justify-end">
+                    <span className="text-4xl font-mono font-bold text-[#22C55E] tabular-nums leading-none">
+                      {pr.weight}
+                    </span>
+                    <span className="text-sm font-mono text-[#22C55E]/70 mb-1">KG</span>
+                  </div>
+                  <span className="text-xs text-[#A3A3A3] block">× {pr.reps} reps</span>
+                  <span className="text-[10px] font-mono text-[#525252] block mt-0.5">
+                    e1RM {pr.estimated1RM} kg
+                  </span>
                 </div>
               </div>
-              <div className="text-[10px] text-[#666] mt-4 pt-3 border-t border-white/10 flex justify-between stamp">
+
+              <div className="text-[10px] text-[#666666] mt-6 pt-3 border-t border-white/10 flex justify-between items-center">
                 <span>{formatDate(pr.date)}</span>
-                <span className="text-[#22C55E]">HIGHEST e1RM</span>
+                <span className="text-[#22C55E] font-medium">PERSONAL BEST</span>
               </div>
-              {/* Hover glow */}
+
               <div
-                className="absolute inset-0 pointer-events-none transition-opacity duration-300 opacity-0 group-hover:opacity-100"
-                style={{
-                  background: "radial-gradient(circle at 50% 0%, rgba(34,197,94,0.08), transparent 70%)",
-                }}
+                className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{ background: "radial-gradient(circle at 40% 20%, rgba(34,197,94,0.12), transparent 70%)" }}
               />
-            </div>
+            </Card>
           );
         })}
       </div>

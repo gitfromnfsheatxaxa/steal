@@ -3,22 +3,7 @@
 import { cn } from "@/lib/utils";
 import type { PersonalRecord } from "@/types/progress";
 
-function estKg(oneRM: number, reps: number): string {
-  if (oneRM <= 0) return "—";
-  return String(Math.round(oneRM / (1 + reps / 30)));
-}
-
-function fmtDate(iso: string): string {
-  try {
-    return new Date(iso)
-      .toLocaleDateString("en-US", { month: "short", day: "numeric" })
-      .toUpperCase();
-  } catch {
-    return "—";
-  }
-}
-
-const COLS = ["EXERCISE", "1RM", "3RM~", "5RM~", "DATE"];
+const COLS = ["EXERCISE", "WEIGHT", "REPS"];
 
 interface PRBoardProps {
   records: PersonalRecord[];
@@ -29,7 +14,7 @@ export function PRBoard({ records, className }: PRBoardProps) {
   if (records.length === 0) {
     return (
       <div className={cn("flex items-center justify-center py-10", className)}>
-        <span className="font-data text-[10px] text-[#333] tracking-[0.2em] uppercase">
+        <span className="font-data text-sm text-[#A3A3A3] tracking-[0.15em] uppercase">
           No records yet — earn them.
         </span>
       </div>
@@ -43,7 +28,7 @@ export function PRBoard({ records, className }: PRBoardProps) {
       aria-label="Personal records board"
       style={{
         display: "grid",
-        gridTemplateColumns: "1.6fr 1fr 1fr 1fr 1fr",
+        gridTemplateColumns: "2fr 1fr 1fr",
         gap: 1,
       }}
     >
@@ -52,45 +37,35 @@ export function PRBoard({ records, className }: PRBoardProps) {
         <div
           key={h}
           role="columnheader"
-          style={{ padding: "4px 7px", background: "rgba(0,0,0,0.4)" }}
+          style={{ padding: "6px 10px", background: "rgba(0,0,0,0.5)" }}
         >
-          <span className="font-data text-[7px] text-[#222] tracking-[0.08em] uppercase">{h}</span>
+          <span className="font-data text-xs text-[#525252] tracking-[0.1em] uppercase" style={{ fontSize: '11px' }}>{h}</span>
         </div>
       ))}
 
       {/* Data rows */}
       {records.map((pr, i) => {
-        const bg = i % 2 === 0 ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.2)";
+        const bg = i % 2 === 0 ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.3)";
         const baseCellStyle = {
-          padding: "5px 7px",
+          padding: "8px 10px",
           background: bg,
-          borderBottom: "1px solid rgba(255,255,255,0.03)",
+          borderBottom: "1px solid rgba(255,255,255,0.05)",
         };
 
         return [
           <div key={`${i}-0`} role="cell" style={baseCellStyle}>
-            <span className="font-data text-[10px] text-[#555] uppercase leading-tight block truncate">
+            <span className="font-data text-sm text-[#A3A3A3] uppercase leading-tight block truncate" style={{ fontSize: '13px' }}>
               {pr.exerciseName}
             </span>
           </div>,
           <div key={`${i}-1`} role="cell" style={baseCellStyle}>
-            <span className="font-data text-[12px] font-bold text-[#C2410C]">
-              {Math.round(pr.estimated1RM)}
+            <span className="font-data text-lg font-bold text-[#e53e00]" style={{ fontSize: '16px' }}>
+              {Math.round(pr.weight)} kg
             </span>
           </div>,
           <div key={`${i}-2`} role="cell" style={baseCellStyle}>
-            <span className="font-data text-[10px] text-[#333]">
-              {estKg(pr.estimated1RM, 3)}
-            </span>
-          </div>,
-          <div key={`${i}-3`} role="cell" style={baseCellStyle}>
-            <span className="font-data text-[10px] text-[#333]">
-              {estKg(pr.estimated1RM, 5)}
-            </span>
-          </div>,
-          <div key={`${i}-4`} role="cell" style={baseCellStyle}>
-            <span className="font-data text-[9px] text-[#2a2a2a]">
-              {fmtDate(pr.date)}
+            <span className="font-data text-sm text-[#A3A3A3]" style={{ fontSize: '13px' }}>
+              {pr.reps}
             </span>
           </div>,
         ];

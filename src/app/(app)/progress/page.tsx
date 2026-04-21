@@ -11,7 +11,7 @@ import {
 } from "@/hooks/useProgress";
 import { useAchievements } from "@/hooks/useAchievements";
 import { CalendarHeatmap } from "@/components/progress/CalendarHeatmap";
-import { MusclePieChart } from "@/components/progress/MusclePieChart";
+import { MuscleRadar } from "@/components/progress/MuscleRadar";
 import { PRWall } from "@/components/progress/PRWall";
 import { AchievementsBoard } from "@/components/progress/AchievementsBoard";
 import { CounterFX } from "@/components/fx/ImpactFlash";
@@ -388,24 +388,45 @@ export default function ProgressPage() {
     });
   }, [sessions, allSets]);
 
-  // -- Muscle pie chart data (percentage distribution) --
-  const musclePieData = useMemo(() => {
+  // -- Pentagon radar: 5-axis muscle groups --
+  const muscleRadarData = useMemo(() => {
     if (!muscleData || muscleData.length === 0) return [];
 
-    const totalSets = muscleData.reduce((sum: number, d: { value: number }) => sum + d.value, 0);
-    if (totalSets === 0) return [];
+    // Map individual muscle groups to the 5 radar categories
+    const GROUP_MAP: Record<string, string> = {
+      // BACK category
+      'BACK': 'BACK',
+      'TRAP': 'BACK',
+      // CHEST category
+      'CHEST': 'CHEST',
+      // SHOULDERS category
+      'SHOULDER': 'SHOULDERS',
+      // ARMS category
+      'BICEP': 'ARMS',
+      'TRICEP': 'ARMS',
+      // LEGS category
+      'QUAD': 'LEGS',
+      'HAMSTRING': 'LEGS',
+      'GLUTE': 'LEGS',
+      'CALF': 'LEGS',
+    };
 
-    const colors = [
-      "#e53e00", "#10b981", "#3b82f6", "#f59e0b", "#ef4444",
-      "#8b5cf6", "#ec4899", "#06b6d4", "#84cc16", "#f97316",
-      "#6366f1", "#6b7280"
-    ];
+    const grouped: Record<string, number> = { BACK: 0, CHEST: 0, SHOULDERS: 0, ARMS: 0, LEGS: 0 };
 
-    return muscleData.slice(0, 12).map((d: { name: string; value: number; volume: number }, index: number) => ({
-      muscle: d.name,
-      percentage: (d.value / totalSets) * 100,
-      volume: d.volume,
-      color: colors[index % colors.length],
+    for (const d of muscleData) {
+      const groupName = GROUP_MAP[d.name.toUpperCase()] || null;
+      if (groupName) {
+        grouped[groupName] += d.volume;
+      }
+    }
+
+    const maxVol = Math.max(...Object.values(grouped));
+    if (maxVol === 0) return [];
+
+    return Object.entries(grouped).map(([label, vol]) => ({
+      label,
+      value: Math.round((vol / maxVol) * 100),
+      volumeKg: Math.round(vol),
     }));
   }, [muscleData]);
 
@@ -413,20 +434,20 @@ export default function ProgressPage() {
   const splitCounts = useMemo(() => {
     if (!muscleData || muscleData.length === 0) return { push: 1, pull: 1, legs: 1 };
 
-    const PUSH_MUSCLES = ["chest", "shoulder", "shoulders", "tricep", "triceps"];
-    const PULL_MUSCLES = ["back", "bicep", "biceps", "lat", "lats", "rear delt", "rear delts", "traps"];
-    const LEGS_MUSCLES = ["leg", "legs", "quad", "quads", "hamstring", "hamstrings", "glute", "glutes", "calf", "calves"];
+    const PUSH_MUSCLES = ["CHEST", "SHOULDER"];
+    const PULL_MUSCLES = ["BACK", "BICEP", "TRAP"];
+    const LEGS_MUSCLES = ["QUAD", "HAMSTRING", "GLUTE", "CALF"];
 
     let push = 0;
     let pull = 0;
     let legs = 0;
 
     for (const d of muscleData) {
-      const name = d.name.toLowerCase();
-      if (PUSH_MUSCLES.some((m) => name.includes(m))) push += d.value;
-      else if (PULL_MUSCLES.some((m) => name.includes(m))) pull += d.value;
-      else if (LEGS_MUSCLES.some((m) => name.includes(m))) legs += d.value;
-      else push += d.value;
+      const name = d.name.toUpperCase();
+      if (PUSH_MUSCLES.includes(name)) push += d.volume;
+      else if (PULL_MUSCLES.includes(name)) pull += d.volume;
+      else if (LEGS_MUSCLES.includes(name)) legs += d.volume;
+      else push += d.volume; // default to push for unmatched
     }
 
     return { push: push || 1, pull: pull || 1, legs: legs || 1 };
@@ -694,14 +715,14 @@ export default function ProgressPage() {
         />
         {muscleLoading ? (
           <Skeleton className="skeleton-steal h-48 rounded-none" />
-        ) : musclePieData.length === 0 ? (
+        ) : muscleRadarData.length === 0 ? (
           <div className="flex items-center justify-center py-16">
             <span className="stamp" style={{ color: "#525252", letterSpacing: "0.2em" }}>
               {t("progress.NO_MUSCLE_DATA")}
             </span>
           </div>
         ) : (
-          <MusclePieChart data={musclePieData} />
+          <MuscleRadar data={muscleRadarData} />
         )}
       </div>
 
