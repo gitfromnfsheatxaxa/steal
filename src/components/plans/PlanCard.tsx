@@ -2,8 +2,6 @@
 
 import Link from "next/link";
 import { useState, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PlanImageCarousel } from "@/components/programs/PlanImageCarousel";
 import type { WorkoutPlan } from "@/types/plan";
@@ -78,10 +76,12 @@ export function PlanCard({ plan }: PlanCardProps) {
     }
   };
 
+  const isActive = plan.status === "active";
+
   return (
     <div className="relative">
       <Link href={`/plans/${plan.id}`}>
-        <Card className="transition-colors hover:border-foreground/20 overflow-hidden">
+        <div className={`${isActive ? "glass-acc forge-pulse" : "glass glass-hover"} overflow-hidden`}>
           {/* Image Carousel */}
           {imageUrls.length > 0 && (
             <PlanImageCarousel
@@ -92,55 +92,49 @@ export function PlanCard({ plan }: PlanCardProps) {
               showIndicators={true}
             />
           )}
-          <CardHeader className="pb-2">
+          <div className="p-4 space-y-3">
             <div className="flex items-start justify-between gap-2">
-              <CardTitle className="text-base leading-tight">
-                {plan.title}
-              </CardTitle>
-              <div className="flex items-center gap-2">
-                {/* Toggle Status Button */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 rounded-full bg-[#1a1a1a] text-[#71717A] hover:bg-[#e53e00] hover:text-white"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleToggleStatus();
-                  }}
+              <div>
+                {isActive && (
+                  <span className="tag-pill tag-pill-acc text-[8px] mb-1.5 block w-fit">ACTIVE</span>
+                )}
+                <h3 className="font-heading text-lg font-black uppercase text-[#f0f0f0] leading-tight">
+                  {plan.title}
+                </h3>
+                <span className="font-data text-[8px] text-[#444] uppercase mt-0.5 block">
+                  {plan.goalType?.replace(/_/g, " ")} · {t("plans.WEEK")} {plan.currentWeek}/{plan.durationWeeks}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <button
+                  className="btn-ghost h-7 w-7 flex items-center justify-center"
+                  onClick={(e) => { e.preventDefault(); handleToggleStatus(); }}
                   disabled={isTogglingStatus}
-                  title={plan.status === "active" ? t("plans.PAUSE_PROGRAM") : t("plans.RESUME_PROGRAM")}
                 >
-                  {plan.status === "active" ? (
-                    <Pause className="h-3.5 w-3.5" />
-                  ) : (
-                    <Play className="h-3.5 w-3.5" />
-                  )}
-                </Button>
-                <Badge className={statusColor} variant="secondary">
-                  {plan.status || "draft"}
-                </Badge>
+                  {isActive ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+                </button>
               </div>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <p className="text-sm text-muted-foreground line-clamp-2">
-              {plan.description}
-            </p>
-            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
-                {t("plans.WEEK")} {plan.currentWeek}/{plan.durationWeeks}
-              </span>
-              {plan.goalType && (
-                <span className="flex items-center gap-1">
-                  <Target className="h-3 w-3" />
-                  {plan.goalType.replace(/_/g, " ")}
-                </span>
-              )}
-              <span>{formatRelativeDate(plan.created)}</span>
+            {plan.description && (
+              <p className="font-data text-[10px] text-[#444] line-clamp-2">{plan.description}</p>
+            )}
+            {/* Progress bar */}
+            <div className="prog-bar">
+              <div
+                className="prog-fill"
+                style={{ width: `${Math.round((plan.currentWeek / plan.durationWeeks) * 100)}%` }}
+              />
             </div>
-          </CardContent>
-        </Card>
+            <div className="flex gap-2 pt-1">
+              <button className="btn-forge flex-1 h-7 text-[10px]" onClick={(e) => e.preventDefault()}>
+                Continue
+              </button>
+              <button className="btn-ghost h-7 px-3 text-[10px]" onClick={(e) => e.preventDefault()}>
+                Details
+              </button>
+            </div>
+          </div>
+        </div>
       </Link>
 
       {/* Delete Button */}

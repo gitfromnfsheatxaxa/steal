@@ -26,17 +26,16 @@ const GAP = 2;
 const DAY_INITIALS = ["S", "M", "T", "W", "T", "F", "S"];
 
 function getIntensityColor(volume: number, maxVolume: number, count: number): string {
-  if (count === 0) return "var(--surface-2)";
+  if (count === 0) return "rgba(255,255,255,0.04)";
   if (maxVolume > 0) {
     const ratio = volume / maxVolume;
-    if (ratio < 0.25) return "#14532d"; // var(--tactical-dim)
-    if (ratio < 0.6) return "var(--tactical)";
-    return "#22c55e";
+    if (ratio < 0.25) return "rgba(194,65,12,0.12)";
+    if (ratio < 0.6)  return "rgba(194,65,12,0.55)";
+    return "#C2410C";
   }
-  // fallback: count-based
-  if (count === 1) return "#14532d";
-  if (count >= 2) return "#22c55e";
-  return "#166534";
+  if (count === 1) return "rgba(194,65,12,0.12)";
+  if (count >= 2)  return "#C2410C";
+  return "rgba(194,65,12,0.55)";
 }
 
 function formatMonthLabel(date: Date): string {

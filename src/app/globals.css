@@ -126,6 +126,21 @@
   /* Grid / reticle */
   --reticle: rgba(229, 229, 229, 0.04);
   --grid-line: rgba(229, 229, 229, 0.025);
+
+  /* ── Glassmorphism system ─────────────────────────────────── */
+  --glass-bg:         rgba(255, 255, 255, 0.05);
+  --glass-bg-hover:   rgba(255, 255, 255, 0.08);
+  --glass-bg-acc:     rgba(194, 65, 12, 0.08);
+  --glass-border:     rgba(255, 255, 255, 0.08);
+  --glass-border-acc: rgba(194, 65, 12, 0.30);
+  --glass-blur:       20px;
+  --glass-shadow:     0 8px 32px rgba(0, 0, 0, 0.5);
+  --glass-shadow-acc: 0 8px 32px rgba(194, 65, 12, 0.15);
+
+  /* ── Forge background blobs ───────────────────────────────── */
+  --forge-blob-1: rgba(194, 65, 12, 0.18);
+  --forge-blob-2: rgba(194, 65, 12, 0.12);
+  --forge-blob-3: rgba(150, 40, 0, 0.08);
 }
 
 /* Light mode overrides */
@@ -417,6 +432,194 @@ h1, h2, h3, h4, h5, h6 {
 
 @media (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; }
+}
+
+/* ============================================================
+   GLASSMORPHISM SYSTEM
+   ============================================================ */
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.glass-acc {
+  background: var(--glass-bg-acc);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border-acc);
+  box-shadow: var(--glass-shadow-acc), inset 0 1px 0 rgba(194, 65, 12, 0.08);
+}
+
+.glass-dark {
+  background: rgba(5, 5, 5, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.glass-hover {
+  transition: transform 300ms cubic-bezier(0.23, 1, 0.32, 1),
+              box-shadow 300ms cubic-bezier(0.23, 1, 0.32, 1),
+              border-color 300ms;
+}
+.glass-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6),
+              0 0 0 1px rgba(194, 65, 12, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.10);
+}
+
+/* KPI card — left accent border */
+.kpi {
+  padding: 12px 14px;
+  position: relative;
+  overflow: hidden;
+}
+.kpi::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+}
+.kpi-acc::before {
+  background: linear-gradient(to bottom, #C2410C, #EA580C);
+  box-shadow: 0 0 8px rgba(194, 65, 12, 0.4);
+}
+.kpi-grn::before {
+  background: linear-gradient(to bottom, #22c55e, #16a34a);
+}
+.kpi-blu::before {
+  background: linear-gradient(to bottom, #3b82f6, #2563eb);
+}
+
+/* Forge accent pulse */
+@keyframes forge-pulse {
+  0%, 100% { box-shadow: var(--glass-shadow-acc), inset 0 1px 0 rgba(194, 65, 12, 0.08); }
+  50%       { box-shadow: 0 8px 32px rgba(194, 65, 12, 0.30), 0 0 24px rgba(194, 65, 12, 0.2), inset 0 1px 0 rgba(194, 65, 12, 0.08); }
+}
+.forge-pulse {
+  animation: forge-pulse 3s ease-in-out infinite;
+}
+
+/* Fade-up stagger entry */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up   { animation: fade-up 400ms cubic-bezier(0.23, 1, 0.32, 1) both; }
+.fade-up-1 { animation-delay: 50ms; }
+.fade-up-2 { animation-delay: 100ms; }
+.fade-up-3 { animation-delay: 150ms; }
+.fade-up-4 { animation-delay: 200ms; }
+.fade-up-5 { animation-delay: 250ms; }
+
+/* Forge progress bar */
+.prog-bar {
+  height: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  position: relative;
+  overflow: hidden;
+}
+.prog-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #C2410C, #EA580C);
+  box-shadow: 0 0 8px rgba(194, 65, 12, 0.6);
+}
+
+/* Forge button */
+.btn-forge {
+  background: #C2410C;
+  color: #fff;
+  border: none;
+  font-family: var(--font-heading, 'Barlow Condensed', sans-serif);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 250ms cubic-bezier(0.23, 1, 0.32, 1);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-forge::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(255, 255, 255, 0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.btn-forge:hover {
+  background: #EA580C;
+  box-shadow: 0 0 24px rgba(194, 65, 12, 0.5), 0 4px 16px rgba(0, 0, 0, 0.4);
+  transform: translateY(-1px);
+}
+.btn-forge:hover::after { opacity: 1; }
+.btn-forge:active { transform: translateY(0) scale(0.98); }
+
+/* Ghost button */
+.btn-ghost {
+  background: transparent;
+  color: #888;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-family: var(--font-heading, 'Barlow Condensed', sans-serif);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 200ms cubic-bezier(0.23, 1, 0.32, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-ghost:hover {
+  border-color: rgba(194, 65, 12, 0.4);
+  color: #ccc;
+  background: rgba(194, 65, 12, 0.06);
+}
+
+/* Tag pills */
+.tag-pill {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  padding: 2px 7px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #555;
+  display: inline-block;
+}
+.tag-pill-acc {
+  border-color: rgba(194, 65, 12, 0.4);
+  color: #C2410C;
+  background: rgba(194, 65, 12, 0.08);
+}
+.tag-pill-grn {
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.08);
+}
+
+/* Scrollbar — forge tint */
+.scroll-forge::-webkit-scrollbar { width: 3px; }
+.scroll-forge::-webkit-scrollbar-track { background: transparent; }
+.scroll-forge::-webkit-scrollbar-thumb { background: rgba(194, 65, 12, 0.3); border-radius: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-up, .fade-up-1, .fade-up-2, .fade-up-3, .fade-up-4, .fade-up-5 {
+    animation: none;
+  }
+  .forge-pulse { animation: none; }
+  .glass-hover { transition: none; }
+  .glass-hover:hover { transform: none; }
+  .btn-forge:hover { transform: none; }
 }
 
 /* ==========================================================================

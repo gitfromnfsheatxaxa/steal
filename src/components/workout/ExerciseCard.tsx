@@ -38,110 +38,142 @@ export function ExerciseCard({
 }: ExerciseCardProps) {
   const { t } = useI18n();
   const [collapsed, setCollapsed] = useState(false);
-  const [mediaOpen, setMediaOpen] = useState(isActive);
+  const [mediaOpen, setMediaOpen] = useState(false);
   const targetReps = repsMin === repsMax ? `${repsMin}` : `${repsMin}–${repsMax}`;
   const allComplete = completedSets.length >= sets;
+
+  const delay = Math.min(exerciseNumber, 5);
 
   return (
     <div
       className={cn(
-        "border bg-card transition-colors",
-        allComplete
-          ? "border-[#16a34a]/30 bg-[#16a34a]/5"
-          : isActive
-            ? "border-[#e53e00]/50"
-            : "border-border",
+        `fade-up fade-up-${delay}`,
+        allComplete ? "glass opacity-50" : isActive ? "glass-acc" : "glass",
       )}
     >
-      {/* Exercise header — tap to collapse */}
+      {/* Exercise header */}
       <button
         type="button"
         onClick={() => setCollapsed((c) => !c)}
-        className="flex w-full items-center gap-3 p-4 text-left"
+        className="flex w-full items-center gap-3 p-3 text-left"
       >
-        {/* Number badge */}
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center border border-border bg-background font-data text-xs font-bold tabular-nums text-muted-foreground">
-          {exerciseNumber}
+        <span className="font-data text-[8px] text-[#2a2a2a] w-5 shrink-0 tabular-nums">
+          {String(exerciseNumber).padStart(2, "0")}
         </span>
 
         <div className="min-w-0 flex-1">
           <p
-            className="truncate text-base font-extrabold uppercase leading-tight tracking-tight"
-            style={{ fontFamily: "var(--font-heading, system-ui)" }}
+            className={cn(
+              "font-heading truncate text-[15px] font-bold uppercase leading-tight",
+              allComplete ? "text-[#333]" : isActive ? "text-[#f0f0f0]" : "text-[#ccc]",
+            )}
           >
             {exerciseName}
           </p>
-          <div className="mt-0.5 flex items-center gap-3">
-            <span className="font-data text-xs text-muted-foreground">
+          <div className="mt-0.5 flex items-center gap-2">
+            <span className="font-data text-[7px] text-[#333]">
               {sets} × {targetReps}
             </span>
             {restSeconds > 0 && (
-              <span className="flex items-center gap-1 font-data text-xs text-muted-foreground">
-                <Clock className="h-3 w-3" />
+              <span className="font-data text-[7px] text-[#333] flex items-center gap-0.5">
+                <Clock className="h-2.5 w-2.5" />
                 {formatDuration(restSeconds)}
               </span>
             )}
-            <span className="font-data text-xs tabular-nums text-[#e53e00]">
-              {completedSets.length}/{sets} {t("dashboard.DONE").toLowerCase()}
+            <span className={cn("font-data text-[7px] tabular-nums", isActive ? "text-[#C2410C]" : "text-[#444]")}>
+              {completedSets.length}/{sets}
             </span>
           </div>
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
-          {/* Tutorial toggle */}
+          {allComplete && <span className="text-[#22c55e] text-sm">✓</span>}
+          {isActive && (
+            <span className="tag-pill tag-pill-acc text-[8px]">ACTIVE</span>
+          )}
+          {!allComplete && !isActive && (
+            <span className="font-data text-[14px] text-[#222]">›</span>
+          )}
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setMediaOpen((o) => !o);
-            }}
+            onClick={(e) => { e.stopPropagation(); setMediaOpen((o) => !o); }}
             aria-label={mediaOpen ? "Hide tutorial" : "Show tutorial"}
             className={cn(
-              "flex items-center gap-1 px-2 py-1 font-data text-[9px] uppercase tracking-widest border transition-colors",
+              "flex items-center gap-1 px-1.5 py-0.5 font-data text-[8px] uppercase tracking-widest border transition-colors",
               mediaOpen
-                ? "border-[#e53e00]/50 text-[#e53e00] bg-[#e53e00]/10"
-                : "border-[#2a2a2a] text-muted-foreground hover:border-[#e53e00]/30",
+                ? "border-[rgba(194,65,12,0.5)] text-[#C2410C] bg-[rgba(194,65,12,0.1)]"
+                : "border-[rgba(255,255,255,0.08)] text-[#444] hover:border-[rgba(194,65,12,0.3)]",
             )}
           >
-            <BookOpen className="h-3 w-3" />
-            Tutorial
+            <BookOpen className="h-2.5 w-2.5" />
           </button>
-
-          {collapsed ? (
-            <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
-          ) : (
-            <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground" />
-          )}
+          {collapsed
+            ? <ChevronDown className="h-4 w-4 shrink-0 text-[#444]" />
+            : <ChevronUp className="h-4 w-4 shrink-0 text-[#444]" />
+          }
         </div>
       </button>
 
       {/* Body */}
       {!collapsed && (
-        <div className="border-t border-border">
-          {/* Exercise media (tutorial) */}
-          {mediaOpen && (
-            <div className="p-3 border-b border-border bg-[#0a0a0a]">
+        <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+          {/* Media / Tutorial */}
+          {mediaOpen ? (
+            <div className="p-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
               <ExerciseMedia exerciseName={exerciseName} size="card" />
+            </div>
+          ) : (
+            /* GIF placeholder when media is hidden */
+            <div
+              className="mx-3 mt-2"
+              style={{
+                height: 100,
+                background: "rgba(0,0,0,0.4)",
+                border: "1px dashed rgba(255,255,255,0.06)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                position: "relative",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background:
+                    "repeating-linear-gradient(-45deg, rgba(194,65,12,0.03) 0, rgba(194,65,12,0.03) 2px, transparent 2px, transparent 12px)",
+                }}
+              />
+              <div className="relative text-center">
+                <div style={{ fontSize: 28, opacity: 0.15 }}>▶</div>
+                <span className="font-data block text-[8px] text-[#2a2a2a] mt-1 tracking-widest uppercase">
+                  EXERCISE GIF
+                </span>
+              </div>
             </div>
           )}
 
           {/* Coach note */}
           {notes?.trim() && (
-            <div className="border-b border-border bg-[#1a1a1a] px-4 py-2">
-              <p className="font-data text-xs text-muted-foreground">{notes}</p>
+            <div
+              className="px-3 py-2 mx-3 mt-2"
+              style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", background: "rgba(0,0,0,0.3)" }}
+            >
+              <p className="font-data text-xs text-[#444]">{notes}</p>
             </div>
           )}
 
           {/* Column headers */}
-          <div className="grid grid-cols-[2rem_1fr_1fr_2.5rem] gap-2 px-4 py-2">
-            <span className="font-data text-[10px] uppercase tracking-widest text-muted-foreground">#</span>
-            <span className="font-data text-[10px] uppercase tracking-widest text-muted-foreground">kg</span>
-            <span className="font-data text-[10px] uppercase tracking-widest text-muted-foreground">Reps</span>
+          <div className="grid grid-cols-[2rem_1fr_1fr_2.5rem] gap-2 px-3 py-2">
+            <span className="font-data text-[7px] uppercase tracking-widest text-[#222]">SET</span>
+            <span className="font-data text-[7px] uppercase tracking-widest text-[#222] text-center">WEIGHT</span>
+            <span className="font-data text-[7px] uppercase tracking-widest text-[#222] text-center">REPS</span>
             <span />
           </div>
 
           {/* Set rows */}
-          <div className="divide-y divide-border">
+          <div>
             {Array.from({ length: sets }).map((_, i) => (
               <SetRow
                 key={i}
@@ -151,8 +183,31 @@ export function ExerciseCard({
                 previousWeight={completedSets[i - 1]?.weight}
                 previousReps={completedSets[i - 1]?.reps}
                 onComplete={onCompleteSet}
+                isActive={isActive && i === completedSets.length}
               />
             ))}
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex gap-2 p-3" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+            <button
+              type="button"
+              className="btn-ghost flex-1 h-8 text-[10px]"
+              onClick={() => onCompleteSet({ weight: 0, reps: 0, rpe: 7 })}
+            >
+              + Add Set
+            </button>
+            <button
+              type="button"
+              className="btn-forge h-8 text-[12px]"
+              style={{ flex: 2 }}
+              onClick={() => {
+                const last = completedSets[completedSets.length - 1];
+                onCompleteSet({ weight: last?.weight ?? 0, reps: last?.reps ?? 0, rpe: 7 });
+              }}
+            >
+              Log Set ✓
+            </button>
           </div>
         </div>
       )}

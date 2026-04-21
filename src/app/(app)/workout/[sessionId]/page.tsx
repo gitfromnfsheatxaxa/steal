@@ -9,9 +9,7 @@ import { ExerciseCard } from "@/components/workout/ExerciseCard";
 import { RestTimer } from "@/components/workout/RestTimer";
 import { MoodCheck } from "@/components/workout/MoodCheck";
 import { WorkoutSummary } from "@/components/workout/WorkoutSummary";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Clock, CheckCircle2 } from "lucide-react";
@@ -342,49 +340,50 @@ export default function WorkoutSessionPage({
   const progressPct = targetSets > 0 ? Math.round((totalSets / targetSets) * 100) : 0;
 
   return (
-    <div className="space-y-5 py-4">
-      {/* Header */}
-      <div className="space-y-3">
-        <div>
-          <h1
-            className="text-3xl font-extrabold uppercase tracking-tight"
-            style={{ fontFamily: "var(--font-heading, system-ui)" }}
-          >
+    <div className="space-y-3 py-2">
+      {/* Sticky header */}
+      <div
+        className="glass-dark sticky top-14 z-10 -mx-4 px-4 py-2 flex items-center gap-3"
+        style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+      >
+        <div className="flex-1">
+          <h1 className="font-heading text-xl font-bold uppercase text-[#f0f0f0] leading-none">
             {currentPlanDay?.label || "WORKOUT"}
           </h1>
-          <div className="mt-2 h-0.5 w-12 bg-[#e53e00]" />
-          {isGuest && (
-            <p className="mt-1 text-xs text-[#71717A] font-data uppercase tracking-widest">
-              {t("workout.GUEST_MODE")}
-            </p>
-          )}
-        </div>
-
-        {/* Stats row */}
-        <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5 font-data text-sm tabular-nums text-muted-foreground">
-            <Clock className="h-3.5 w-3.5 text-[#e53e00]" />
-            {formatDuration(elapsedSeconds)}
+          <span className="font-data text-[8px] text-[#333] tracking-widest uppercase mt-0.5 block">
+            {isGuest ? t("workout.GUEST_MODE") : `${totalSets} / ${targetSets} ${t("workout.SETS")} · ${formatDuration(elapsedSeconds)}`}
           </span>
-          <Badge
-            variant="outline"
-            className="rounded-none border-[#e53e00]/40 font-data text-[10px] uppercase tracking-widest text-[#e53e00]"
-          >
-            {totalSets} / {targetSets} {t("workout.SETS")}
-          </Badge>
         </div>
-
-        {/* Progress bar */}
-        <div className="h-1 w-full bg-border">
-          <div
-            className="h-1 bg-[#e53e00] transition-all duration-300"
-            style={{ width: `${progressPct}%` }}
-          />
+        {/* Rest timer display */}
+        <div className="glass-acc px-3 py-1.5 text-center shrink-0">
+          <span className="font-data block text-[7px] text-[rgba(194,65,12,0.6)] tracking-widest uppercase">REST</span>
+          <span className="font-data font-bold text-[#C2410C] tabular-nums" style={{ fontSize: 18, lineHeight: 1 }}>
+            {timer.isRunning ? String(Math.floor(timer.secondsLeft / 60)).padStart(2, "0") + ":" + String(timer.secondsLeft % 60).padStart(2, "0") : "--:--"}
+          </span>
         </div>
       </div>
 
+      {/* 5-segment progress bar */}
+      <div className="flex gap-1">
+        {currentExercises.slice(0, 5).map((_, i) => {
+          const exSets = store.exercises[i]?.completedSets.length ?? 0;
+          const done = exSets >= (currentExercises[i]?.sets ?? 1);
+          const active = store.currentExerciseIndex === i;
+          return (
+            <div key={i} className="flex-1 h-[3px] rounded-none" style={{
+              background: done
+                ? "#22c55e"
+                : active
+                ? "linear-gradient(90deg,#C2410C,#EA580C)"
+                : "rgba(255,255,255,0.06)",
+              boxShadow: active ? "0 0 8px rgba(194,65,12,0.5)" : undefined,
+            }} />
+          );
+        })}
+      </div>
+
       {/* Exercise list */}
-      <div className="space-y-3">
+      <div className="space-y-2">
         {currentExercises.map((ex, i) => (
           <ExerciseCard
             key={ex.id}
@@ -404,11 +403,8 @@ export default function WorkoutSessionPage({
       </div>
 
       {/* Finish section */}
-      <div className="space-y-4 border border-border bg-card p-5">
-        <h2
-          className="text-base font-extrabold uppercase tracking-widest"
-          style={{ fontFamily: "var(--font-heading, system-ui)" }}
-        >
+      <div className="glass p-4 space-y-4">
+        <h2 className="font-heading text-base font-black uppercase tracking-widest text-[#e5e5e5]">
           {t("workout.WRAP_IT_UP")}
         </h2>
 
@@ -416,7 +412,7 @@ export default function WorkoutSessionPage({
 
         <div className="space-y-1.5">
           <label
-            className="font-data text-xs font-semibold uppercase tracking-widest text-muted-foreground"
+            className="font-data text-xs font-semibold uppercase tracking-widest text-[#525252]"
             htmlFor="session-notes"
           >
             {t("workout.NOTES")}
@@ -427,28 +423,27 @@ export default function WorkoutSessionPage({
             onChange={(e) => setNotes(e.target.value)}
             placeholder={t("workout.NOTES_PLACEHOLDER")}
             rows={2}
-            className="rounded-none border-border bg-input font-data text-sm"
+            className="rounded-none border-[rgba(255,255,255,0.08)] bg-[rgba(0,0,0,0.4)] font-data text-sm"
           />
         </div>
 
-        <Button
+        <button
           onClick={handleFinishWorkout}
           disabled={isFinishing || totalSets === 0}
-          className="w-full rounded-none bg-[#e53e00] font-data text-sm font-bold uppercase tracking-widest text-white hover:bg-[#ff4500] disabled:opacity-40"
-          size="lg"
+          className="btn-forge w-full h-10 text-sm disabled:opacity-40"
         >
           <CheckCircle2 className="mr-2 h-4 w-4" />
           {isFinishing ? t("workout.SAVING") : t("workout.FINISH_SESSION")}
-        </Button>
+        </button>
 
         {totalSets === 0 && (
-          <p className="text-center font-data text-xs text-muted-foreground">
+          <p className="text-center font-data text-xs text-[#525252]">
             {t("workout.LOG_AT_LEAST_ONE")}
           </p>
         )}
       </div>
 
-      {/* Rest timer */}
+      {/* Rest timer controls */}
       <RestTimer
         secondsLeft={timer.secondsLeft}
         isRunning={timer.isRunning}

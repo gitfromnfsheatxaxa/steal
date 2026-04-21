@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Steel Therapy — Wireframes</title>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #151515; font-family: 'Oswald', sans-serif; }
+.sk-placeholder {
+  background-image: repeating-linear-gradient(-45deg,#1a1a1a 0,#1a1a1a 2px,#141414 2px,#141414 10px);
+  border: 1.5px dashed #252525;
+  display:flex; align-items:center; justify-content:center;
+  color:#2e2e2e; font-size:9px; text-align:center; padding:4px;
+  font-family:'Share Tech Mono',monospace; letter-spacing:0.06em;
+}
+</style>
+</head>
+<body>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel">
+
+const FONT = "'Oswald', sans-serif";
+const MONO = "'Share Tech Mono', monospace";
+const BG   = '#080808';
+const BG2  = '#0d0d0d';
+const BG3  = '#111';
+const BORDER = '#1e1e1e';
+const ACC  = '#e53e00';
+const GRN  = '#22c55e';
+const BLU  = '#3b82f6';
+
+// ── primitives ────────────────────────────────────────────────
+
+const T = ({ size=13, bold=false, mono=false, acc=false, grn=false, dim=false, muted=false, style={}, children }) => (
+  <span style={{ fontFamily:mono?MONO:FONT, fontSize:size, fontWeight:bold?700:mono?400:500,
+    color: acc?ACC : grn?GRN : dim?'#444' : muted?'#666' : '#d0d0d0', lineHeight:1.2, ...style }}>{children}</span>
+);
+
+const Divider = ({ style={} }) => <div style={{ height:1, background:BORDER, width:'100%', ...style }}/>;
+
+const Pill = ({ acc=false, grn=false, dim=false, children, style={} }) => (
+  <div style={{ padding:'1px 6px', border:`1.5px solid ${acc?ACC:grn?GRN:'#2a2a2a'}`,
+    background:acc?ACC:'transparent', color:acc?'#fff':grn?GRN:'#444',
+    fontFamily:MONO, fontSize:7, letterSpacing:'0.1em',
+    display:'inline-flex', alignItems:'center', flexShrink:0, ...style }}>{children}</div>
+);
+
+const Btn = ({ acc=false, outline=false, ghost=false, full=false, h=28, children, style={} }) => (
+  <div style={{ height:h, display:'flex', alignItems:'center', justifyContent:'center', padding:'0 12px',
+    border:`2px solid ${acc?ACC:outline?'#2a2a2a':'#1a1a1a'}`,
+    background:acc?ACC:ghost?BG3:'transparent',
+    color:acc?'#fff':outline?'#888':'#555',
+    fontFamily:FONT, fontSize:11, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase',
+    width:full?'100%':undefined, flexShrink:0, cursor:'pointer', ...style }}>{children}</div>
+);
+
+const SecLabel = ({ children, style={} }) => (
+  <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:6, ...style }}>
+    <T size={7} mono dim style={{ letterSpacing:'0.22em', flexShrink:0 }}>{children}</T>
+    <div style={{ flex:1, height:1, background:BORDER }}/>
+  </div>
+);
+
+const KpiCard = ({ label, value, unit, c=ACC }) => (
+  <div style={{ flex:1, border:`1.5px solid ${BORDER}`, background:BG2, padding:'6px 8px', borderLeft:`3px solid ${c}`, minWidth:0 }}>
+    <T size={7} mono dim style={{ display:'block', letterSpacing:'0.12em', marginBottom:3 }}>{label}</T>
+    <T size={22} bold style={{ display:'block', color:c, fontFamily:FONT }}>{value}</T>
+    {unit && <T size={7} mono dim style={{ display:'block', marginTop:1 }}>{unit}</T>}
+  </div>
+);
+
+const SetRowWire = ({ set, weight, reps, done=false, active=false }) => (
+  <div style={{ display:'flex', alignItems:'center', gap:5, padding:'3px 6px',
+    background: done?'#0a1a0a':active?'#160800':BG3,
+    border:`1px solid ${done?'#1a3a1a':active?ACC:BORDER}` }}>
+    <T size={9} mono dim style={{ width:14 }}>{set}</T>
+    <div style={{ width:46, height:22, border:`1px solid ${active?ACC:'#222'}`, background:BG, display:'flex', alignItems:'center', justifyContent:'center' }}>
+      <T size={10} mono style={{ color:active?ACC:'#777' }}>{weight}kg</T>
+    </div>
+    <T size={9} dim>×</T>
+    <div style={{ width:32, height:22, border:`1px solid ${active?ACC:'#222'}`, background:BG, display:'flex', alignItems:'center', justifyContent:'center' }}>
+      <T size={10} mono style={{ color:active?ACC:'#777' }}>{reps}</T>
+    </div>
+    <div style={{ flex:1 }}/>
+    <div style={{ width:22, height:22, border:`1.5px solid ${done?GRN:active?ACC:'#222'}`, background:done?'#0a2a0a':'transparent', display:'flex', alignItems:'center', justifyContent:'center' }}>
+      {done && <T size={10} grn>✓</T>}
+      {active && <div style={{ width:7,height:7,background:ACC,borderRadius:'50%' }}/>}
+    </div>
+  </div>
+);
+
+const Chart = ({ type='bar', h=65, label='' }) => (
+  <div style={{ height:h, border:`1px solid ${BORDER}`, background:'#060606', position:'relative', overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center' }}>
+    {type==='bar' && <div style={{ display:'flex', alignItems:'flex-end', gap:2, height:h-14, padding:'0 8px', width:'100%', position:'absolute', bottom:8 }}>
+      {[32,50,38,72,48,62,80,58,68,90].map((v,i)=>(
+        <div key={i} style={{ flex:1, height:`${v}%`, background:i===9?ACC:i===6?`${ACC}55`:'#1e1e1e', border:`1px solid ${i>=6?`${ACC}33`:'#252525'}` }}/>
+      ))}
+    </div>}
+    {type==='line' && <svg width="100%" height={h-10} style={{ position:'absolute', top:4 }}>
+      <polyline points="0,48 30,36 60,40 90,20 120,26 150,12 180,18 210,8 240,14 270,4" fill="none" stroke={ACC} strokeWidth="2"/>
+      <polyline points="0,52 30,44 60,48 90,36 120,42 150,32 180,38 210,26 240,30 270,24" fill="none" stroke={BLU} strokeWidth="1.5" strokeDasharray="4 2"/>
+    </svg>}
+    {type==='heatmap' && <div style={{ display:'grid', gridTemplateColumns:'repeat(13,1fr)', gap:2, padding:'5px', width:'100%' }}>
+      {Array.from({length:52}).map((_,i)=>{ const v=Math.random(); return <div key={i} style={{ aspectRatio:'1', background:v>.72?ACC:v>.48?`${ACC}55`:v>.28?'#1a0800':'#111' }}/>; })}
+    </div>}
+    {type==='radar' && <svg width="68" height="68" viewBox="0 0 68 68">
+      <polygon points="34,4 62,22 56,54 12,54 6,22" fill="none" stroke="#1a1a1a" strokeWidth="1"/>
+      <polygon points="34,14 54,28 50,48 18,48 14,28" fill={`${ACC}18`} stroke={ACC} strokeWidth="1.5"/>
+    </svg>}
+    {type==='donut' && <svg width="54" height="54" viewBox="0 0 54 54">
+      <circle cx="27" cy="27" r="19" fill="none" stroke="#111" strokeWidth="9"/>
+      <circle cx="27" cy="27" r="19" fill="none" stroke={ACC} strokeWidth="9" strokeDasharray="66 53" strokeDashoffset="14"/>
+      <circle cx="27" cy="27" r="19" fill="none" stroke={GRN} strokeWidth="9" strokeDasharray="34 85" strokeDashoffset="-52"/>
+      <circle cx="27" cy="27" r="19" fill="none" stroke={BLU} strokeWidth="9" strokeDasharray="19 100" strokeDashoffset="-86"/>
+    </svg>}
+    <T size={7} mono dim style={{ position:'absolute', bottom:3 }}>{label}</T>
+  </div>
+);
+
+const NavTop = ({ title='', minimal=false }) => (
+  <div style={{ height:44, borderBottom:`1px solid ${BORDER}`, background:'#050505', display:'flex', alignItems:'center', padding:'0 14px', gap:10, flexShrink:0 }}>
+    <T size={12} bold mono acc style={{ letterSpacing:'0.2em' }}>STEAL</T>
+    {!minimal && <T size={8} mono dim style={{ letterSpacing:'0.1em' }}>THERAPY</T>}
+    <div style={{ flex:1 }}/>
+    {!minimal && ['HQ','PLANS','WORKOUT','INTEL','SETTINGS'].map(l=>(
+      <T key={l} size={9} mono dim style={{ letterSpacing:'0.08em', padding:'0 7px' }}>{l}</T>
+    ))}
+    {!minimal && <div style={{ width:28,height:28,borderRadius:'50%',border:`1.5px solid #2a2a2a`,background:'#1a1a1a' }}/>}
+    {minimal && <div style={{ width:20,height:14,display:'flex',flexDirection:'column',justifyContent:'space-between' }}>
+      <div style={{ height:2,background:'#333' }}/><div style={{ height:2,background:'#333' }}/><div style={{ height:2,background:'#333' }}/>
+    </div>}
+  </div>
+);
+
+const NavBottom = ({ active='dash' }) => {
+  const tabs=[{id:'dash',l:'HQ',ic:'⊞'},{id:'plans',l:'PLANS',ic:'≡'},{id:'workout',l:'TRAIN',ic:'◉'},{id:'progress',l:'INTEL',ic:'▲'},{id:'settings',l:'SET',ic:'⊙'}];
+  return (
+    <div style={{ height:52,borderTop:`1px solid ${BORDER}`,background:'#050505',display:'flex',position:'absolute',bottom:0,left:0,right:0,zIndex:10 }}>
+      {tabs.map(t=>(
+        <div key={t.id} style={{ flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:2,color:t.id===active?ACC:'#333' }}>
+          <T size={15} style={{ color:'inherit',lineHeight:1 }}>{t.ic}</T>
+          <T size={6} mono style={{ color:'inherit',letterSpacing:'0.06em' }}>{t.l}</T>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// ════════════════════════════════════════════════════════════════
+// DASHBOARD
+// ════════════════════════════════════════════════════════════════
+
+// Shared week grid — REST DAY neutral, no red for missed
+const WeekGrid = ({ compact=false }) => {
+  const days = [
+    {d:'MON',state:'done',label:'PUSH A'},
+    {d:'TUE',state:'done',label:'PULL B'},
+    {d:'WED',state:'rest',label:'REST DAY'},
+    {d:'THU',state:'next',label:'LEGS C'},
+    {d:'FRI',state:'plan',label:'PUSH D'},
+    {d:'SAT',state:'rest',label:'REST DAY'},
+    {d:'SUN',state:'rest',label:'REST DAY'},
+  ];
+  return (
+    <div style={{ display:'grid', gridTemplateColumns:'repeat(7,1fr)', gap:compact?2:3 }}>
+      {days.map((d,i)=>{
+        const isNext = d.state==='next';
+        const isDone = d.state==='done';
+        const isRest = d.state==='rest';
+        return (
+          <div key={i} style={{ border:`1.5px solid ${isNext?ACC:isDone?`${GRN}44`:BORDER}`, padding:compact?'3px 1px':'4px 2px', textAlign:'center', background:isNext?'#180800':isDone?'#0a160a':BG }}>
+            <T size={compact?6:7} mono dim style={{ display:'block', letterSpacing:'0.03em' }}>{d.d}</T>
+            {isRest
+              ? <T size={compact?7:8} mono dim style={{ display:'block', lineHeight:1.3, letterSpacing:'0.03em' }}>—</T>
+              : <T size={compact?8:10} style={{ color:isNext?ACC:isDone?GRN:'#444', display:'block', lineHeight:1.3 }}>
+                  {isDone?'✓':isNext?'▶':'·'}
+                </T>
+            }
+            {!compact && <T size={5} mono dim style={{ display:'block', letterSpacing:'0.02em', marginTop:1 }}>
+              {isRest ? 'REST' : d.label.split(' ')[0]}
+            </T>}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+// MOBILE dashboard
+const DashMobile = () => (
+  <div style={{ width:'100%',height:'100%',display:'flex',flexDirection:'column',background:'#060606',overflow:'hidden' }}>
+    <NavTop minimal/>
+    <div style={{ flex:1,overflowY:'auto',padding:'10px 10px 70px',display:'flex',flexDirection:'column',gap:8 }}>
+      {/* Mission hero */}
+      <div style={{ background:BG2,border:`1px solid ${BORDER}`,padding:10,display:'flex',gap:10,alignItems:'center' }}>
+        <div style={{ flex:1 }}>
+          <T size={7} mono dim style={{ display:'block',letterSpacing:'0.2em',marginBottom:3 }}>OPERATOR: MARCUS</T>
+          <T size={18} bold style={{ color:'#f0f0f0',display:'block',lineHeight:1,textTransform:'uppercase' }}>SHEIKO HEAVY</T>
+          <T size={8} mono dim style={{ display:'block',marginTop:3 }}>WK 3 · PUSH DAY A · ~65 MIN</T>
+          <div style={{ display:'flex',gap:5,marginTop:7 }}>
+            <Pill acc>NEXT: TODAY</Pill>
+            <Pill dim>~65 MIN</Pill>
+          </div>
+          <Btn acc full h={30} style={{ marginTop:9,fontSize:12 }}>[ DEPLOY SESSION ]</Btn>
+        </div>
+        <svg width="68" height="68" viewBox="0 0 68 68" style={{ flexShrink:0 }}>
+          <circle cx="34" cy="34" r="26" fill="none" stroke="#1a1a1a" strokeWidth="4"/>
+          <circle cx="34" cy="34" r="26" fill="none" stroke={ACC} strokeWidth="4"
+            strokeDasharray="98 65" strokeDashoffset="18"/>
+          <text x="34" y="38" textAnchor="middle" fontSize="12" fontWeight="700" fill={ACC} fontFamily="Oswald,sans-serif">60%</text>
+          <text x="34" y="49" textAnchor="middle" fontSize="6" fill="#444" fontFamily="Share Tech Mono,monospace">PROGRAM</text>
+        </svg>
+      </div>
+      {/* 4 KPIs */}
+      <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:5 }}>
+        <KpiCard label="STREAK" value="12" unit="DAYS" c={GRN}/>
+        <KpiCard label="THIS WEEK" value="3/5" unit="SESSIONS" c={ACC}/>
+        <KpiCard label="TOTAL VOL" value="42T" unit="LIFTED" c={ACC}/>
+        <KpiCard label="PRS / MO" value="4" unit="RECORDS" c={BLU}/>
+      </div>
+      {/* Week grid */}
+      <div style={{ border:`1px solid ${BORDER}`,background:BG2,padding:9 }}>
+        <SecLabel>WEEK 3 SCHEDULE</SecLabel>
+        <WeekGrid compact/>
+      </div>
+      {/* Activity */}
+      <div style={{ border:`1px solid ${BORDER}`,background:BG2,padding:9 }}>
+        <SecLabel>ACTIVITY LOG</SecLabel>
+        {[{d:'20APR',l:'PUSH A',s:'18 SETS',v:'2.1T'},{d:'18APR',l:'LEGS B',s:'22 SETS',v:'3.4T'},{d:'16APR',l:'PULL A',s:'15 SETS',v:'1.9T'}].map((r,i)=>(
+          <div key={i} style={{ display:'flex',gap:6,alignItems:'center',padding:'3px 0',borderBottom:i<2?`1px solid ${BORDER}`:undefined }}>
+            <T size={8} mono dim style={{ width:38 }}>{r.d}</T>
+            <T size={10} style={{ flex:1,textTransform:'uppercase',color:'#777' }}>{r.l}</T>
+            <T size={8} mono dim>{r.s}</T>
+            <T size={9} mono acc bold>{r.v}</T>
+          </div>
+        ))}
+      </div>
+    </div>
+    <NavBottom active="dash"/>
+  </div>
+);
+
+// DESKTOP dashboard — wide, more features
+const DashDesktop = () => (
+  <div style={{ width:'100%',height:'100%',display:'flex',flexDirection:'column',background:'#060606',overflow:'hidden' }}>
+    {/* Top nav with full links */}
+    <div style={{ height:48,borderBottom:`1px solid ${BORDER}`,background:'#050505',display:'flex',alignItems:'center',padding:'0 20px',gap:12,flexShrink:0 }}>
+      <T size={13} bold mono acc style={{ letterSpacing:'0.2em' }}>STEAL THERAPY</T>
+      <div style={{ width:1,height:20,background:'#2a2a2a',margin:'0 4px' }}/>
+      {['HQ','PLANS','WORKOUT','INTEL','SETTINGS'].map(l=>(
+        <T key={l} size={9} mono dim style={{ letterSpacing:'0.09em',padding:'0 6px',color:l==='HQ'?'#bbb':'#3a3a3a' }}>{l}</T>
+      ))}
+      <div style={{ flex:1 }}/>
+      <T size={8} mono dim>21APR26 · 14:33</T>
+      <div style={{ width:30,height:30,borderRadius:'50%',border:`1.5px solid #252525`,background:'#161616',display:'flex',alignItems:'center',justifyContent:'center' }}>
+        <T size={11} muted>M</T>
+      </div>
+    </div>
+    <div style={{ flex:1,overflowY:'auto',padding:'14px 20px',display:'flex',flexDirection:'column',gap:12 }}>
+      {/* Header row */}
+      <div style={{ display:'flex',alignItems:'flex-end',justifyContent:'space-between' }}>
+        <div>
+          <T size={8} mono dim style={{ display:'block',letterSpacing:'0.3em',marginBottom:4 }}>STEAL THERAPY</T>
+          <T size={26} bold style={{ display:'block',lineHeight:0.9,color:'#f0f0f0',textTransform:'uppercase' }}>OPERATIONS<br/>DASHBOARD</T>
+          <div style={{ height:2,width:32,background:ACC,marginTop:6 }}/>
+        </div>
+        <div style={{ display:'flex',gap:8,alignItems:'center' }}>
+          <T size={8} mono dim>OPERATOR: MARCUS</T>
+          <div style={{ width:1,height:14,background:'#2a2a2a' }}/>
+          <T size={8} mono dim>21APR26 · 14:33</T>
+        </div>
+      </div>
+      {/* 4 KPIs */}
+      <div style={{ display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8 }}>
+        <KpiCard label="CURRENT STREAK" value="12" unit="DAYS" c={GRN}/>
+        <KpiCard label="THIS WEEK" value="3" unit="SESSIONS" c={ACC}/>
+        <KpiCard label="TOTAL VOLUME" value="42" unit="TONNES LIFTED" c={ACC}/>
+        <KpiCard label="PRS THIS MONTH" value="4" unit="RECORDS SET" c={BLU}/>
+      </div>
+      {/* Main 3-col grid */}
+      <div style={{ display:'grid',gridTemplateColumns:'2fr 1.2fr 1fr',gap:10 }}>
+        {/* Active mission */}
+        <div style={{ border:`1.5px solid ${ACC}33`,background:BG2,padding:12,display:'flex',flexDirection:'column',gap:7 }}>
+          <SecLabel>ACTIVE MISSION</SecLabel>
+          <div>
+            <T size={20} bold style={{ color:'#f0f0f0',lineHeight:1,textTransform:'uppercase',display:'block' }}>SHEIKO HEAVY</T>
+            <T size={8} mono dim style={{ display:'block',marginTop:3 }}>WK 3 / 12 · STRENGTH · ~65 MIN ESTIMATED</T>
+          </div>
+          <Divider/>
+          {/* Progress ring + info row */}
+          <div style={{ display:'flex',gap:10,alignItems:'center' }}>
+            <svg width="58" height="58" viewBox="0 0 58 58" style={{ flexShrink:0 }}>
+              <circle cx="29" cy="29" r="22" fill="none" stroke="#1a1a1a" strokeWidth="4"/>
+              <circle cx="29" cy="29" r="22" fill="none" stroke={ACC} strokeWidth="4" strokeDasharray="83 55" strokeDashoffset="14"/>
+              <text x="29" y="33" textAnchor="middle" fontSize="11" fontWeight="700" fill={ACC} fontFamily="Oswald,sans-serif">60%</text>
+            </svg>
+            <div>
+              <T size={8} mono dim style={{ display:'block',marginBottom:4,letterSpacing:'0.1em' }}>NEXT SESSION</T>
+              <T size={13} bold style={{ color:'#e0e0e0',display:'block',textTransform:'uppercase' }}>PUSH DAY A</T>
+              <T size={8} mono dim>TODAY · 5 EXERCISES</T>
+            </div>
+          </div>
+          <Divider/>
+          {/* Exercise list */}
+          {['BACK SQUAT — 4×5 @80%','BENCH PRESS — 3×3 @85%','ROM. DEADLIFT — 3×8 @65%','OVERHEAD PRESS — 3×8','DIPS — 3×AMRAP'].map((ex,i)=>(
+            <div key={i} style={{ display:'flex',gap:7,alignItems:'center',padding:'3px 0',borderBottom:`1px solid ${BORDER}` }}>
+              <T size={7} mono dim style={{ width:18 }}>{String(i+1).padStart(2,'0')}</T>
+              <T size={11} bold style={{ color:'#bbb',flex:1,textTransform:'uppercase' }}>{ex}</T>
+            </div>
+          ))}
+          <div style={{ marginTop:4 }}>
+            <Btn acc full h={30} style={{ fontSize:12 }}>[ DEPLOY — START SESSION ]</Btn>
+          </div>
+        </div>
+        {/* Week schedule + session history */}
+        <div style={{ display:'flex',flexDirection:'column',gap:8 }}>
+          <div style={{ border:`1px solid ${BORDER}`,background:BG2,padding:10 }}>
+            <SecLabel>WEEK 3 SCHEDULE</SecLabel>
+            <WeekGrid/>
+          </div>
+          <div style={{ border:`1px solid ${BORDER}`,background:BG2,padding:10,flex:1 }}>
+            <SecLabel>UPCOMING</SecLabel>
+            {[{l:'Push Day A',d:'TODAY',next:true},{l:'Pull Day B',d:'23APR'},{l:'Legs Day C',d:'25APR'}].map((s,i)=>(
+              <div key={i} style={{ display:'flex',alignItems:'center',gap:6,padding:'4px 5px',border:`1px solid ${s.next?`${ACC}55`:BORDER}`,background:s.next?'#180800':BG,marginBottom:3 }}>
+                <T size={10} style={{ flex:1,color:s.next?'#e0e0e0':'#555' }}>{s.l}</T>
+                <T size={8} mono style={{ color:s.next?ACC:'#333' }}>{s.d}</T>
+                {s.next && <T size={10} acc>▶</T>}
+              </div>
+            ))}
+            <SecLabel style={{ marginTop:8 }}>COMPLETED</SecLabel>
+            {[{l:'Pull Day B · 19APR'},{l:'Legs Day C · 17APR'}].map((s,i)=>(
+              <div key={i} style={{ display:'flex',alignItems:'center',gap:6,padding:'4px 5px',border:`1px solid ${BORDER}`,background:BG,marginBottom:3,opacity:0.6 }}>
+                <T size={10} grn>✓</T>
+                <T size={10} dim style={{ flex:1 }}>{s.l}</T>
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* Activity + PRs */}
+        <div style={{ display:'flex',flexDirection:'column',gap:8 }}>
+          <div style={{ border:`1px solid ${BORDER}`,background:BG2,padding:10,flex:1 }}>
+            <SecLabel>ACTIVITY LOG</SecLabel>
+            {[{d:'20APR',l:'PUSH A',v:'2.1T'},{d:'18APR',l:'LEGS B',v:'3.4T'},{d:'16APR',l:'PULL A',v:'1.9T'},{d:'14APR',l:'PUSH A',v:'2.0T'},{d:'12APR',l:'LEGS B',v:'3.1T'}].map((r,i)=>(
+              <div key={i} style={{ display:'flex',gap:5,alignItems:'center',padding:'3px 0',borderBottom:i<4?`1px solid ${BORDER}`:undefined }}>
+                <T size={8} mono dim style={{ width:36 }}>{r.d}</T>
+                <T size={10} style={{ flex:1,textTransform:'uppercase',color:'#666' }}>{r.l}</T>
+                <T size={9} mono acc bold>{r.v}</T>
+              </div>
+            ))}
+          </div>
+          <div style={{ border:`1px solid ${BORDER}`,background:BG2,padding:10 }}>
+            <SecLabel>RECENT PRS</SecLabel>
+            {[{n:'SQUAT',w:'180×1'},{n:'BENCH',w:'120×1'},{n:'DEADLIFT',w:'210×1'}].map((p,i)=>(
+              <div key={i} style={{ display:'flex',gap:5,padding:'4px 0',borderBottom:i<2?`1px solid ${BORDER}`:undefined }}>
+                <T size={11} bold style={{ flex:1,textTransform:'uppercase',color:'#777' }}>{p.n}</T>
+                <T size={11} mono bold acc>{p.w}</T>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// ════════════════════════════════════════════════════════════════
+// WORKOUT — Option C (accordion), fixed
+// ════════════════════════════════════════════════════════════════
+
+const WorkoutC = () => (
+  <div style={{ width:'100%',height:'100%',display:'flex',flexDirection:'column',background:'#060606',overflow:'hidden' }}>
+    <NavTop minimal/>
+    <div style={{ flex:1,overflowY:'auto',padding:'8px 9px 70px',display:'flex',flexDirection:'column',gap:6 }}>
+      {/* Title */}
+      <div style={{ display:'flex',alignItems:'center',gap:8 }}>
+        <div style={{ flex:1 }}>
+          <T size={16} bold style={{ color:'#f0f0f0',textTransform:'uppercase' }}>PUSH DAY A</T>
+          <T size={8} mono dim style={{ display:'block',letterSpacing:'0.08em' }}>SHEIKO HEAVY · WK 3 · 5 EXERCISES</T>
+        </div>
+        <div style={{ border:`2px solid ${ACC}`,padding:'4px 9px',background:BG2,textAlign:'center' }}>
+          <T size={7} mono dim style={{ display:'block',letterSpacing:'0.1em' }}>REST</T>
+          <T size={14} bold mono acc>01:23</T>
+        </div>
+      </div>
+      {/* 5-dot progress */}
+      <div style={{ display:'flex',gap:3 }}>
+        {[true,false,false,false,false].map((done,i)=>(
+          <div key={i} style={{ flex:1,height:4,background:done?ACC:'#1a1a1a',border:`1px solid ${done?ACC:'#222'}` }}/>
+        ))}
+      </div>
+      {/* Exercise cards */}
+      {[
+        { n:'Back Squat', tags:'QUADS · GLUTES', done:true, expanded:false },
+        { n:'Bench Press', tags:'CHEST · SHOULDERS', active:true, expanded:true,
+          sets:[{w:'80',r:'5',done:true},{w:'85',r:'5',done:true},{w:'87.5',r:'3',active:true},{w:'87.5',r:'3'}] },
+        { n:'Romanian DL', tags:'HAMSTRINGS', expanded:false },
+        { n:'OHP', tags:'SHOULDERS · TRICEPS', expanded:false },
+        { n:'Dips', tags:'TRICEPS · CHEST', expanded:false },
+      ].map((ex,i)=>(
+        <div key={i} style={{ border:`1.5px solid ${ex.active?ACC:'#1e1e1e'}`, background:BG2, opacity:ex.done?0.5:1 }}>
+          <div style={{ padding:'7px 9px' }}>
+            <div style={{ display:'flex',alignItems:'center',gap:6 }}>
+              <T size={8} mono dim style={{ width:18 }}>0{i+1}</T>
+              <div style={{ flex:1 }}>
+                <T size={14} bold style={{ textTransform:'uppercase',color:ex.done?'#444':'#e0e0e0' }}>{ex.n}</T>
+                <T size={7} mono dim style={{ display:'block',letterSpacing:'0.06em',marginTop:1 }}>{ex.tags}</T>
+              </div>
+              {ex.done && <T size={14} grn>✓</T>}
+              {ex.active && <Pill acc>ACTIVE</Pill>}
+              {!ex.done && !ex.active && <T size={13} dim>›</T>}
+            </div>
+            {ex.expanded && (
+              <div style={{ marginTop:9 }}>
+                {/* GIF placeholder */}
+                <div className="sk-placeholder" style={{ height:90,marginBottom:8,fontSize:8 }}>
+                  exercise GIF / animation
+                </div>
+                {/* Set headers */}
+                <div style={{ display:'flex',gap:5,marginBottom:4,paddingLeft:20 }}>
+                  {['WEIGHT','REPS','DONE'].map((h,j)=>(
+                    <T key={j} size={7} mono dim style={{ flex:j<2?1:undefined,width:j===2?22:undefined,textAlign:'center',letterSpacing:'0.08em' }}>{h}</T>
+                  ))}
+                </div>
+                <div style={{ display:'flex',flexDirection:'column',gap:3 }}>
+                  {ex.sets.map((s,j)=><SetRowWire key={j} set={j+1} weight={s.w} reps={s.r} done={s.done} active={s.active}/>)}
+                </div>
+                {/* Actions — two clearly distinct buttons */}
+                <div style={{ display:'flex',gap:6,marginTop:8 }}>
+                  <Btn ghost h={28} style={{ fontSize:10,flex:1,border:`1px solid #2a2a2a`,color:'#555' }}>+ ADD SET</Btn>
+                  <Btn acc h={28} style={{ fontSize:12,flex:2 }}>LOG SET ✓</Btn>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+    {/* Bottom bar */}
+    <div style={{ position:'absolute',bottom:52,left:0,right:0,background:'rgba(6,6,6,0.97)',borderTop:`1px solid ${BORDER}`,padding:'6px 10px',display:'flex',gap:6 }}>
+      <div style={{ flex:1,border:`1px solid ${BORDER}`,padding:'5px 8px',display:'flex',alignItems:'center',gap:7 }}>
+        <T size={8} mono dim style={{ letterSpacing:'0.1em' }}>MOOD:</T>
+        {['😩','😕','😐','💪','🔥'].map((m,i)=>(
+          <div key={i} style={{ width:24,height:24,border:`1.5px solid ${i===3?ACC:BORDER}`,display:'flex',alignItems:'center',justifyContent:'center',background:i===3?'#180800':'transparent' }}>
+            <T size={13}>{m}</T>
+          </div>
+        ))}
+      </div>
+      <Btn acc h={38} style={{ flex:1,fontSize:12 }}>FINISH</Btn>
+    </div>
+    <NavBottom active="workout"/>
+  </div>
+);
+
+// ════════════════════════════════════════════════════════════════
+// PROGRESS — Option A + PR Board + PR Wall
+// ════════════════════════════════════════════════════════════════
+
+const ProgressA = () => (
+  <div style={{ width:'100%',height:'100%',display:'flex',flexDirection:'column',background:'#060606',overflow:'hidden' }}>
+    <NavTop minimal/>
+    <div style={{ flex:1,overflowY:'auto',padding:'10px 10px 70px',display:'flex',flexDirection:'column',gap:9 }}>
+      <div style={{ borderBottom:`1px solid ${BORDER}`,paddingBottom:7 }}>
+        <T size={22} bold style={{ display:'block',textTransform:'uppercase',color:'#f0f0f0' }}>INTEL</T>
+        <T size={8} mono dim style={{ display:'block',letterSpacing:'0.18em',marginTop:2 }}>PERFORMANCE ANALYTICS</T>
+        <div style={{ height:2,width:24,background:ACC,marginTop:5 }}/>
+      </div>
+      {/* KPI strip */}
+      <div style={{ display:'flex',gap:5 }}>
+        <KpiCard label="STREAK" value="12" unit="DAYS" c={GRN}/>
+        <KpiCard label="VOLUME" value="42T" unit="THIS MONTH" c={ACC}/>
+        <KpiCard label="PRS" value="4" unit="THIS MONTH" c={BLU}/>
+      </div>
+      {/* Volume chart */}
+      <div style={{ border:`1px solid ${BORDER}`,background:BG2,padding:9 }}>
+        <SecLabel>VOLUME TREND — 8 WEEKS</SecLabel>
+        <Chart type="bar" h={74} label="WEEKLY VOLUME (KG)"/>
+      </div>
+      {/* 2-col charts */}
+      <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:6 }}>
+        <div style={{ border:`1px solid ${BORDER}`,background:BG2,padding:9 }}>
+          <SecLabel>LIFT PROGRESSION</SecLabel>
+          <Chart type="line" h={68} label="e1RM OVER TIME"/>
+        </div>
+        <div style={{ border:`1px solid ${BORDER}`,background:BG2,padding:9 }}>
+          <SecLabel>MUSCLE RADAR</SecLabel>
+          <div style={{ display:'flex',justifyContent:'center',padding:'4px 0' }}>
+            <Chart type="radar" h={74}/>
+          </div>
+        </div>
+      </div>
+      {/* Heatmap */}
+      <div style={{ border:`1px solid ${BORDER}`,background:BG2,padding:9 }}>
+        <SecLabel>CALENDAR HEATMAP — 12 MONTHS</SecLabel>
+        <Chart type="heatmap" h={55}/>
+      </div>
+      {/* Split donut */}
+      <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:6 }}>
+        <div style={{ border:`1px solid ${BORDER}`,background:BG2,padding:9 }}>
+          <SecLabel>SPLIT BREAKDOWN</SecLabel>
+          <div style={{ display:'flex',alignItems:'center',gap:8 }}>
+            <Chart type="donut" h={64}/>
+            <div style={{ flex:1,display:'flex',flexDirection:'column',gap:5 }}>
+              {[{l:'PUSH',v:'40%',c:ACC},{l:'PULL',v:'35%',c:GRN},{l:'LEGS',v:'25%',c:BLU}].map((x,i)=>(
+                <div key={i} style={{ display:'flex',gap:5,alignItems:'center' }}>
+                  <div style={{ width:8,height:8,background:x.c }}/>
+                  <T size={9} mono style={{ color:'#888' }}>{x.l}</T>
+                  <T size={9} mono dim>{x.v}</T>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        {/* Streak tracker */}
+        <div style={{ border:`1px solid ${BORDER}`,background:BG2,padding:9 }}>
+          <SecLabel>STREAK TRACKER</SecLabel>
+          <div style={{ textAlign:'center',paddingTop:4 }}>
+            <T size={36} bold acc style={{ display:'block',fontFamily:FONT }}>12</T>
+            <T size={8} mono dim>DAYS · BEST: 21D</T>
+          </div>
+        </div>
+      </div>
+      {/* ── PR BOARD (from option B) ── */}
+      <div style={{ border:`1px solid ${BORDER}`,background:BG2,padding:9 }}>
+        <SecLabel>PR BOARD — ALL-TIME BESTS</SecLabel>
+        <div style={{ display:'grid',gridTemplateColumns:'1.4fr 1fr 1fr 1fr 1fr',gap:1 }}>
+          {['EXERCISE','1RM','3RM','5RM','DATE'].map((h,i)=>(
+            <div key={i} style={{ padding:'3px 6px',background:'#0a0a0a' }}>
+              <T size={7} mono dim style={{ letterSpacing:'0.07em' }}>{h}</T>
+            </div>
+          ))}
+          {[['SQUAT','180','165','152','15MAR'],['BENCH','120','108','100','08APR'],['DEADLIFT','210','192','178','21APR'],['OHP','80','72','67','02MAR']].map((row,i)=>(
+            row.map((cell,j)=>(
+              <div key={`${i}-${j}`} style={{ padding:'4px 6px',background:i%2===0?BG2:'#0a0a0a',borderBottom:`1px solid ${BORDER}` }}>
+                <T size={10} mono bold={j===1} style={{ color:j===1?ACC:j===0?'#aaa':'#444' }}>{cell}</T>
+              </div>
+            ))
+          ))}
+        </div>
+      </div>
+      {/* ── PR WALL — 3 cards ── */}
+      <div>
+        <SecLabel>PR WALL — RECENT RECORDS</SecLabel>
+        <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6 }}>
+          {[
+            {n:'SQUAT',w:'180KG',r:'1RM',d:'21APR26',icon:'🏆'},
+            {n:'DEADLIFT',w:'210KG',r:'1RM',d:'15MAR26',icon:'⚡'},
+            {n:'BENCH',w:'120KG',r:'1RM',d:'08APR26',icon:'🔥'},
+          ].map((pr,i)=>(
+            <div key={i} style={{ border:`1.5px solid ${ACC}44`,background:BG2,padding:'8px 8px',textAlign:'center' }}>
+              <T size={18} style={{ display:'block' }}>{pr.icon}</T>
+              <T size={11} bold style={{ display:'block',textTransform:'uppercase',color:'#ccc',marginTop:4 }}>{pr.n}</T>
+              <T size={18} bold acc style={{ display:'block',lineHeight:1,marginTop:3,fontFamily:FONT }}>{pr.w}</T>
+              <T size={8} mono dim style={{ display:'block',marginTop:2 }}>{pr.r} · {pr.d}</T>
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Achievements */}
+      <div style={{ border:`1px solid ${BORDER}`,background:BG2,padding:9 }}>
+        <SecLabel>ACHIEVEMENTS</SecLabel>
+        <div style={{ display:'flex',gap:6,flexWrap:'wrap' }}>
+          {['🥇','🔥','⚡','🎯','💪','🏅','⚔️','🛡️'].map((b,i)=>(
+            <div key={i} style={{ width:34,height:34,border:`1.5px solid ${i<4?`${ACC}55`:BORDER}`,display:'flex',alignItems:'center',justifyContent:'center',background:i<4?'#180800':'#0a0a0a',opacity:i<4?1:0.25 }}>
+              <T size={18}>{b}</T>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+    <NavBottom active="progress"/>
+  </div>
+);
+
+// ════════════════════════════════════════════════════════════════
+// PROGRAMS — Option A (grid cards)
+// ════════════════════════════════════════════════════════════════
+
+const ProgramsA = () => (
+  <div style={{ width:'100%',height:'100%',display:'flex',flexDirection:'column',background:'#060606',overflow:'hidden' }}>
+    <NavTop minimal/>
+    <div style={{ flex:1,overflowY:'auto',padding:'10px 10px 70px' }}>
+      <div style={{ marginBottom:10 }}>
+        <T size={20} bold style={{ display:'block',textTransform:'uppercase',color:'#f0f0f0' }}>PROGRAMS</T>
+        <T size={8} mono dim style={{ display:'block',letterSpacing:'0.18em',marginTop:2 }}>LEGEND TRAINING PROTOCOLS</T>
+      </div>
+      {/* Filter strip */}
+      <div style={{ display:'flex',gap:4,marginBottom:10,overflowX:'auto',paddingBottom:4 }}>
+        {['ALL','STRENGTH','HYPERTROPHY','POWERLIFTING','BEGINNER'].map((f,i)=>(
+          <div key={i} style={{ flexShrink:0,padding:'3px 9px',border:`1.5px solid ${i===0?ACC:'#222'}`,background:i===0?ACC:'transparent' }}>
+            <T size={8} mono bold={i===0} style={{ color:i===0?'#fff':'#444',letterSpacing:'0.06em' }}>{f}</T>
+          </div>
+        ))}
+      </div>
+      <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:8 }}>
+        {[
+          {n:'SHEIKO HEAVY',s:'12 WKS · 4×/WK',tags:['POWERLIFTING','ADVANCED'],feat:true},
+          {n:'PHUL',s:'12 WKS · 4×/WK',tags:['STRENGTH+SIZE','INTER']},
+          {n:'GZCLP',s:'OPEN · 3-4×/WK',tags:['STRENGTH','BEGINNER']},
+          {n:'531 BORING',s:'16 WKS · 4×/WK',tags:['STRENGTH','INTER']},
+          {n:'TEXAS METHOD',s:'OPEN · 3×/WK',tags:['POWERLIFTING','INTER']},
+          {n:'NSUNS 5/3/1',s:'OPEN · 5×/WK',tags:['STRENGTH','ADVANCED']},
+        ].map((prog,i)=>(
+          <div key={i} style={{ border:`1.5px solid ${prog.feat?ACC:BORDER}`,background:BG2 }}>
+            <div className="sk-placeholder" style={{ height:120,fontSize:9 }}>athlete photo</div>
+            <div style={{ padding:'7px 9px' }}>
+              <T size={14} bold style={{ display:'block',lineHeight:1,textTransform:'uppercase',color:'#e0e0e0',marginBottom:3 }}>{prog.n}</T>
+              <T size={8} mono dim style={{ display:'block',marginBottom:5 }}>{prog.s}</T>
+              <div style={{ display:'flex',gap:3,flexWrap:'wrap',marginBottom:7 }}>
+                {prog.tags.map(t=><Pill key={t} acc={prog.feat} dim={!prog.feat}>{t}</Pill>)}
+              </div>
+              <Btn acc={prog.feat} outline={!prog.feat} full h={26} style={{ fontSize:10 }}>VIEW PROGRAM</Btn>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+    <NavBottom active="plans"/>
+  </div>
+);
+
+// ════════════════════════════════════════════════════════════════
+// ONBOARDING — Option A
+// ════════════════════════════════════════════════════════════════
+
+const OnboardA = () => (
+  <div style={{ width:'100%',height:'100%',display:'flex',flexDirection:'column',background:'#060606',overflow:'hidden' }}>
+    <div style={{ flex:1,display:'flex',flexDirection:'column',padding:15 }}>
+      <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:18 }}>
+        <T size={12} bold mono acc style={{ letterSpacing:'0.2em' }}>STEAL THERAPY</T>
+        <T size={8} mono dim>2 / 4</T>
+      </div>
+      <div style={{ display:'flex',gap:4,marginBottom:18 }}>
+        {['PROFILE','LIMITS','GOALS','ARENA'].map((s,i)=>(
+          <div key={i} style={{ flex:1 }}>
+            <div style={{ height:2,background:i<2?ACC:i===2?`${ACC}33`:BORDER,marginBottom:4 }}/>
+            <T size={6} mono style={{ color:i<2?ACC:'#2a2a2a',letterSpacing:'0.08em' }}>{s}</T>
+          </div>
+        ))}
+      </div>
+      <T size={8} mono dim style={{ display:'block',letterSpacing:'0.22em',marginBottom:5 }}>STEP 02 — LIMITATIONS</T>
+      <T size={24} bold style={{ color:'#f0f0f0',lineHeight:1,textTransform:'uppercase' }}>INJURY RECON</T>
+      <T size={10} style={{ color:'#444',marginTop:6,display:'block' }}>Mark injuries so your program avoids aggravating them.</T>
+      <div style={{ flex:1,marginTop:16,display:'flex',flexDirection:'column',gap:5 }}>
+        <T size={8} mono dim style={{ letterSpacing:'0.15em',display:'block',marginBottom:3 }}>CURRENT LIMITATIONS</T>
+        {[{l:'Lower Back',c:true},{l:'Left Knee',c:false},{l:'Left Shoulder',c:true},{l:'Right Shoulder',c:false},{l:'Wrist / Grip',c:false},{l:'Neck',c:false}].map((item,i)=>(
+          <div key={i} style={{ display:'flex',alignItems:'center',gap:9,padding:'7px 9px',border:`1.5px solid ${item.c?ACC:BORDER}`,background:item.c?'#180800':BG2 }}>
+            <div style={{ width:18,height:18,border:`2px solid ${item.c?ACC:'#2a2a2a'}`,background:item.c?ACC:'transparent',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0 }}>
+              {item.c && <T size={11} style={{ color:'#fff',lineHeight:1 }}>✓</T>}
+            </div>
+            <T size={13} bold style={{ color:item.c?'#e0e0e0':'#555' }}>{item.l}</T>
+          </div>
+        ))}
+      </div>
+      <div style={{ display:'flex',gap:7,marginTop:16 }}>
+        <Btn ghost h={42} style={{ border:`1px solid ${BORDER}`,fontSize:11 }}>← BACK</Btn>
+        <Btn acc h={42} style={{ flex:1,fontSize:14 }}>CONTINUE →</Btn>
+      </div>
+    </div>
+  </div>
+);
+
+// ════════════════════════════════════════════════════════════════
+// NEW: /exercises — filterable library
+// ════════════════════════════════════════════════════════════════
+
+const ExercisesPage = () => (
+  <div style={{ width:'100%',height:'100%',display:'flex',flexDirection:'column',background:'#060606',overflow:'hidden' }}>
+    <NavTop minimal/>
+    <div style={{ flex:1,overflowY:'auto',padding:'10px 10px 70px',display:'flex',flexDirection:'column',gap:8 }}>
+      <div>
+        <T size={20} bold style={{ display:'block',textTransform:'uppercase',color:'#f0f0f0' }}>EXERCISES</T>
+        <T size={8} mono dim style={{ display:'block',letterSpacing:'0.18em',marginTop:2 }}>EXERCISE LIBRARY · 312 MOVEMENTS</T>
+      </div>
+      {/* Search bar */}
+      <div style={{ border:`1.5px solid ${ACC}`,background:BG2,display:'flex',alignItems:'center',gap:8,padding:'0 10px',height:38 }}>
+        <T size={13} acc>⌕</T>
+        <T size={11} muted style={{ fontFamily:FONT,letterSpacing:'0.04em' }}>Search exercises...</T>
+      </div>
+      {/* Filter chips */}
+      <div>
+        <T size={7} mono dim style={{ display:'block',letterSpacing:'0.15em',marginBottom:5 }}>MUSCLE GROUP</T>
+        <div style={{ display:'flex',gap:3,flexWrap:'wrap' }}>
+          {['ALL','CHEST','BACK','SHOULDERS','LEGS','ARMS','CORE','GLUTES'].map((f,i)=>(
+            <div key={i} style={{ padding:'3px 8px',border:`1.5px solid ${i===0?ACC:'#222'}`,background:i===0?ACC:'transparent',marginBottom:3 }}>
+              <T size={8} mono bold={i===0} style={{ color:i===0?'#fff':'#444',letterSpacing:'0.06em' }}>{f}</T>
+            </div>
+          ))}
+        </div>
+        <div style={{ display:'flex',gap:3,flexWrap:'wrap',marginTop:5 }}>
+          <T size={7} mono dim style={{ letterSpacing:'0.15em',marginBottom:4,width:'100%' }}>EQUIPMENT</T>
+          {['ANY','BARBELL','DUMBBELL','MACHINE','CABLE','BODYWEIGHT'].map((f,i)=>(
+            <div key={i} style={{ padding:'3px 8px',border:`1.5px solid ${i===1?`${ACC}77`:'#222'}`,background:'transparent',marginBottom:3 }}>
+              <T size={8} mono style={{ color:i===1?ACC:'#444',letterSpacing:'0.06em' }}>{f}</T>
+            </div>
+          ))}
+        </div>
+      </div>
+      <Divider/>
+      {/* Exercise list */}
+      <div style={{ display:'flex',flexDirection:'column',gap:3 }}>
+        {[
+          {n:'Back Squat',m:'QUADS · GLUTES · CORE',eq:'BARBELL',diff:'COMPOUND'},
+          {n:'Romanian Deadlift',m:'HAMSTRINGS · GLUTES',eq:'BARBELL',diff:'COMPOUND'},
+          {n:'Bench Press',m:'CHEST · SHOULDERS · TRICEPS',eq:'BARBELL',diff:'COMPOUND'},
+          {n:'Pull-Up',m:'LATS · BICEPS · RHOMBOIDS',eq:'BODYWEIGHT',diff:'COMPOUND'},
+          {n:'Overhead Press',m:'SHOULDERS · TRICEPS',eq:'BARBELL',diff:'COMPOUND'},
+          {n:'Barbell Row',m:'BACK · BICEPS · REAR DELT',eq:'BARBELL',diff:'COMPOUND'},
+          {n:'Incline DB Press',m:'UPPER CHEST · SHOULDERS',eq:'DUMBBELL',diff:'COMPOUND'},
+          {n:'Leg Press',m:'QUADS · GLUTES',eq:'MACHINE',diff:'ISOLATION'},
+        ].map((ex,i)=>(
+          <div key={i} style={{ display:'flex',alignItems:'center',gap:9,padding:'8px 10px',border:`1px solid ${BORDER}`,background:BG2 }}>
+            <div className="sk-placeholder" style={{ width:38,height:38,flexShrink:0,fontSize:7 }}>gif</div>
+            <div style={{ flex:1,minWidth:0 }}>
+              <T size={13} bold style={{ display:'block',textTransform:'uppercase',color:'#ddd',lineHeight:1 }}>{ex.n}</T>
+              <T size={7} mono dim style={{ display:'block',letterSpacing:'0.06em',marginTop:2 }}>{ex.m}</T>
+              <div style={{ display:'flex',gap:3,marginTop:3 }}>
+                <Pill dim>{ex.eq}</Pill>
+                <Pill dim>{ex.diff}</Pill>
+              </div>
+            </div>
+            <T size={13} muted>›</T>
+          </div>
+        ))}
+      </div>
+    </div>
+    <NavBottom active="plans"/>
+  </div>
+);
+
+// ════════════════════════════════════════════════════════════════
+// NEW: /exercises/[slug] — exercise detail
+// ════════════════════════════════════════════════════════════════
+
+const ExerciseDetail = () => (
+  <div style={{ width:'100%',height:'100%',display:'flex',flexDirection:'column',background:'#060606',overflow:'hidden' }}>
+    <NavTop minimal/>
+    <div style={{ flex:1,overflowY:'auto',padding:'0 0 70px',display:'flex',flexDirection:'column' }}>
+      {/* Hero GIF */}
+      <div className="sk-placeholder" style={{ height:160,borderBottom:`1px solid ${BORDER}`,fontSize:10 }}>
+        EXERCISE GIF / VIDEO LOOP
+      </div>
+      <div style={{ padding:'12px 12px',display:'flex',flexDirection:'column',gap:10 }}>
+        {/* Title + tags */}
+        <div>
+          <T size={24} bold style={{ display:'block',textTransform:'uppercase',color:'#f0f0f0',lineHeight:1 }}>BACK SQUAT</T>
+          <div style={{ display:'flex',gap:4,marginTop:6,flexWrap:'wrap' }}>
+            <Pill acc>COMPOUND</Pill>
+            <Pill dim>BARBELL</Pill>
+            <Pill dim>QUADS</Pill>
+            <Pill dim>GLUTES</Pill>
+            <Pill dim>CORE</Pill>
+          </div>
+        </div>
+        <Divider/>
+        {/* Mechanics */}
+        <div>
+          <SecLabel>MECHANICS</SecLabel>
+          <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:4 }}>
+            {[{l:'FORCE TYPE',v:'PUSH'},{l:'MECHANICS',v:'COMPOUND'},{l:'DIFFICULTY',v:'ADVANCED'},{l:'EQUIPMENT',v:'BARBELL + RACK'}].map((m,i)=>(
+              <div key={i} style={{ border:`1px solid ${BORDER}`,background:BG2,padding:'5px 7px' }}>
+                <T size={7} mono dim style={{ display:'block',letterSpacing:'0.1em',marginBottom:2 }}>{m.l}</T>
+                <T size={11} bold style={{ color:'#ccc' }}>{m.v}</T>
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* Instructions */}
+        <div>
+          <SecLabel>CUES</SecLabel>
+          {['Brace core, bar on upper traps','Break at hips and knees simultaneously','Keep chest up, knees track over toes','Drive through full foot, lock out at top'].map((cue,i)=>(
+            <div key={i} style={{ display:'flex',gap:7,alignItems:'flex-start',padding:'4px 0',borderBottom:`1px solid ${BORDER}` }}>
+              <T size={8} mono acc style={{ width:14,flexShrink:0 }}>{i+1}.</T>
+              <T size={10} style={{ color:'#888',lineHeight:1.4 }}>{cue}</T>
+            </div>
+          ))}
+        </div>
+        {/* My PRs */}
+        <div>
+          <SecLabel>MY PERSONAL RECORDS</SecLabel>
+          <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:5 }}>
+            {[{r:'1RM',v:'180KG',d:'21APR'},{r:'3RM',v:'165KG',d:'15MAR'},{r:'5RM',v:'152KG',d:'02FEB'}].map((p,i)=>(
+              <div key={i} style={{ border:`1px solid ${BORDER}`,background:BG2,padding:'6px',textAlign:'center' }}>
+                <T size={7} mono dim style={{ display:'block',letterSpacing:'0.1em',marginBottom:3 }}>{p.r}</T>
+                <T size={16} bold acc style={{ display:'block',fontFamily:FONT }}>{p.v}</T>
+                <T size={7} mono dim style={{ display:'block',marginTop:1 }}>{p.d}</T>
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* Variations */}
+        <div>
+          <SecLabel>VARIATIONS</SecLabel>
+          <div style={{ display:'flex',flexDirection:'column',gap:3 }}>
+            {['Front Squat','Box Squat','Pause Squat','Goblet Squat'].map((v,i)=>(
+              <div key={i} style={{ display:'flex',alignItems:'center',gap:8,padding:'6px 9px',border:`1px solid ${BORDER}`,background:BG2 }}>
+                <T size={12} bold style={{ flex:1,textTransform:'uppercase',color:'#888' }}>{v}</T>
+                <T size={12} muted>›</T>
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* Add to plan */}
+        <Btn acc full h={40} style={{ fontSize:13 }}>+ ADD TO PLAN</Btn>
+      </div>
+    </div>
+    <NavBottom active="plans"/>
+  </div>
+);
+
+// ════════════════════════════════════════════════════════════════
+// NEW: /plans — tabbed list
+// ════════════════════════════════════════════════════════════════
+
+const PlansPage = () => (
+  <div style={{ width:'100%',height:'100%',display:'flex',flexDirection:'column',background:'#060606',overflow:'hidden' }}>
+    <NavTop minimal/>
+    {/* Tabs */}
+    <div style={{ display:'flex',borderBottom:`1px solid ${BORDER}`,background:'#080808',flexShrink:0 }}>
+      {['MY PLANS','SESSIONS','TEMPLATES'].map((tab,i)=>(
+        <div key={i} style={{ flex:1,padding:'8px 0',textAlign:'center',borderBottom:i===0?`3px solid ${ACC}`:'3px solid transparent',marginBottom:'-1px' }}>
+          <T size={9} mono bold={i===0} acc={i===0} style={{ letterSpacing:'0.07em' }}>{tab}</T>
+        </div>
+      ))}
+    </div>
+    <div style={{ flex:1,overflowY:'auto',padding:'10px 10px 70px',display:'flex',flexDirection:'column',gap:8 }}>
+      <div style={{ display:'flex',alignItems:'center',gap:7 }}>
+        <T size={16} bold style={{ flex:1,color:'#f0f0f0',textTransform:'uppercase' }}>MY PROGRAMS</T>
+        <Btn acc h={28} style={{ fontSize:10 }}>+ CREATE</Btn>
+      </div>
+      {/* Active plan card */}
+      <div style={{ border:`2px solid ${ACC}`,background:BG2,padding:11 }}>
+        <div style={{ display:'flex',alignItems:'center',gap:7,marginBottom:6 }}>
+          <Pill acc>ACTIVE</Pill>
+          <T size={7} mono dim style={{ letterSpacing:'0.1em' }}>WEEK 3 / 12</T>
+        </div>
+        <T size={16} bold style={{ color:'#f0f0f0',textTransform:'uppercase',display:'block' }}>SHEIKO HEAVY</T>
+        <T size={8} mono dim style={{ display:'block',marginTop:2 }}>POWERLIFTING · 4 DAYS/WK · 12 WEEKS</T>
+        {/* Progress bar */}
+        <div style={{ marginTop:8,height:4,background:'#1a1a1a' }}>
+          <div style={{ width:'25%',height:'100%',background:ACC }}/>
+        </div>
+        <T size={7} mono dim style={{ display:'block',marginTop:2 }}>25% COMPLETE · 9 WEEKS REMAINING</T>
+        <div style={{ display:'flex',gap:5,marginTop:8 }}>
+          <Btn acc h={26} style={{ flex:2,fontSize:10 }}>CONTINUE</Btn>
+          <Btn outline h={26} style={{ flex:1,fontSize:10 }}>DETAILS</Btn>
+        </div>
+      </div>
+      {/* Other plans */}
+      {[{n:'GZCLP — BEGINNER',dur:'Open',weeks:'Done: 16W',active:false},{n:'TEXAS METHOD',dur:'Open',weeks:'Done: 8W',active:false}].map((p,i)=>(
+        <div key={i} style={{ border:`1px solid ${BORDER}`,background:BG2,padding:10,display:'flex',alignItems:'center',gap:8 }}>
+          <div style={{ flex:1 }}>
+            <T size={13} bold style={{ display:'block',textTransform:'uppercase',color:'#888' }}>{p.n}</T>
+            <T size={8} mono dim style={{ display:'block' }}>{p.weeks}</T>
+          </div>
+          <Btn outline h={24} style={{ fontSize:9 }}>VIEW</Btn>
+        </div>
+      ))}
+      <Divider/>
+      <T size={9} mono dim style={{ letterSpacing:'0.15em' }}>TEMPLATE PLANS</T>
+      <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:6 }}>
+        {[{n:'PHUL',s:'4×/WK',feat:false},{n:'NSUNS',s:'5×/WK',feat:false},{n:'531 BBB',s:'4×/WK',feat:false},{n:'PPL',s:'6×/WK',feat:false}].map((t,i)=>(
+          <div key={i} style={{ border:`1px solid ${BORDER}`,background:BG2,padding:'7px 8px',display:'flex',alignItems:'center',gap:7 }}>
+            <div style={{ flex:1 }}>
+              <T size={12} bold style={{ textTransform:'uppercase',color:'#888' }}>{t.n}</T>
+              <T size={8} mono dim style={{ display:'block' }}>{t.s}</T>
+            </div>
+            <T size={13} muted>›</T>
+          </div>
+        ))}
+      </div>
+    </div>
+    <NavBottom active="plans"/>
+  </div>
+);
+
+// ════════════════════════════════════════════════════════════════
+// NEW: /plans/[planId] — plan detail: week grid + day cards
+// ════════════════════════════════════════════════════════════════
+
+const PlanDetail = () => (
+  <div style={{ width:'100%',height:'100%',display:'flex',flexDirection:'column',background:'#060606',overflow:'hidden' }}>
+    <NavTop minimal/>
+    <div style={{ flex:1,overflowY:'auto',padding:'10px 10px 70px',display:'flex',flexDirection:'column',gap:9 }}>
+      {/* Header */}
+      <div style={{ display:'flex',alignItems:'flex-start',gap:8 }}>
+        <div style={{ flex:1 }}>
+          <T size={8} mono acc style={{ display:'block',letterSpacing:'0.2em',marginBottom:3 }}>← PLANS</T>
+          <T size={20} bold style={{ color:'#f0f0f0',textTransform:'uppercase',lineHeight:1 }}>SHEIKO HEAVY</T>
+          <T size={8} mono dim style={{ display:'block',marginTop:3 }}>POWERLIFTING · 4 DAYS/WK · 12 WEEKS</T>
+        </div>
+        <Pill acc>ACTIVE</Pill>
+      </div>
+      {/* Overall progress */}
+      <div style={{ border:`1px solid ${BORDER}`,background:BG2,padding:9 }}>
+        <div style={{ display:'flex',justifyContent:'space-between',marginBottom:5 }}>
+          <T size={8} mono dim style={{ letterSpacing:'0.12em' }}>OVERALL PROGRESS</T>
+          <T size={8} mono acc>25% — WK 3 / 12</T>
+        </div>
+        <div style={{ height:5,background:'#111' }}>
+          <div style={{ width:'25%',height:'100%',background:ACC }}/>
+        </div>
+        <div style={{ display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:4,marginTop:8 }}>
+          {[{l:'SESSIONS',v:'12'},{l:'COMPLETED',v:'9'},{l:'VOLUME',v:'42T'},{l:'PRS',v:'4'}].map((s,i)=>(
+            <div key={i} style={{ textAlign:'center' }}>
+              <T size={16} bold style={{ display:'block',color:i===0?ACC:'#888',fontFamily:FONT }}>{s.v}</T>
+              <T size={7} mono dim>{s.l}</T>
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Week selector */}
+      <div>
+        <SecLabel>SELECT WEEK</SecLabel>
+        <div style={{ display:'flex',gap:3,overflowX:'auto',paddingBottom:3 }}>
+          {Array.from({length:12}).map((_,i)=>(
+            <div key={i} style={{ flexShrink:0,width:36,height:36,border:`1.5px solid ${i===2?ACC:i<2?`${GRN}44`:BORDER}`,background:i===2?'#180800':i<2?'#0a160a':BG2,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:1 }}>
+              <T size={7} mono dim>WK</T>
+              <T size={11} bold style={{ color:i===2?ACC:i<2?GRN:'#333',fontFamily:FONT }}>{i+1}</T>
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Day cards for week 3 */}
+      <div>
+        <SecLabel>WEEK 3 — DAYS</SecLabel>
+        <div style={{ display:'flex',flexDirection:'column',gap:5 }}>
+          {[
+            {d:'MON',n:'PUSH DAY A',m:'SQUAT · BENCH · OHP',ex:5,state:'done'},
+            {d:'TUE',n:'PULL DAY B',m:'DEADLIFT · ROWS · PULLUPS',ex:5,state:'done'},
+            {d:'THU',n:'LEGS DAY C',m:'SQUAT · LEG PRESS · CURLS',ex:6,state:'next'},
+            {d:'SAT',n:'PUSH DAY D',m:'BENCH · OHP · TRICEPS',ex:5,state:'locked'},
+          ].map((day,i)=>(
+            <div key={i} style={{ border:`1.5px solid ${day.state==='next'?ACC:day.state==='done'?`${GRN}44`:BORDER}`,background:day.state==='next'?'#180800':day.state==='done'?'#0a160a':BG2,padding:'8px 10px',display:'flex',alignItems:'center',gap:10,opacity:day.state==='locked'?0.4:1 }}>
+              <div style={{ width:32,height:32,border:`1.5px solid ${day.state==='done'?GRN:day.state==='next'?ACC:BORDER}`,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0 }}>
+                <T size={7} mono style={{ color:day.state==='done'?GRN:day.state==='next'?ACC:'#333' }}>{day.d}</T>
+              </div>
+              <div style={{ flex:1 }}>
+                <T size={13} bold style={{ color:day.state==='done'?'#666':day.state==='next'?'#e0e0e0':'#444',textTransform:'uppercase',display:'block' }}>{day.n}</T>
+                <T size={7} mono dim style={{ display:'block',marginTop:1 }}>{day.m}</T>
+                <T size={7} mono dim style={{ display:'block',marginTop:1 }}>{day.ex} EXERCISES</T>
+              </div>
+              {day.state==='done' && <T size={16} grn>✓</T>}
+              {day.state==='next' && <Btn acc h={24} style={{ fontSize:10,flexShrink:0 }}>START</Btn>}
+              {day.state==='locked' && <T size={13} dim>🔒</T>}
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Exercise list for next day */}
+      <div style={{ border:`1px solid ${BORDER}`,background:BG2,padding:9 }}>
+        <SecLabel>LEGS DAY C — EXERCISES</SecLabel>
+        {[{n:'Back Squat',s:'4×5 @80%'},{n:'Leg Press',s:'3×10 @70%'},{n:'Romanian DL',s:'3×8'},{n:'Leg Curl',s:'3×12'},{n:'Calf Raises',s:'4×15'},{n:'Plank',s:'3×60s'}].map((ex,i)=>(
+          <div key={i} style={{ display:'flex',alignItems:'center',gap:8,padding:'5px 0',borderBottom:i<5?`1px solid ${BORDER}`:undefined }}>
+            <T size={8} mono dim style={{ width:18 }}>{String(i+1).padStart(2,'0')}</T>
+            <div className="sk-placeholder" style={{ width:28,height:28,flexShrink:0,fontSize:6 }}>gif</div>
+            <T size={12} bold style={{ flex:1,textTransform:'uppercase',color:'#aaa' }}>{ex.n}</T>
+            <T size={9} mono dim>{ex.s}</T>
+          </div>
+        ))}
+        <Btn acc full h={30} style={{ marginTop:8,fontSize:11 }}>START THIS SESSION</Btn>
+      </div>
+    </div>
+    <NavBottom active="plans"/>
+  </div>
+);
+
+// ════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
+// MAIN
+// ════════════════════════════════════════════════════════════════
+function App() {
+  React.useEffect(()=>{
+    const s=document.createElement('style');
+    s.textContent='.design-canvas{background:#111 !important;}';
+    document.head.appendChild(s);
+  },[]);
+  return (
+    <DesignCanvas>
+
+      <DCSection id="dash" title="Dashboard" subtitle="Mobile (bottom nav) + Desktop (wider, more panels)">
+        <DCArtboard id="mob" label="Mobile — B layout" width={390} height={620}><DashMobile/></DCArtboard>
+        <DCArtboard id="desk" label="Desktop — B layout (wide)" width={760} height={620}><DashDesktop/></DCArtboard>
+      </DCSection>
+
+      <DCSection id="workout" title="Live Workout Session" subtitle="Option C — accordion + GIF + fixed buttons">
+        <DCArtboard id="a" label="C · Accordion (mobile)" width={390} height={680}><WorkoutC/></DCArtboard>
+      </DCSection>
+
+      <DCSection id="progress" title="Progress / Analytics" subtitle="Option A + PR Board (from B) + PR Wall">
+        <DCArtboard id="a" label="A · Grid charts + PR Board + PR Wall" width={390} height={820}><ProgressA/></DCArtboard>
+      </DCSection>
+
+      <DCSection id="programs" title="Programs Browse" subtitle="Option A — grid cards">
+        <DCArtboard id="a" label="A · Grid cards" width={390} height={620}><ProgramsA/></DCArtboard>
+      </DCSection>
+
+      <DCSection id="onboard" title="Onboarding" subtitle="Option A — dark fullscreen wizard">
+        <DCArtboard id="a" label="A · Injury recon step" width={390} height={620}><OnboardA/></DCArtboard>
+      </DCSection>
+
+      <DCSection id="exercises" title="/exercises — Library" subtitle="Filterable exercise catalog">
+        <DCArtboard id="list" label="Exercise list" width={390} height={680}><ExercisesPage/></DCArtboard>
+        <DCArtboard id="detail" label="Exercise detail /exercises/[slug]" width={390} height={720}><ExerciseDetail/></DCArtboard>
+      </DCSection>
+
+      <DCSection id="plans" title="/plans — Plan Management" subtitle="Tabbed plans list + plan detail">
+        <DCArtboard id="list" label="Plans list (tabbed)" width={390} height={660}><PlansPage/></DCArtboard>
+        <DCArtboard id="detail" label="Plan detail /plans/[planId]" width={390} height={760}><PlanDetail/></DCArtboard>
+      </DCSection>
+
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+<div id="root"></div>
+</body>
+</html>

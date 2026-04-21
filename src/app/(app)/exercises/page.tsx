@@ -14,7 +14,7 @@ export default async function ExercisesPage() {
   ]);
 
   return (
-    <div className="space-y-6 py-6">
+    <div className="space-y-4 py-4">
       <ExercisePageHeader count={all.length} />
       <ExerciseLibrary filters={filters} />
     </div>

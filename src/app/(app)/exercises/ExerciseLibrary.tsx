@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { Search, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { LibraryExercise } from "@/types/exercise";
 import { getAllExercises } from "@/lib/exercise-library";
@@ -25,71 +25,80 @@ interface Props {
 
 const PAGINATION_SIZE = 20;
 
-function TileSkeleton() {
+function RowSkeleton() {
   return (
-    <div className="border border-[#2a2a2a] bg-[#0a0a0a] overflow-hidden">
-      <div className="skeleton-steal aspect-square w-full" />
-      <div className="p-3 space-y-2">
-        <div className="skeleton-steal h-3 w-3/4" />
+    <div className="glass flex items-center gap-3 p-3">
+      <div className="skeleton-steal shrink-0" style={{ width: 44, height: 44 }} />
+      <div className="flex-1 space-y-2">
+        <div className="skeleton-steal h-3 w-2/5" />
         <div className="flex gap-1">
-          <div className="skeleton-steal h-3 w-16" />
-          <div className="skeleton-steal h-3 w-12" />
+          <div className="skeleton-steal h-2.5 w-16" />
+          <div className="skeleton-steal h-2.5 w-12" />
         </div>
       </div>
     </div>
   );
 }
 
-function ExerciseTile({ exercise, noImgLabel }: { exercise: LibraryExercise; noImgLabel: string }) {
+function ExerciseRow({ exercise, noImgLabel }: { exercise: LibraryExercise; noImgLabel: string }) {
   return (
     <Link
       href={`/exercises/${exercise.slug}`}
-      className="group border border-[#2a2a2a] bg-[#0a0a0a] overflow-hidden block transition-all duration-150 hover:-translate-y-0.5 hover:border-[#e53e00]/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#e53e00]"
-      style={{ boxShadow: "0 0 0 0 transparent" }}
+      className="glass glass-hover flex items-center gap-3 p-3 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#C2410C]"
     >
-      <div className="relative aspect-square w-full bg-[#111] overflow-hidden">
+      {/* 44×44 thumbnail with diagonal hatch fallback */}
+      <div
+        className="shrink-0 relative overflow-hidden"
+        style={{ width: 44, height: 44 }}
+      >
         {exercise.image ? (
           <Image
             src={exercise.image}
             alt={exercise.name}
             fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            sizes="44px"
+            className="object-cover"
             loading="lazy"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
+          <div
+            className="absolute inset-0"
+            style={{
+              background: "rgba(0,0,0,0.4)",
+              backgroundImage: "repeating-linear-gradient(45deg, rgba(194,65,12,0.08) 0px, rgba(194,65,12,0.08) 1px, transparent 1px, transparent 8px)",
+            }}
+          >
             <span
-              className="stamp text-[#525252] text-[9px] tracking-widest"
-              style={{ fontFamily: "var(--font-mono, monospace)" }}
+              className="absolute inset-0 flex items-center justify-center font-data text-[10px] text-[#444]"
+              aria-hidden="true"
             >
-              {noImgLabel}
+              ▶
             </span>
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/60 to-transparent pointer-events-none group-hover:opacity-0 transition-opacity duration-150" />
       </div>
 
-      <div className="p-3">
-        <p
-          className="font-data text-[11px] font-bold uppercase tracking-widest text-[#e5e5e5] leading-tight mb-2 line-clamp-2 group-hover:text-[#e53e00] transition-colors"
-          style={{ fontFamily: "var(--font-mono, monospace)" }}
-        >
+      {/* Name + tags */}
+      <div className="flex-1 min-w-0">
+        <p className="font-heading text-[12px] font-bold uppercase text-[#f0f0f0] leading-tight truncate">
           {exercise.name}
         </p>
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1 mt-1">
           {exercise.bodyPart && (
-            <span className="px-1.5 py-0.5 border border-[#2a2a2a] font-data text-[8px] uppercase tracking-widest text-[#71717A]">
-              {exercise.bodyPart}
-            </span>
+            <span className="tag-pill">{exercise.bodyPart}</span>
           )}
           {exercise.equipment && (
-            <span className="px-1.5 py-0.5 border border-[#2a2a2a] font-data text-[8px] uppercase tracking-widest text-[#525252]">
-              {exercise.equipment}
+            <span className="tag-pill">{exercise.equipment}</span>
+          )}
+          {exercise.target && (
+            <span className="tag-pill text-[#C2410C] border-[rgba(194,65,12,0.3)]">
+              {exercise.target}
             </span>
           )}
         </div>
       </div>
+
+      <ChevronRight className="shrink-0 h-4 w-4 text-[#444]" />
     </Link>
   );
 }
@@ -107,12 +116,11 @@ function FilterChip({
     <button
       onClick={onClick}
       className={cn(
-        "shrink-0 px-3 py-1.5 font-data text-[10px] font-semibold uppercase tracking-widest transition-all border relative overflow-hidden",
+        "shrink-0 px-3 py-1.5 font-data text-[10px] uppercase tracking-widest transition-all border",
         active
-          ? "border-[#e53e00] text-[#e53e00] bg-[#e53e00]/10"
-          : "border-[#2a2a2a] text-[#71717A] hover:border-[#525252] hover:text-[#a3a3a3]",
+          ? "bg-[#C2410C] text-white border-[#C2410C]"
+          : "border-[rgba(255,255,255,0.06)] text-[#71717A] hover:border-[rgba(255,255,255,0.12)] hover:text-[#a3a3a3]",
       )}
-      style={{ borderLeft: active ? "3px solid #e53e00" : "3px solid transparent" }}
       aria-pressed={active}
     >
       {label}
@@ -123,9 +131,7 @@ function FilterChip({
 export function ExerciseLibrary({ filters }: Props) {
   const { language, t } = useI18n();
   const translationNames = useAllExerciseTranslationNames();
-  const [allExercises, setAllExercises] = useState<LibraryExercise[] | null>(
-    null,
-  );
+  const [allExercises, setAllExercises] = useState<LibraryExercise[] | null>(null);
   const [displayCount, setDisplayCount] = useState(PAGINATION_SIZE);
   const [rawQ, setRawQ] = useState("");
   const [q, setQ] = useState("");
@@ -187,15 +193,13 @@ export function ExerciseLibrary({ filters }: Props) {
   const displayedExercises = useMemo(() => {
     if (language === "en") return displayedSlice;
     return displayedSlice.map((ex) => {
-      const t = translations.get(ex.exerciseId);
-      const merged = applyTranslationToLibraryExercise(ex, t);
+      const tr = translations.get(ex.exerciseId);
+      const merged = applyTranslationToLibraryExercise(ex, tr);
       return {
         ...merged,
-        bodyPart:
-          t?.bodyPart || tBodyPart(ex.bodyPart, language) || ex.bodyPart,
-        equipment:
-          t?.equipment || tEquipment(ex.equipment, language) || ex.equipment,
-        target: t?.target || tMuscle(ex.target, language) || ex.target,
+        bodyPart: tr?.bodyPart || tBodyPart(ex.bodyPart, language) || ex.bodyPart,
+        equipment: tr?.equipment || tEquipment(ex.equipment, language) || ex.equipment,
+        target: tr?.target || tMuscle(ex.target, language) || ex.target,
       };
     });
   }, [displayedSlice, translations, language]);
@@ -203,30 +207,28 @@ export function ExerciseLibrary({ filters }: Props) {
   const hasMore = displayedSlice.length < filteredExercises.length;
 
   return (
-    <div className="space-y-4">
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#525252] pointer-events-none" />
+    <div className="space-y-4 fade-up fade-up-1">
+      {/* Search bar */}
+      <div className="glass-acc relative flex items-center h-10">
+        <Search className="absolute left-3 h-4 w-4 text-[#C2410C] pointer-events-none" />
         <input
           type="search"
           value={rawQ}
           onChange={(e) => handleQueryChange(e.target.value)}
           placeholder={t("library.SEARCH")}
           aria-label="Search exercises"
-          className="w-full border border-[#2a2a2a] bg-[#0a0a0a] pl-10 pr-4 py-2.5 font-data text-[11px] uppercase tracking-widest text-[#e5e5e5] placeholder:text-[#525252] focus:outline-none focus:border-[#e53e00]/60 transition-colors"
+          className="w-full h-full bg-transparent pl-10 pr-4 font-heading text-[13px] uppercase text-[#f0f0f0] placeholder:text-[#525252] focus:outline-none"
         />
       </div>
 
+      {/* Filters */}
       <div className="space-y-2">
         <div
-          className="flex gap-2 overflow-x-auto pb-2 scrollbar-custom"
+          className="flex gap-2 overflow-x-auto pb-1 scroll-forge"
           role="group"
           aria-label="Filter by body part"
         >
-          <FilterChip
-            label={t("library.ALL")}
-            active={bodyPart === ""}
-            onClick={() => setBodyPart("")}
-          />
+          <FilterChip label={t("library.ALL")} active={bodyPart === ""} onClick={() => setBodyPart("")} />
           {filters.bodyParts.map((bp) => (
             <FilterChip
               key={bp}
@@ -238,15 +240,11 @@ export function ExerciseLibrary({ filters }: Props) {
         </div>
 
         <div
-          className="flex gap-2 overflow-x-auto pb-2 scrollbar-custom"
+          className="flex gap-2 overflow-x-auto pb-1 scroll-forge"
           role="group"
           aria-label="Filter by equipment"
         >
-          <FilterChip
-            label={t("library.ANY_EQUIP")}
-            active={equipment === ""}
-            onClick={() => setEquipment("")}
-          />
+          <FilterChip label={t("library.ANY_EQUIP")} active={equipment === ""} onClick={() => setEquipment("")} />
           {filters.equipment.map((eq) => (
             <FilterChip
               key={eq}
@@ -258,77 +256,62 @@ export function ExerciseLibrary({ filters }: Props) {
         </div>
 
         <div
-          className="flex gap-2 overflow-x-auto pb-2 scrollbar-custom"
+          className="flex gap-2 overflow-x-auto pb-1 scroll-forge"
           role="group"
           aria-label="Filter by target muscle"
         >
-          <FilterChip
-            label={t("library.ALL_MUSCLES")}
-            active={target === ""}
-            onClick={() => setTarget("")}
-          />
-          {filters.targets.map((t) => (
+          <FilterChip label={t("library.ALL_MUSCLES")} active={target === ""} onClick={() => setTarget("")} />
+          {filters.targets.map((tgt) => (
             <FilterChip
-              key={t}
-              label={tMuscle(t, language).toUpperCase()}
-              active={target === t}
-              onClick={() => setTarget(target === t ? "" : t)}
+              key={tgt}
+              label={tMuscle(tgt, language).toUpperCase()}
+              active={target === tgt}
+              onClick={() => setTarget(target === tgt ? "" : tgt)}
             />
           ))}
         </div>
       </div>
 
+      {/* Result count */}
       {!isLoading && allExercises !== null && (
         <div className="flex items-center gap-2">
-          <div className="h-px flex-1 bg-[#1a1a1a]" />
-          <span
-            className="stamp text-[9px] text-[#525252] tracking-widest"
-            style={{ fontFamily: "var(--font-mono, monospace)" }}
-          >
+          <div className="h-px flex-1 bg-[rgba(255,255,255,0.04)]" />
+          <span className="font-data text-[9px] text-[#525252] tracking-widest uppercase">
             {displayedSlice.length} / {filteredExercises.length} {t("library.RESULTS")}
           </span>
-          <div className="h-px flex-1 bg-[#1a1a1a]" />
+          <div className="h-px flex-1 bg-[rgba(255,255,255,0.04)]" />
         </div>
       )}
 
+      {/* Exercise list */}
       {isLoading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div className="space-y-2">
           {Array.from({ length: 12 }).map((_, i) => (
-            <TileSkeleton key={i} />
+            <RowSkeleton key={i} />
           ))}
         </div>
       ) : displayedExercises.length === 0 ? (
-        <div
-          className="border border-[#2a2a2a] bg-[#0a0a0a] flex flex-col items-center justify-center py-20 gap-4"
-          style={{ borderLeft: "3px solid #525252" }}
-        >
-          <span
-            className="stamp text-[14px] tracking-[0.3em] text-[#525252]"
-            style={{ fontFamily: "var(--font-mono, monospace)" }}
-          >
+        <div className="glass flex flex-col items-center justify-center py-20 gap-4">
+          <span className="font-data text-[14px] tracking-[0.3em] text-[#525252] uppercase">
             {t("library.NO_RESULTS")}
           </span>
-          <span
-            className="stamp text-[10px] text-[#71717A] tracking-[0.2em]"
-            style={{ fontFamily: "var(--font-mono, monospace)" }}
-          >
+          <span className="font-data text-[10px] text-[#444] tracking-[0.2em] uppercase">
             {t("library.NO_RESULTS_DESC")}
           </span>
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="space-y-2">
             {displayedExercises.map((ex) => (
-              <ExerciseTile key={ex.id} exercise={ex} noImgLabel={t("library.NO_IMG")} />
+              <ExerciseRow key={ex.id} exercise={ex} noImgLabel={t("library.NO_IMG")} />
             ))}
           </div>
 
           {hasMore && (
-            <div className="flex justify-center">
+            <div className="flex justify-center pt-2">
               <button
                 onClick={() => setDisplayCount((c) => c + PAGINATION_SIZE)}
-                className="px-6 py-3 border border-[#e53e00] bg-[#0a0a0a] text-[#e53e00] font-data text-[10px] font-semibold uppercase tracking-widest hover:bg-[#e53e00] hover:text-white transition-all relative overflow-hidden"
-                style={{ borderLeft: "3px solid #e53e00" }}
+                className="btn-forge px-6 py-2.5 text-[10px]"
               >
                 {t("library.LOAD_MORE")}
               </button>

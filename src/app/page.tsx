@@ -8,89 +8,70 @@ export default function Home() {
   const { t } = useI18n();
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-background px-4">
-      <div className="container-app space-y-16 py-16">
+    <div className="flex min-h-dvh flex-col items-center justify-center px-4">
+      <div className="container-app space-y-14 py-16">
         {/* Hero */}
-        <div className="space-y-6 text-center">
-          <div className="inline-block border border-[#e53e00]/40 bg-[#e53e00]/10 px-3 py-1">
-            <span className="font-data text-xs font-semibold uppercase tracking-[0.2em] text-[#e53e00]">
+        <div className="space-y-6 text-center fade-up">
+          <div
+            className="inline-block px-3 py-1"
+            style={{
+              border: "1px solid rgba(194,65,12,0.4)",
+              background: "rgba(194,65,12,0.08)",
+            }}
+          >
+            <span className="font-data text-[10px] font-semibold uppercase tracking-[0.2em] text-[#C2410C]">
               {t("landing.TAGLINE")}
             </span>
           </div>
           <h1
-            className="font-heading text-6xl font-extrabold uppercase tracking-tight text-foreground sm:text-8xl"
-            style={{ fontFamily: "var(--font-heading, system-ui)", lineHeight: 0.9 }}
+            className="font-heading font-black uppercase leading-none tracking-tight text-[#f0f0f0]"
+            style={{ fontSize: "clamp(3.5rem, 10vw, 6rem)" }}
           >
             STEAL
             <br />
-            <span className="text-[#e53e00]">FORGES</span>
+            <span style={{ color: "#C2410C", textShadow: "0 0 40px rgba(194,65,12,0.4)" }}>
+              FORGES
+            </span>
             <br />
             STEEL
           </h1>
-          <p className="mx-auto max-w-md text-base text-muted-foreground">
+          <p className="mx-auto max-w-md font-data text-[11px] uppercase tracking-widest text-[#444]">
             {t("landing.HERO_DESC")}
           </p>
         </div>
 
-        {/* Features */}
-        <div className="grid gap-px border border-border bg-border sm:grid-cols-3">
-          <div className="space-y-3 bg-background p-6">
-            <TrendingUp className="h-5 w-5 text-[#e53e00]" />
-            <h3
-              className="text-sm font-bold uppercase tracking-widest"
-              style={{ fontFamily: "var(--font-heading, system-ui)" }}
-            >
-              {t("landing.FEATURE_1_TITLE")}
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              {t("landing.FEATURE_1_DESC")}
-            </p>
-          </div>
-          <div className="space-y-3 bg-background p-6">
-            <Zap className="h-5 w-5 text-[#e53e00]" />
-            <h3
-              className="text-sm font-bold uppercase tracking-widest"
-              style={{ fontFamily: "var(--font-heading, system-ui)" }}
-            >
-              {t("landing.FEATURE_2_TITLE")}
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              {t("landing.FEATURE_2_DESC")}
-            </p>
-          </div>
-          <div className="space-y-3 bg-background p-6">
-            <BarChart3 className="h-5 w-5 text-[#e53e00]" />
-            <h3
-              className="text-sm font-bold uppercase tracking-widest"
-              style={{ fontFamily: "var(--font-heading, system-ui)" }}
-            >
-              {t("landing.FEATURE_3_TITLE")}
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              {t("landing.FEATURE_3_DESC")}
-            </p>
-          </div>
+        {/* Feature cards */}
+        <div className="grid gap-3 sm:grid-cols-3 fade-up fade-up-1">
+          {[
+            { icon: TrendingUp, titleKey: "landing.FEATURE_1_TITLE", descKey: "landing.FEATURE_1_DESC" },
+            { icon: Zap, titleKey: "landing.FEATURE_2_TITLE", descKey: "landing.FEATURE_2_DESC" },
+            { icon: BarChart3, titleKey: "landing.FEATURE_3_TITLE", descKey: "landing.FEATURE_3_DESC" },
+          ].map(({ icon: Icon, titleKey, descKey }, i) => (
+            <div key={i} className="glass glass-hover p-6 space-y-3">
+              <Icon className="h-5 w-5 text-[#C2410C]" />
+              <h3 className="font-heading text-[13px] font-bold uppercase tracking-widest text-[#f0f0f0]">
+                {t(titleKey)}
+              </h3>
+              <p className="font-data text-[10px] text-[#444] leading-relaxed">
+                {t(descKey)}
+              </p>
+            </div>
+          ))}
         </div>
 
         {/* CTA */}
-        <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-          <Link
-            href="/programs"
-            className="inline-flex h-12 items-center gap-2 bg-[#e53e00] px-8 text-sm font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#ff4500]"
-          >
+        <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center fade-up fade-up-2">
+          <Link href="/programs" className="btn-forge h-12 px-8 text-[12px] flex items-center gap-2">
             {t("landing.START_TRAINING")}
             <ArrowRight className="h-4 w-4" />
           </Link>
-          <Link
-            href="/login"
-            className="inline-flex h-12 items-center gap-2 border border-border px-8 text-sm font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
-          >
+          <Link href="/login" className="btn-ghost h-12 px-8 text-[11px] flex items-center gap-2">
             {t("landing.SIGN_IN")}
           </Link>
         </div>
 
-        {/* Footer line */}
-        <p className="text-center font-data text-xs text-muted-foreground/40 uppercase tracking-widest">
+        {/* Footer */}
+        <p className="text-center font-data text-[9px] text-[#222] uppercase tracking-widest fade-up fade-up-3">
           {t("landing.FOOTER")}
         </p>
       </div>

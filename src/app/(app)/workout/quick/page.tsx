@@ -390,7 +390,7 @@ export default function QuickWorkoutPage() {
             weight: Number(s.weight) || 0,
             rpe: s.rpe,
             completed: true,
-            notes: "",
+            notes: ex.name,
           });
         }
       }

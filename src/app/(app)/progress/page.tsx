@@ -15,12 +15,12 @@ import { MusclePieChart } from "@/components/progress/MusclePieChart";
 import { PRWall } from "@/components/progress/PRWall";
 import { AchievementsBoard } from "@/components/progress/AchievementsBoard";
 import { CounterFX } from "@/components/fx/ImpactFlash";
-import { BrandNoiseOverlay } from "@/components/layout/BrandNoiseOverlay";
 import { Skeleton } from "@/components/ui/skeleton";
 import { calculateVolume, estimate1RM } from "@/lib/utils";
 import { EnhancedVolumeChart } from "@/components/progress/EnhancedVolumeChart";
 import { ProgressTrendChart } from "@/components/progress/ProgressTrendChart";
 import { RepsDistributionChart } from "@/components/progress/RepsDistributionChart";
+import { PRBoard } from "@/components/progress/PRBoard";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { useI18n } from "@/components/providers/I18nProvider";
 
@@ -125,44 +125,19 @@ function KPIPanel({ label, value, subValue, trend, panelNum, accent = "orange" }
 
   const TrendIcon = trend === "up" ? TrendingUp : trend === "down" ? TrendingDown : Minus;
 
+  const kpiType = accent === "green" ? "kpi-grn" : accent === "blue" ? "kpi-blu" : "kpi-acc";
   return (
-    <div
-      className="border border-[#2a2a2a] bg-[#0a0a0a] p-3 relative overflow-hidden"
-      style={{ borderLeft: `2px solid ${colors.border}` }}
-    >
-      <BrandNoiseOverlay />
-      <div className="relative z-10">
-        <PanelHeader label={label} panelNum={panelNum} />
-        <div className="flex items-end justify-between mt-2">
-          <div>
-            <div
-              className="metric-xl"
-              style={{ 
-                color: colors.text, 
-                lineHeight: 1,
-                fontSize: "clamp(1.5rem, 4vw, 2.2rem)",
-                fontWeight: 800,
-                fontVariantNumeric: "tabular-nums",
-              }}
-            >
-              <CounterFX value={typeof value === "number" ? value : parseInt(value.toString()) || 0} />
-            </div>
-            {subValue && (
-              <div className="stamp mt-1" style={{ color: "#71717A", fontSize: 9 }}>
-                {subValue}
-              </div>
-            )}
-          </div>
-          {trend && (
-            <TrendIcon 
-              className={`h-4 w-4 ${
-                trend === "up" ? "text-[#10b981]" : 
-                trend === "down" ? "text-[#ef4444]" : "text-[#525252]"
-              }`} 
-            />
-          )}
-        </div>
+    <div className={`glass kpi ${kpiType} glass-hover fade-up`}>
+      <span className="font-data block text-[8px] tracking-[0.2em] text-[#333] uppercase mb-1.5">{label}</span>
+      <div
+        className="font-heading leading-none"
+        style={{ fontSize: 26, fontWeight: 700, color: colors.text }}
+      >
+        <CounterFX value={typeof value === "number" ? value : parseInt(value.toString()) || 0} />
       </div>
+      {subValue && (
+        <span className="font-data block text-[8px] text-[#444] mt-1">{subValue}</span>
+      )}
     </div>
   );
 }
@@ -243,21 +218,11 @@ function SkeletonGrid() {
 // ============================================================================
 function EmptyState({ t }: { t: (p: string) => string }) {
   return (
-    <div
-      className="border border-[#2a2a2a] bg-[#0a0a0a] flex flex-col items-center justify-center py-20 gap-6"
-      style={{ borderLeft: "3px solid #525252" }}
-    >
-      <BrandNoiseOverlay />
-      <div
-        className="stamp relative z-10"
-        style={{ fontSize: 14, letterSpacing: "0.3em", color: "#525252", textAlign: "center" }}
-      >
+    <div className="glass flex flex-col items-center justify-center py-20 gap-6">
+      <div className="stamp" style={{ fontSize: 14, letterSpacing: "0.3em", color: "#525252", textAlign: "center" }}>
         {t("progress.NO_DATA_ACQUIRED")}
       </div>
-      <div
-        className="stamp relative z-10"
-        style={{ fontSize: 10, letterSpacing: "0.2em", color: "#71717A", textAlign: "center" }}
-      >
+      <div className="stamp" style={{ fontSize: 10, letterSpacing: "0.2em", color: "#71717A", textAlign: "center" }}>
         {t("progress.NO_DATA_DESC")}
       </div>
     </div>
@@ -600,7 +565,7 @@ export default function ProgressPage() {
             >
               {t("progress.STATS")}
             </h1>
-            <div className="mt-2 h-0.5 w-12 bg-[#e53e00]" />
+            <div className="mt-2" style={{ height: 2, width: 32, background: "linear-gradient(90deg,#C2410C,transparent)", boxShadow: "0 0 8px #C2410C" }} />
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
@@ -653,9 +618,8 @@ export default function ProgressPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {/* Enhanced Volume Chart — spans 2 columns on large screens */}
         <div className="lg:col-span-2">
-          <div className="border border-card-border bg-card p-3 relative overflow-hidden">
-            <BrandNoiseOverlay />
-            <div className="relative z-10">
+          <div className="glass p-3">
+            <div>
               <PanelHeader 
                 label={t("progress.WEEKLY_VOLUME")}
                 sub={t("progress.LAST_8_WEEKS")} 
@@ -668,9 +632,8 @@ export default function ProgressPage() {
 
         {/* Progress Trend Chart */}
         <div>
-          <div className="border border-card-border bg-card p-3 relative overflow-hidden">
-            <BrandNoiseOverlay />
-            <div className="relative z-10">
+          <div className="glass p-3">
+            <div>
               <PanelHeader
                 label={t("progress.PROGRESS_TREND")}
                 sub="e1RM vs RPE"
@@ -685,9 +648,8 @@ export default function ProgressPage() {
       {/* ── SECONDARY CHARTS ROW ────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {/* Calendar Heatmap */}
-        <div className="border border-card-border bg-card p-3 relative overflow-hidden">
-          <BrandNoiseOverlay />
-          <div className="relative z-10">
+        <div className="glass p-3">
+          <div>
             <PanelHeader
               label={t("progress.CONTACT_MATRIX")}
               sub={`YEAR ${new Date().getFullYear()}`}
@@ -700,9 +662,8 @@ export default function ProgressPage() {
         </div>
 
         {/* Reps Distribution */}
-        <div className="border border-card-border bg-card p-3 relative overflow-hidden">
-          <BrandNoiseOverlay />
-          <div className="relative z-10">
+        <div className="glass p-3">
+          <div>
             <PanelHeader 
               label={t("progress.REP_DISTRIBUTION")}
               sub={t("progress.INTENSITY_PROFILE")} 
@@ -713,49 +674,48 @@ export default function ProgressPage() {
         </div>
       </div>
 
-      {/* ── MUSCLE BALANCE + PR WALL ────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        {/* Muscle Pie Chart */}
-        <div className="border border-card-border bg-card p-3 relative overflow-hidden">
-          <BrandNoiseOverlay />
-          <div className="relative z-10">
-            <PanelHeader 
-              label={t("progress.MUSCLE_BALANCE")}
-              sub={t("progress.TRAINING_DISTRIBUTION")} 
-              panelNum="09"
-            />
-            {muscleLoading ? (
-              <Skeleton className="skeleton-steal h-64 rounded-none" />
-            ) : musclePieData.length === 0 ? (
-              <div className="flex items-center justify-center py-16">
-                <span className="stamp" style={{ color: "#525252", letterSpacing: "0.2em" }}>
-                  {t("progress.NO_MUSCLE_DATA")}
-                </span>
-              </div>
-            ) : (
-              <MusclePieChart data={musclePieData} />
-            )}
+      {/* ── MUSCLE BALANCE ────────────────────────────────────────────── */}
+      <div className="glass p-3">
+        <PanelHeader
+          label={t("progress.MUSCLE_BALANCE")}
+          sub={t("progress.TRAINING_DISTRIBUTION")}
+          panelNum="09"
+        />
+        {muscleLoading ? (
+          <Skeleton className="skeleton-steal h-48 rounded-none" />
+        ) : musclePieData.length === 0 ? (
+          <div className="flex items-center justify-center py-16">
+            <span className="stamp" style={{ color: "#525252", letterSpacing: "0.2em" }}>
+              {t("progress.NO_MUSCLE_DATA")}
+            </span>
           </div>
-        </div>
+        ) : (
+          <MusclePieChart data={musclePieData} />
+        )}
+      </div>
 
-        {/* PR Wall */}
-        <div className="border border-card-border bg-card p-3 relative overflow-hidden">
-          <BrandNoiseOverlay />
-          <div className="relative z-10">
-            <PanelHeader 
-              label={t("progress.PR_WALL")}
-              sub={t("progress.PERSONAL_RECORDS")} 
-              panelNum="10"
-            />
-            <PRWall records={personalRecords.slice(0, 3)} />
-          </div>
+      {/* ── PR BOARD TABLE ────────────────────────────────────────────── */}
+      <div className="glass p-3 fade-up fade-up-4">
+        <PanelHeader
+          label={t("progress.PR_WALL")}
+          sub="ALL-TIME BESTS"
+          panelNum="10"
+        />
+        <PRBoard records={personalRecords.slice(0, 8)} />
+      </div>
+
+      {/* ── PR WALL CARDS ────────────────────────────────────────────── */}
+      <div className="fade-up fade-up-5">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="font-data text-[8px] text-[#333] tracking-[0.2em] uppercase">Recent Records</span>
+          <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.06)" }} />
         </div>
+        <PRWall records={personalRecords.slice(0, 3)} />
       </div>
 
         {/* ── ACHIEVEMENTS ────────────────────────────────────────────── */}
-        <div className="border border-card-border bg-card p-3 relative overflow-hidden">
-        <BrandNoiseOverlay />
-        <div className="relative z-10">
+      <div className="glass p-3">
+        <div>
           <PanelHeader 
             label={t("progress.MERIT_BOARD")}
             sub={t("progress.ACHIEVEMENTS_UNLOCKED")}
@@ -766,7 +726,7 @@ export default function ProgressPage() {
       </div>
 
       {/* ── BOTTOM HUD STRIP ────────────────────────────────────────────── */}
-      <div className="border-t-2 border-[#e53e00] pt-4">
+      <div className="pt-4" style={{ borderTop: "2px solid #C2410C" }}>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="flex flex-col gap-1">
             <span className="stamp" style={{ color: "#71717A", fontSize: 9, letterSpacing: "0.1em" }}>

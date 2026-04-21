@@ -6,24 +6,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { useActivePlan, usePlanDays, usePlanExercises, usePlanDaySession } from "@/hooks/usePlans";
 import { useStreakData, usePersonalRecords, useSessions, useAllSets } from "@/hooks/useProgress";
 import { CounterFX } from "@/components/fx/ImpactFlash";
-import { BrandNoiseOverlay } from "@/components/layout/BrandNoiseOverlay";
-import { GymBackgroundOverlay } from "@/components/layout/GymBackgroundOverlay";
-import { Button } from "@/components/ui/button";
 import { useI18n } from "@/components/providers/I18nProvider";
 import {
-  Zap,
-  Flame,
   Trophy,
-  BarChart3,
-  Settings,
   Dumbbell,
-  Target,
   TrendingUp,
-  Activity,
   CheckCircle2,
   Play,
   Calendar,
-  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -63,57 +53,31 @@ interface KpiPanelProps {
 }
 
 function KpiPanel({ label, value, unit, subValue, icon, accent = "orange", tag = "01", trend }: KpiPanelProps) {
-  const accentColors = {
-    orange: { border: "#e53e00", text: "#e53e00" },
-    green: { border: "#10b981", text: "#10b981" },
-    blue: { border: "#3b82f6", text: "#3b82f6" },
-    default: { border: "#525252", text: "#71717A" },
-  };
-  const colors = accentColors[accent];
+  const textColor =
+    accent === "green" ? "#22c55e" :
+    accent === "blue"  ? "#3b82f6" :
+    "#C2410C";
+
+  const kpiType =
+    accent === "green" ? "kpi-grn" :
+    accent === "blue"  ? "kpi-blu" :
+    "kpi-acc";
 
   return (
-    <div
-      className="border border-[#2a2a2a] bg-[#0a0a0a] p-3 relative overflow-hidden"
-      style={{ borderLeft: `2px solid ${colors.border}` }}
-    >
-      <BrandNoiseOverlay />
-      <div className="relative z-10">
-        <div className="flex items-start justify-between mb-2">
-          <div className="flex items-center gap-1.5">
-            <span style={{ color: colors.text }}>{icon}</span>
-            <span className="stamp text-[9px] tracking-[0.15em] text-[#71717A]">{label}</span>
-          </div>
-          <span className="stamp text-[8px] text-[#525252]">{tag}</span>
-        </div>
-        <div className="flex items-end justify-between">
-          <div>
-            <div
-              className="metric-xl tabular-nums"
-              style={{ 
-                color: colors.text,
-                fontSize: "clamp(1.5rem, 4vw, 2rem)",
-                fontWeight: 800,
-              }}
-            >
-              <CounterFX value={value} />
-            </div>
-            {unit && (
-              <div className="stamp mt-1 text-[9px] text-[#71717A]">{unit}</div>
-            )}
-            {subValue && (
-              <div className="stamp mt-0.5 text-[8px] text-[#525252]">{subValue}</div>
-            )}
-          </div>
-          {trend && (
-            <TrendingUp 
-              className={`h-4 w-4 ${
-                trend === "up" ? "text-[#10b981]" : 
-                trend === "down" ? "text-[#ef4444]" : "text-[#525252]"
-              }`} 
-            />
-          )}
-        </div>
+    <div className={`glass kpi ${kpiType} glass-hover fade-up`}>
+      <span className="font-data block text-[8px] tracking-[0.2em] text-[#333] uppercase mb-1.5">{label}</span>
+      <div
+        className="font-heading tabular-nums leading-none"
+        style={{ fontSize: 26, fontWeight: 700, color: textColor }}
+      >
+        <CounterFX value={value} />
       </div>
+      {unit && (
+        <span className="font-data block text-[8px] text-[#444] uppercase mt-1">{unit}</span>
+      )}
+      {subValue && (
+        <span className="font-data block text-[8px] text-[#333] mt-0.5">{subValue}</span>
+      )}
     </div>
   );
 }
@@ -372,30 +336,19 @@ function ActiveMissionPanel({ planId, t }: { planId: string; t: (path: string) =
         </div>
       )}
 
-      <Button
-        asChild
-        disabled={!!completedSession}
+      <Link
+        href={`/workout/${nextSessionDay.id}`}
         className={cn(
-          "w-full rounded-none font-data text-xs font-black uppercase tracking-widest h-11",
-          completedSession
-            ? "bg-[#16a34a] text-white cursor-default"
-            : "bg-[#e53e00] text-white hover:bg-[#ff4500]"
+          "btn-forge w-full h-9 text-[12px] font-heading mt-1",
+          completedSession && "opacity-60 pointer-events-none"
         )}
       >
-        <Link href={`/workout/${nextSessionDay.id}`}>
-          {completedSession ? (
-            <>
-              <CheckCircle2 className="mr-2 h-3.5 w-3.5" />
-              [ {t("dashboard.COMPLETED")} ]
-            </>
-          ) : (
-            <>
-              <Play className="mr-2 h-3.5 w-3.5" />
-              [ {t("dashboard.DEPLOY_START").replace("[", "").replace("]", "")} ]
-            </>
-          )}
-        </Link>
-      </Button>
+        {completedSession ? (
+          <><CheckCircle2 className="mr-2 h-3.5 w-3.5" />[ {t("dashboard.COMPLETED")} ]</>
+        ) : (
+          <><Play className="mr-2 h-3.5 w-3.5" />[ {t("dashboard.DEPLOY_START").replace("[", "").replace("]", "")} ]</>
+        )}
+      </Link>
     </div>
   );
 }
@@ -708,7 +661,8 @@ function RecentPRs({ t }: { t: (path: string) => string }) {
       {top3.map((pr, i) => (
         <div
           key={pr.exerciseId}
-          className="border border-[#2a2a2a] bg-[#0a0a0a] p-3 flex items-center gap-3"
+          className="flex items-center gap-3 py-1.5"
+          style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
         >
           <span className="stamp text-[8px] text-[#525252] w-5 shrink-0">
             {String(i + 1).padStart(2, "0")}
@@ -787,194 +741,180 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="relative space-y-6 py-6">
-      {/* Gym background overlay */}
-      <GymBackgroundOverlay className="fixed inset-0 -z-10" opacity={0.02} />
-      
+    <div className="relative space-y-[14px] py-4 scroll-forge">
       {/* ── Hero strip ─────────────────────────────────────────────────────── */}
-      <div className="border-b border-[#2a2a2a] pb-4">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <p className="stamp text-[9px] tracking-[0.3em] text-[#525252] mb-1">{t("dashboard.STEAL_THERAPY")}</p>
-            <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight leading-none text-[#e5e5e5]">
-              {t("dashboard.OPERATIONS_DASHBOARD")}
-            </h1>
-            <div className="mt-2 h-0.5 w-12 bg-[#e53e00]" />
-          </div>
-          <div className="flex flex-col items-end gap-1 shrink-0">
-            <TacticalClock />
-            <span className="stamp text-[9px] text-[#525252]">{t("dashboard.OPERATOR")}: {firstName}</span>
-          </div>
+      <div
+        className="fade-up pb-3 flex items-end justify-between flex-wrap gap-3"
+        style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+      >
+        <div>
+          <span className="font-data block text-[8px] tracking-[0.3em] text-[#2a2a2a] uppercase mb-1.5">
+            {t("dashboard.STEAL_THERAPY")}
+          </span>
+          <h1
+            className="font-heading uppercase leading-none text-[#f0f0f0]"
+            style={{ fontSize: 32, fontWeight: 700, letterSpacing: "-0.01em" }}
+          >
+            {t("dashboard.OPERATIONS_DASHBOARD")}
+          </h1>
+          <div
+            className="mt-2"
+            style={{
+              height: 2,
+              width: 32,
+              background: "linear-gradient(90deg, #C2410C, transparent)",
+              boxShadow: "0 0 8px #C2410C",
+            }}
+          />
+        </div>
+        <div className="text-right">
+          <span className="font-data block text-[9px] text-[#2a2a2a]">{t("dashboard.OPERATOR")}: {firstName}</span>
+          <TacticalClock />
         </div>
       </div>
 
       {/* ── KPI row ────────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <KpiPanel
-          label={t("dashboard.CURRENT_STREAK")}
-          value={streakData.currentStreak}
-          unit={t("dashboard.DAYS")}
-          subValue={`${t("dashboard.BEST")}: ${streakData.longestStreak}D`}
-          icon={<Flame className="h-3.5 w-3.5" />}
-          accent="green"
-          tag="01"
-          trend="up"
-        />
-        <KpiPanel
-          label={t("dashboard.THIS_WEEK")}
-          value={streakData.thisWeekSessions}
-          unit={t("dashboard.SESSIONS")}
-          icon={<Zap className="h-3.5 w-3.5" />}
-          accent="orange"
-          tag="02"
-          trend="up"
-        />
-        <KpiPanel
-          label={t("dashboard.TOTAL_VOLUME")}
-          value={totalVolumeTons}
-          unit={t("dashboard.TONNES_LIFTED")}
-          icon={<BarChart3 className="h-3.5 w-3.5" />}
-          accent="orange"
-          tag="03"
-          trend="up"
-        />
-        <KpiPanel
-          label={t("dashboard.PRS_THIS_MONTH")}
-          value={prsThisMonth}
-          unit={t("dashboard.RECORDS_SET")}
-          icon={<Trophy className="h-3.5 w-3.5" />}
-          accent="blue"
-          tag="04"
-          trend={prsThisMonth > 0 ? "up" : "neutral"}
-        />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+        <div className="glass kpi kpi-grn glass-hover fade-up fade-up-1">
+          <span className="font-data block text-[8px] tracking-[0.2em] text-[#333] uppercase mb-1.5">{t("dashboard.CURRENT_STREAK")}</span>
+          <div className="font-heading leading-none" style={{ fontSize: 26, fontWeight: 700, color: "#22c55e" }}>
+            <CounterFX value={streakData.currentStreak} />
+          </div>
+          <span className="font-data block text-[8px] text-[#444] uppercase mt-1">{t("dashboard.DAYS")}</span>
+        </div>
+        <div className="glass kpi kpi-acc glass-hover fade-up fade-up-2">
+          <span className="font-data block text-[8px] tracking-[0.2em] text-[#333] uppercase mb-1.5">{t("dashboard.THIS_WEEK")}</span>
+          <div className="font-heading leading-none" style={{ fontSize: 26, fontWeight: 700, color: "#C2410C" }}>
+            <CounterFX value={streakData.thisWeekSessions} />
+          </div>
+          <span className="font-data block text-[8px] text-[#444] uppercase mt-1">{t("dashboard.SESSIONS")}</span>
+        </div>
+        <div className="glass kpi kpi-acc glass-hover fade-up fade-up-3">
+          <span className="font-data block text-[8px] tracking-[0.2em] text-[#333] uppercase mb-1.5">{t("dashboard.TOTAL_VOLUME")}</span>
+          <div className="font-heading leading-none" style={{ fontSize: 26, fontWeight: 700, color: "#C2410C" }}>
+            <CounterFX value={totalVolumeTons} />
+          </div>
+          <span className="font-data block text-[8px] text-[#444] uppercase mt-1">{t("dashboard.TONNES_LIFTED")}</span>
+        </div>
+        <div className="glass kpi kpi-blu glass-hover fade-up fade-up-4">
+          <span className="font-data block text-[8px] tracking-[0.2em] text-[#333] uppercase mb-1.5">{t("dashboard.PRS_THIS_MONTH")}</span>
+          <div className="font-heading leading-none" style={{ fontSize: 26, fontWeight: 700, color: "#3b82f6" }}>
+            <CounterFX value={prsThisMonth} />
+          </div>
+          <span className="font-data block text-[8px] text-[#444] uppercase mt-1">{t("dashboard.RECORDS_SET")}</span>
+        </div>
       </div>
 
-      {/* ── Main grid ──────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        {/* Active Mission — col 8 */}
-        <div className="lg:col-span-8 border border-[#2a3e00] bg-[#0a0a0a] p-6 relative overflow-hidden">
-          <BrandNoiseOverlay />
-          <div className="relative z-10 space-y-3">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="stamp text-[9px] tracking-[0.25em] text-[#525252]">{t("dashboard.MISSION_BRIEFING")}</span>
-              <div className="h-px flex-1 bg-[#1a1a1a]" />
-              {activePlan && (
-                <span className="stamp text-[9px] text-[#10b981] tracking-widest">{t("dashboard.ACTIVE")}</span>
-              )}
-            </div>
-
-            {activePlan ? (
-              <>
-                <div>
-                  <h2 className="text-2xl font-black uppercase tracking-tight leading-tight text-[#e5e5e5]">
-                    {activePlan.title}
-                  </h2>
-                  <p className="stamp text-[9px] text-[#525252] mt-1">
-                    WK {displayWeek} / {activePlan.durationWeeks} — {activePlan.goalType?.replace(/_/g, " ")}
-                  </p>
-                </div>
-                <div className="h-px bg-[#1a1a1a]" />
-                <ActiveMissionPanel planId={activePlan.id} t={t} />
-              </>
-            ) : (
-              <div className="flex flex-col gap-4 py-6">
-                <p className="stamp text-[10px] text-[#525252]">{t("dashboard.NO_ACTIVE_MISSION_ASSIGNED")}</p>
-                <h2 className="text-xl font-black uppercase tracking-tight text-[#e5e5e5]">
-                  {t("dashboard.NO_ACTIVE_PROGRAM")}
-                </h2>
-                <p className="text-sm text-[#71717A] max-w-sm">
-                  {t("dashboard.NO_PROGRAM_DESC")}
-                </p>
-                <div className="flex gap-3 flex-wrap">
-                  <Button
-                    asChild
-                    className="rounded-none bg-[#e53e00] font-data text-xs font-black uppercase tracking-widest text-white hover:bg-[#ff4500] h-10"
-                  >
-                    <Link href="/programs">
-                      <Dumbbell className="mr-2 h-3 w-3" />
-                      [ {t("dashboard.FIND_A_PROGRAM").replace("[", "").replace("]", "")} ]
-                    </Link>
-                  </Button>
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="rounded-none border-[#2a2a2a] font-data text-xs font-bold uppercase tracking-widest text-[#e5e5e5] hover:border-[#e53e00]/50 hover:bg-[#1a1a1a] h-10"
-                  >
-                    <Link href="/plans">{t("dashboard.BROWSE_TEMPLATES")}</Link>
-                  </Button>
-                </div>
-              </div>
+      {/* ── Main 3-col grid ──────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1.2fr_1fr] gap-[10px]">
+        {/* Active Mission */}
+        <div className="glass-acc forge-pulse fade-up fade-up-2 p-4 space-y-3">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="font-data text-[8px] tracking-[0.2em] text-[#444] uppercase">{t("dashboard.MISSION_BRIEFING")}</span>
+            <div className="h-px flex-1" style={{ background: "rgba(255,255,255,0.06)" }} />
+            {activePlan && (
+              <span className="font-data text-[9px] text-[#22c55e] tracking-widest">{t("dashboard.ACTIVE")}</span>
             )}
           </div>
+
+          {activePlan ? (
+            <>
+              <div>
+                <h2 className="font-heading text-2xl font-black uppercase text-[#f0f0f0] leading-tight">
+                  {activePlan.title}
+                </h2>
+                <span className="font-data text-[8px] text-[#444] block mt-1">
+                  WK {displayWeek} / {activePlan.durationWeeks} · {activePlan.goalType?.replace(/_/g, " ")}
+                </span>
+              </div>
+              <div style={{ height: 1, background: "rgba(255,255,255,0.06)" }} />
+              <ActiveMissionPanel planId={activePlan.id} t={t} />
+            </>
+          ) : (
+            <div className="flex flex-col gap-4 py-6">
+              <span className="font-data text-[10px] text-[#525252]">{t("dashboard.NO_ACTIVE_MISSION_ASSIGNED")}</span>
+              <h2 className="font-heading text-xl font-black uppercase text-[#e5e5e5]">{t("dashboard.NO_ACTIVE_PROGRAM")}</h2>
+              <p className="text-sm text-[#71717A] max-w-sm">{t("dashboard.NO_PROGRAM_DESC")}</p>
+              <div className="flex gap-3 flex-wrap">
+                <Link
+                  href="/programs"
+                  className="btn-forge h-9 px-4 text-[11px] font-heading"
+                >
+                  <Dumbbell className="mr-2 h-3 w-3" />
+                  {t("dashboard.FIND_A_PROGRAM").replace("[", "").replace("]", "")}
+                </Link>
+                <Link
+                  href="/plans"
+                  className="btn-ghost h-9 px-4 text-[11px] font-heading"
+                >
+                  {t("dashboard.BROWSE_TEMPLATES")}
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Session History — col 4 */}
-        <div className="lg:col-span-4 border border-[#2a2a2a] bg-[#0a0a0a] p-5 relative overflow-hidden">
-          <BrandNoiseOverlay />
-          <div className="relative z-10 space-y-3">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="stamp text-[9px] tracking-[0.25em] text-[#525252]">{t("dashboard.SESSION_HISTORY")}</span>
-              <div className="h-px flex-1 bg-[#1a1a1a]" />
+        {/* Week Schedule + Upcoming */}
+        <div className="flex flex-col gap-[8px]">
+          <div className="glass fade-up fade-up-3 p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="font-data text-[8px] tracking-[0.2em] text-[#333] uppercase">Week {displayWeek}</span>
+              <div className="h-px flex-1" style={{ background: "rgba(255,255,255,0.06)" }} />
             </div>
             {activePlan ? (
               <SessionHistoryPanel planId={activePlan.id} t={t} />
             ) : (
-              <p className="stamp text-[10px] text-[#525252]">{t("dashboard.NO_ACTIVE_PROGRAM")}</p>
+              <span className="font-data text-[10px] text-[#525252]">{t("dashboard.NO_ACTIVE_PROGRAM")}</span>
             )}
           </div>
         </div>
-      </div>
 
-      {/* ── Bottom feed + PRs ──────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        {/* Recent activity feed — col 8 */}
-        <div className="lg:col-span-8 border border-[#2a2a2a] bg-[#0a0a0a] p-5 relative overflow-hidden">
-          <BrandNoiseOverlay />
-          <div className="relative z-10 space-y-3">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="stamp text-[9px] tracking-[0.25em] text-[#525252]">{t("dashboard.ACTIVITY_LOG")}</span>
-              <div className="h-px flex-1 bg-[#1a1a1a]" />
-              <Link
-                href="/progress"
-                className="stamp text-[9px] text-[#525252] hover:text-[#e53e00] transition-colors"
-              >
+        {/* Activity Log + Recent PRs */}
+        <div className="flex flex-col gap-[8px]">
+          <div className="glass fade-up fade-up-4 p-3 flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="font-data text-[8px] tracking-[0.2em] text-[#333] uppercase">{t("dashboard.ACTIVITY_LOG")}</span>
+              <div className="h-px flex-1" style={{ background: "rgba(255,255,255,0.06)" }} />
+              <Link href="/progress" className="font-data text-[8px] text-[#333] hover:text-[#C2410C] transition-colors">
                 {t("dashboard.VIEW_ALL")}
               </Link>
             </div>
             <RecentFeed t={t} />
           </div>
-        </div>
-
-        {/* Recent PRs — col 4 */}
-        <div className="lg:col-span-4 border border-[#2a2a2a] bg-[#0a0a0a] p-5 relative overflow-hidden">
-          <BrandNoiseOverlay />
-          <div className="relative z-10 space-y-3">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="stamp text-[9px] tracking-[0.25em] text-[#525252]">{t("dashboard.RECENT_PRS")}</span>
-              <div className="h-px flex-1 bg-[#1a1a1a]" />
-              <Trophy className="h-3 w-3 text-[#71717A]" />
+          <div className="glass fade-up fade-up-5 p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="font-data text-[8px] tracking-[0.2em] text-[#333] uppercase">{t("dashboard.RECENT_PRS")}</span>
+              <div className="h-px flex-1" style={{ background: "rgba(255,255,255,0.06)" }} />
+              <Trophy className="h-3 w-3 text-[#444]" />
             </div>
             <RecentPRs t={t} />
           </div>
         </div>
       </div>
 
-      {/* ── Bottom HUD ─────────────────────────────────────────────────────── */}
-      <div className="border-t-2 border-[#e53e00] pt-4">
-        <div className="grid grid-cols-3">
-          <div className="px-4 py-2 text-center border-r border-[#1a1a1a]">
-            <p className="stamp text-[8px] text-[#525252] mb-1">{t("dashboard.LAST_SYNC")}</p>
-            <p className="font-data text-[10px] text-[#71717A]">{t("dashboard.LIVE")}</p>
+      {/* ── HUD strip ──────────────────────────────────────────────────────── */}
+      <div
+        className="flex"
+        style={{
+          borderTop: "2px solid #C2410C",
+          background: "rgba(0,0,0,0.6)",
+          backdropFilter: "blur(20px)",
+        }}
+      >
+        {[
+          [t("dashboard.LAST_SYNC"), t("dashboard.LIVE")],
+          [t("dashboard.DEVICE"), t("dashboard.WEB")],
+          [t("dashboard.BUILD"), "STEEL v2"],
+        ].map(([label, val], i) => (
+          <div
+            key={i}
+            className="flex-1 px-2 py-1.5 text-center"
+            style={{ borderRight: i < 2 ? "1px solid rgba(255,255,255,0.04)" : undefined }}
+          >
+            <span className="font-data block text-[7px] tracking-[0.1em] text-[#1e1e1e] uppercase">{label}</span>
+            <span className="font-data block text-[8px] text-[#2a2a2a] uppercase mt-0.5">{val}</span>
           </div>
-          <div className="px-4 py-2 text-center border-r border-[#1a1a1a]">
-            <p className="stamp text-[8px] text-[#525252] mb-1">{t("dashboard.DEVICE")}</p>
-            <p className="font-data text-[10px] text-[#71717A] uppercase">{t("dashboard.WEB")}</p>
-          </div>
-          <div className="px-4 py-2 text-center">
-            <p className="stamp text-[8px] text-[#525252] mb-1">{t("dashboard.BUILD")}</p>
-            <p className="font-data text-[10px] text-[#71717A]">STEEL v2</p>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );

@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
-import { useTheme } from "@/components/providers/ThemeProvider";
 import { useI18n } from "@/components/providers/I18nProvider";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Sun, Moon, User, LogOut, Settings, LayoutDashboard, Globe } from "lucide-react";
+import { User, LogOut, Settings, LayoutDashboard, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -75,7 +74,6 @@ function StatusIndicator({ t }: { t: (path: string) => string }) {
 export function Navbar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const { language, setLanguage, t } = useI18n();
 
   const displayName: string =
@@ -87,8 +85,8 @@ export function Navbar() {
 
   return (
     <header
-      className="sticky top-0 z-40 h-14 bg-surface-1"
-      style={{ borderBottom: "1px solid rgba(185,28,28,0.4)" }}
+      className="sticky top-0 z-40 h-14 glass-dark"
+      style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
     >
       <div className="container-app flex h-full items-center justify-between">
 
@@ -96,22 +94,24 @@ export function Navbar() {
         <div className="flex items-center gap-8">
           <Link
             href="/dashboard"
-            className="flex flex-col leading-none select-none"
-            aria-label="Steal — go to dashboard"
+            className="flex items-center gap-2 select-none"
+            aria-label="Steal Therapy — go to dashboard"
           >
             <span
-              className="text-ink-high font-black tracking-tight leading-none"
-              style={{
-                fontFamily: "'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif",
-                fontSize: "22px",
-                fontWeight: 800,
-                letterSpacing: "-0.02em",
-              }}
+              className="font-heading font-black leading-none text-[#C2410C]"
+              style={{ fontSize: "15px", letterSpacing: "0.2em" }}
             >
-              STEEL
+              STEAL
             </span>
-            <span className="stamp text-ink-low" style={{ letterSpacing: "0.3em" }}>
-              {t("navbar.STEEL")}
+            <span
+              aria-hidden="true"
+              style={{ width: 1, height: 16, background: "rgba(255,255,255,0.08)" }}
+            />
+            <span
+              className="font-data text-[#333]"
+              style={{ fontSize: "9px", letterSpacing: "0.1em" }}
+            >
+              THERAPY
             </span>
           </Link>
 
@@ -169,32 +169,21 @@ export function Navbar() {
             aria-hidden="true"
           />
 
-          {/* Theme toggle */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleTheme}
-            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-            className="h-8 w-8 rounded-none text-ink-mid hover:bg-surface-3 hover:text-ink-high"
-          >
-            {theme === "dark" ? (
-              <Sun className="h-3.5 w-3.5" />
-            ) : (
-              <Moon className="h-3.5 w-3.5" />
-            )}
-          </Button>
-
           {/* User avatar dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
+              <button
                 aria-label="User menu"
-                className="h-8 w-8 rounded-none border border-surface-4 text-ink-mid hover:border-rust hover:bg-surface-3 hover:text-ink-high"
+                className="h-[30px] w-[30px] rounded-full flex items-center justify-center transition-all"
+                style={{
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                }}
               >
-                <User className="h-3.5 w-3.5" />
-              </Button>
+                <span className="font-data text-[11px] text-[#888]">
+                  {displayName.charAt(0).toUpperCase()}
+                </span>
+              </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"

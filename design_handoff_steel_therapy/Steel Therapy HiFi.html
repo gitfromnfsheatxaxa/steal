@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Steel Therapy — Hi-Fi Prototype</title>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+html,body,#root{height:100%;width:100%;overflow:hidden}
+body{background:#080808;font-family:'Oswald',sans-serif;color:#d0d0d0}
+
+/* ─── Forge background ─────────────────────────────────────── */
+.forge-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:#080808}
+.forge-blob{position:absolute;border-radius:50%;filter:blur(80px);mix-blend-mode:screen}
+.blob-1{width:600px;height:600px;top:-200px;left:-100px;background:radial-gradient(circle,rgba(229,62,0,.18) 0%,transparent 70%);animation:blob1 18s ease-in-out infinite}
+.blob-2{width:400px;height:400px;bottom:-100px;right:-80px;background:radial-gradient(circle,rgba(229,62,0,.12) 0%,transparent 70%);animation:blob2 22s ease-in-out infinite}
+.blob-3{width:300px;height:300px;top:40%;left:40%;background:radial-gradient(circle,rgba(180,40,0,.08) 0%,transparent 70%);animation:blob3 28s ease-in-out infinite}
+@keyframes blob1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(60px,40px) scale(1.15)}}
+@keyframes blob2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-40px,-60px) scale(1.2)}}
+@keyframes blob3{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(80px,-40px) scale(1.1)}66%{transform:translate(-60px,50px) scale(0.9)}}
+
+/* Tactical grid overlay */
+.forge-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(229,62,0,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(229,62,0,.025) 1px,transparent 1px);background-size:40px 40px;animation:grid-drift 60s linear infinite}
+@keyframes grid-drift{from{background-position:0 0}to{background-position:40px 40px}}
+
+/* Noise overlay */
+.forge-noise{position:absolute;inset:0;opacity:0.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* ─── Glass card ───────────────────────────────────────────── */
+.glass{background:rgba(255,255,255,0.05);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08);box-shadow:0 8px 32px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.06)}
+.glass-dark{background:rgba(0,0,0,.4);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.06);box-shadow:0 16px 48px rgba(0,0,0,.7)}
+.glass-acc{background:rgba(229,62,0,.08);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(229,62,0,.25);box-shadow:0 8px 32px rgba(229,62,0,.15),inset 0 1px 0 rgba(229,62,0,.1)}
+.glass-hover{transition:transform .25s cubic-bezier(.23,1,.32,1),box-shadow .25s cubic-bezier(.23,1,.32,1),border-color .25s}
+.glass-hover:hover{transform:translateY(-2px);box-shadow:0 16px 48px rgba(0,0,0,.6),0 0 0 1px rgba(229,62,0,.2),inset 0 1px 0 rgba(255,255,255,.1)}
+
+/* ─── Accent glow button ───────────────────────────────────── */
+.btn-forge{background:#e53e00;color:#fff;border:none;font-family:'Oswald',sans-serif;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .25s cubic-bezier(.23,1,.32,1);position:relative;overflow:hidden}
+.btn-forge::after{content:'';position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,.1),transparent);opacity:0;transition:opacity .2s}
+.btn-forge:hover{background:#ff4500;box-shadow:0 0 24px rgba(229,62,0,.5),0 4px 16px rgba(0,0,0,.4);transform:translateY(-1px)}
+.btn-forge:hover::after{opacity:1}
+.btn-ghost{background:transparent;color:#888;border:1px solid rgba(255,255,255,.1);font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s cubic-bezier(.23,1,.32,1)}
+.btn-ghost:hover{border-color:rgba(229,62,0,.4);color:#ccc;background:rgba(229,62,0,.06)}
+
+/* ─── Tags / pills ─────────────────────────────────────────── */
+.tag{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.1em;padding:2px 7px;border:1px solid rgba(255,255,255,.1);color:#555;display:inline-block}
+.tag-acc{border-color:rgba(229,62,0,.4);color:#e53e00;background:rgba(229,62,0,.08)}
+.tag-grn{border-color:rgba(34,197,94,.4);color:#22c55e;background:rgba(34,197,94,.08)}
+
+/* ─── Progress bar ─────────────────────────────────────────── */
+.prog-bar{height:3px;background:rgba(255,255,255,.06);position:relative;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,#e53e00,#ff6a00);box-shadow:0 0 8px rgba(229,62,0,.6)}
+
+/* ─── Scrollbars ───────────────────────────────────────────── */
+.scroll::-webkit-scrollbar{width:3px}
+.scroll::-webkit-scrollbar-track{background:transparent}
+.scroll::-webkit-scrollbar-thumb{background:rgba(229,62,0,.3);border-radius:2px}
+
+/* ─── Bottom nav ───────────────────────────────────────────── */
+.bottom-nav{position:absolute;bottom:0;left:0;right:0;height:56px;display:flex;border-top:1px solid rgba(255,255,255,.06)}
+.bottom-nav .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;transition:all .2s;font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:.08em;color:#333}
+.bottom-nav .tab.active{color:#e53e00}
+.bottom-nav .tab:hover:not(.active){color:#666}
+
+/* ─── Top nav ──────────────────────────────────────────────── */
+.top-nav{height:52px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;position:relative;z-index:1}
+
+/* ─── KPI card ─────────────────────────────────────────────── */
+.kpi{padding:12px 14px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px}
+.kpi-acc::before{background:linear-gradient(to bottom,#e53e00,#ff6a00);box-shadow:0 0 8px rgba(229,62,0,.4)}
+.kpi-grn::before{background:linear-gradient(to bottom,#22c55e,#16a34a)}
+.kpi-blu::before{background:linear-gradient(to bottom,#3b82f6,#2563eb)}
+
+/* ─── Separator ────────────────────────────────────────────── */
+.sep{height:1px;background:rgba(255,255,255,.06);width:100%}
+
+/* ─── Set row ──────────────────────────────────────────────── */
+.set-row{display:flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid rgba(255,255,255,.05);transition:all .2s}
+.set-row.done{border-color:rgba(34,197,94,.2);background:rgba(34,197,94,.04)}
+.set-row.active{border-color:rgba(229,62,0,.4);background:rgba(229,62,0,.06)}
+.set-input{background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.08);color:#e0e0e0;font-family:'Share Tech Mono',monospace;font-size:14px;text-align:center;padding:4px;width:52px;height:28px}
+.set-input.active-in{border-color:rgba(229,62,0,.5);color:#e53e00;background:rgba(229,62,0,.08)}
+
+/* ─── Dev guide ────────────────────────────────────────────── */
+.dev-guide{position:fixed;bottom:0;left:0;right:0;z-index:100;transform:translateY(calc(100% - 44px));transition:transform .35s cubic-bezier(.23,1,.32,1)}
+.dev-guide.open{transform:translateY(0)}
+.dev-guide-handle{height:44px;display:flex;align-items:center;padding:0 20px;cursor:pointer;gap:10px;border-top:1px solid rgba(229,62,0,.3)}
+.dev-guide-body{max-height:50vh;overflow-y:auto;padding:20px}
+
+/* ─── Micro-animations ─────────────────────────────────────── */
+@keyframes fade-up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fade-up .4s cubic-bezier(.23,1,.32,1) both}
+.fade-up-1{animation-delay:.05s}.fade-up-2{animation-delay:.1s}.fade-up-3{animation-delay:.15s}.fade-up-4{animation-delay:.2s}.fade-up-5{animation-delay:.25s}
+
+@keyframes pulse-acc{0%,100%{box-shadow:0 0 0 rgba(229,62,0,0)}50%{box-shadow:0 0 20px rgba(229,62,0,.3)}}
+.pulse{animation:pulse-acc 3s ease-in-out infinite}
+
+/* ─── Tweaks ───────────────────────────────────────────────── */
+.tweaks-panel{position:fixed;bottom:80px;right:20px;z-index:200;width:220px;padding:16px;display:none}
+.tweaks-panel.visible{display:block}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accent": "#e53e00",
+  "accentGlow": "rgba(229,62,0,0.3)",
+  "screen": "dashboard"
+}/*EDITMODE-END*/;
+
+// ─── Shared tokens ────────────────────────────────────────────
+const ACC = '#e53e00';
+const GRN = '#22c55e';
+const BLU = '#3b82f6';
+const MONO = "'Share Tech Mono', monospace";
+const HEAD = "'Oswald', sans-serif";
+
+// ─── Forge Background ─────────────────────────────────────────
+const ForgeBg = () => (
+  <div className="forge-bg">
+    <div className="forge-blob blob-1"/>
+    <div className="forge-blob blob-2"/>
+    <div className="forge-blob blob-3"/>
+    <div className="forge-grid"/>
+    <div className="forge-noise"/>
+  </div>
+);
+
+// ─── Primitives ───────────────────────────────────────────────
+const Mono = ({ size=10, c='#444', bold=false, style={}, children }) => (
+  <span style={{ fontFamily:MONO, fontSize:size, color:c, fontWeight:bold?700:400, letterSpacing:'0.08em', lineHeight:1.3, ...style }}>{children}</span>
+);
+
+const Label = ({ children, style={} }) => (
+  <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:8, ...style }}>
+    <Mono size={8} c="#333" style={{ letterSpacing:'0.2em', flexShrink:0 }}>{children}</Mono>
+    <div className="sep" style={{ flex:1 }}/>
+  </div>
+);
+
+const Tag = ({ acc=false, grn=false, children }) => (
+  <span className={`tag${acc?' tag-acc':grn?' tag-grn':''}`}>{children}</span>
+);
+
+const KpiGlass = ({ label, value, unit, type='acc', delay=0 }) => (
+  <div className={`glass kpi kpi-${type} glass-hover fade-up fade-up-${delay+1}`} style={{ borderRadius:0 }}>
+    <Mono size={8} c="#333" style={{ display:'block', letterSpacing:'0.15em', marginBottom:6, textTransform:'uppercase' }}>{label}</Mono>
+    <div style={{ fontFamily:HEAD, fontSize:26, fontWeight:700, color:type==='grn'?GRN:type==='blu'?BLU:ACC, lineHeight:1 }}>{value}</div>
+    {unit && <Mono size={8} c="#444" style={{ display:'block', marginTop:4, textTransform:'uppercase' }}>{unit}</Mono>}
+  </div>
+);
+
+const GlassCard = ({ children, acc=false, style={}, className='' }) => (
+  <div className={`${acc?'glass-acc':'glass'} glass-hover ${className}`} style={{ borderRadius:0, ...style }}>{children}</div>
+);
+
+const ForgeBtn = ({ children, full=false, h=36, size=11, onClick, style={} }) => (
+  <button className="btn-forge" onClick={onClick} style={{ height:h, width:full?'100%':undefined, fontSize:size, padding:'0 16px', display:'flex', alignItems:'center', justifyContent:'center', gap:8, ...style }}>
+    {children}
+  </button>
+);
+
+const GhostBtn = ({ children, h=32, size=10, onClick, style={} }) => (
+  <button className="btn-ghost" onClick={onClick} style={{ height:h, fontSize:size, padding:'0 12px', display:'flex', alignItems:'center', justifyContent:'center', gap:6, ...style }}>
+    {children}
+  </button>
+);
+
+// ─── Nav components ───────────────────────────────────────────
+const TopNav = ({ screen, setScreen }) => (
+  <div className="top-nav glass-dark">
+    <div style={{ fontFamily:HEAD, fontWeight:700, fontSize:15, color:ACC, letterSpacing:'0.2em' }}>STEAL</div>
+    <div style={{ width:1, height:16, background:'rgba(255,255,255,.08)', margin:'0 2px' }}/>
+    <div style={{ fontFamily:MONO, fontSize:9, color:'#333', letterSpacing:'0.1em' }}>THERAPY</div>
+    <div style={{ flex:1 }}/>
+    {[['dashboard','HQ'],['workout','TRAIN'],['progress','INTEL'],['exercises','DRILLS'],['plans','PLANS']].map(([id,label])=>(
+      <button key={id} onClick={()=>setScreen(id)} style={{ background:'none', border:'none', cursor:'pointer', fontFamily:MONO, fontSize:9, letterSpacing:'0.09em', color:screen===id?'#ccc':'#333', padding:'0 8px', borderBottom:screen===id?`1px solid ${ACC}`:'1px solid transparent', paddingBottom:2, transition:'all .2s' }}>
+        {label}
+      </button>
+    ))}
+    <div style={{ width:30, height:30, borderRadius:'50%', background:'rgba(255,255,255,.06)', border:'1px solid rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+      <Mono size={11} c="#888">M</Mono>
+    </div>
+  </div>
+);
+
+const BottomNavBar = ({ screen, setScreen }) => {
+  const tabs = [['dashboard','HQ','⊞'],['plans','PLANS','≡'],['workout','TRAIN','◉'],['progress','INTEL','▲'],['exercises','DRILLS','⊙']];
+  return (
+    <div className="bottom-nav glass-dark">
+      {tabs.map(([id,label,icon])=>(
+        <div key={id} className={`tab${screen===id?' active':''}`} onClick={()=>setScreen(id)}>
+          <div style={{ fontSize:18, lineHeight:1 }}>{icon}</div>
+          <div>{label}</div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// ─── Week grid ────────────────────────────────────────────────
+const WeekGrid = () => {
+  const days = [
+    {d:'M',state:'done',n:'PUSH A'},
+    {d:'T',state:'done',n:'PULL B'},
+    {d:'W',state:'rest'},
+    {d:'T',state:'next',n:'LEGS C'},
+    {d:'F',state:'plan',n:'PUSH D'},
+    {d:'S',state:'rest'},
+    {d:'S',state:'rest'},
+  ];
+  return (
+    <div style={{ display:'grid', gridTemplateColumns:'repeat(7,1fr)', gap:3 }}>
+      {days.map((d,i)=>(
+        <div key={i} style={{ border:`1px solid ${d.state==='next'?`${ACC}66`:d.state==='done'?'rgba(34,197,94,.2)':'rgba(255,255,255,.05)'}`, padding:'5px 2px', textAlign:'center', background:d.state==='next'?'rgba(229,62,0,.08)':d.state==='done'?'rgba(34,197,94,.04)':'rgba(0,0,0,.3)', transition:'all .2s' }}>
+          <Mono size={7} c="#2a2a2a" style={{ display:'block', marginBottom:3 }}>{d.d}</Mono>
+          {d.state==='rest'
+            ? <Mono size={8} c="#1e1e1e">—</Mono>
+            : <div style={{ fontSize:11, color:d.state==='done'?GRN:d.state==='next'?ACC:'#2a2a2a', lineHeight:1 }}>
+                {d.state==='done'?'✓':d.state==='next'?'▶':'·'}
+              </div>
+          }
+          {d.n && d.state!=='rest' && <Mono size={6} c={d.state==='done'?'#1a3a1a':d.state==='next'?'rgba(229,62,0,.4)':'#1a1a1a'} style={{ display:'block', marginTop:2 }}>{d.n.split(' ')[0]}</Mono>}
+          {d.state==='rest' && <Mono size={6} c="#161616" style={{ display:'block', marginTop:2 }}>REST</Mono>}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// ════════════════════════════════════════════════════════════════
+// SCREEN: DASHBOARD
+// ════════════════════════════════════════════════════════════════
+const DashboardScreen = () => (
+  <div style={{ flex:1, overflowY:'auto', padding:'16px 20px', display:'flex', flexDirection:'column', gap:14 }} className="scroll">
+    {/* Header */}
+    <div className="fade-up" style={{ borderBottom:'1px solid rgba(255,255,255,.06)', paddingBottom:12, display:'flex', alignItems:'flex-end', justifyContent:'space-between' }}>
+      <div>
+        <Mono size={8} c="#2a2a2a" style={{ display:'block', letterSpacing:'0.3em', marginBottom:6 }}>STEAL THERAPY</Mono>
+        <div style={{ fontFamily:HEAD, fontSize:32, fontWeight:700, color:'#f0f0f0', lineHeight:.88, textTransform:'uppercase' }}>OPERATIONS<br/>DASHBOARD</div>
+        <div style={{ height:2, width:32, background:`linear-gradient(90deg,${ACC},transparent)`, marginTop:8, boxShadow:`0 0 8px ${ACC}` }}/>
+      </div>
+      <div style={{ textAlign:'right' }}>
+        <Mono size={9} c="#2a2a2a">OPERATOR: MARCUS</Mono>
+        <Mono size={9} c="#222" style={{ display:'block', marginTop:3 }}>21APR26 · 14:33</Mono>
+      </div>
+    </div>
+    {/* 4 KPIs */}
+    <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8 }}>
+      <KpiGlass label="Current Streak" value="12" unit="Days" type="grn" delay={0}/>
+      <KpiGlass label="This Week" value="3" unit="Sessions" delay={1}/>
+      <KpiGlass label="Total Volume" value="42" unit="Tonnes" delay={2}/>
+      <KpiGlass label="PRs This Month" value="4" unit="Records" type="blu" delay={3}/>
+    </div>
+    {/* Main grid */}
+    <div style={{ display:'grid', gridTemplateColumns:'2fr 1.2fr 1fr', gap:10 }}>
+      {/* Active mission */}
+      <GlassCard acc className="pulse fade-up fade-up-2" style={{ padding:16, display:'flex', flexDirection:'column', gap:10 }}>
+        <Label>Active Mission</Label>
+        <div style={{ display:'flex', gap:12, alignItems:'center' }}>
+          <div style={{ flex:1 }}>
+            <div style={{ fontFamily:HEAD, fontSize:22, fontWeight:700, color:'#f0f0f0', textTransform:'uppercase', lineHeight:1 }}>Sheiko Heavy</div>
+            <Mono size={8} c="#444" style={{ display:'block', marginTop:4 }}>WK 3 / 12 · STRENGTH · ~65 MIN</Mono>
+          </div>
+          <svg width="60" height="60" viewBox="0 0 60 60">
+            <circle cx="30" cy="30" r="24" fill="none" stroke="rgba(255,255,255,.05)" strokeWidth="4"/>
+            <circle cx="30" cy="30" r="24" fill="none" stroke={ACC} strokeWidth="4"
+              strokeDasharray="90 61" strokeDashoffset="18"
+              style={{ filter:`drop-shadow(0 0 6px ${ACC})` }}/>
+            <text x="30" y="34" textAnchor="middle" fontSize="12" fontWeight="700" fill={ACC} fontFamily="Oswald,sans-serif">60%</text>
+          </svg>
+        </div>
+        <div className="sep"/>
+        {['BACK SQUAT — 4×5 @80%','BENCH PRESS — 3×3 @85%','ROM. DEADLIFT — 3×8 @65%','OVERHEAD PRESS — 3×8','DIPS — 3×AMRAP'].map((ex,i)=>(
+          <div key={i} style={{ display:'flex', gap:8, alignItems:'center', padding:'3px 0', borderBottom:'1px solid rgba(255,255,255,.04)' }}>
+            <Mono size={7} c="#222" style={{ width:20 }}>{String(i+1).padStart(2,'0')}</Mono>
+            <div style={{ fontFamily:HEAD, fontSize:12, fontWeight:600, color:'#bbb', flex:1, textTransform:'uppercase', letterSpacing:'.03em' }}>{ex}</div>
+          </div>
+        ))}
+        <ForgeBtn full h={36} size={12} style={{ marginTop:4 }}>[ Deploy — Start Session ]</ForgeBtn>
+      </GlassCard>
+      {/* Week + upcoming */}
+      <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+        <GlassCard className="fade-up fade-up-3" style={{ padding:12 }}>
+          <Label>Week 3 Schedule</Label>
+          <WeekGrid/>
+        </GlassCard>
+        <GlassCard className="fade-up fade-up-4" style={{ padding:12, flex:1 }}>
+          <Label>Upcoming</Label>
+          {[{l:'Push Day A',d:'TODAY',next:true},{l:'Pull Day B',d:'23 APR'},{l:'Legs Day C',d:'25 APR'}].map((s,i)=>(
+            <div key={i} style={{ display:'flex', alignItems:'center', gap:6, padding:'5px 7px', border:`1px solid ${s.next?`${ACC}44`:'rgba(255,255,255,.04)'}`, background:s.next?'rgba(229,62,0,.06)':'rgba(0,0,0,.3)', marginBottom:4 }}>
+              <div style={{ fontFamily:HEAD, fontSize:11, fontWeight:600, color:s.next?'#e0e0e0':'#444', flex:1, textTransform:'uppercase' }}>{s.l}</div>
+              <Mono size={8} c={s.next?ACC:'#2a2a2a'}>{s.d}</Mono>
+            </div>
+          ))}
+          <div style={{ marginTop:8 }}>
+            <Mono size={7} c="#1e3a1e" style={{ letterSpacing:'0.15em', display:'block', marginBottom:5 }}>COMPLETED</Mono>
+            {[{l:'Pull Day B · 19 APR'},{l:'Legs Day C · 17 APR'}].map((s,i)=>(
+              <div key={i} style={{ display:'flex', alignItems:'center', gap:6, padding:'4px 7px', border:'1px solid rgba(34,197,94,.1)', background:'rgba(34,197,94,.04)', marginBottom:3, opacity:.7 }}>
+                <div style={{ color:GRN, fontSize:11 }}>✓</div>
+                <div style={{ fontFamily:HEAD, fontSize:11, color:'#333', textTransform:'uppercase' }}>{s.l}</div>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
+      </div>
+      {/* Activity + PRs */}
+      <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+        <GlassCard className="fade-up fade-up-4" style={{ padding:12, flex:1 }}>
+          <Label>Activity Log</Label>
+          {[{d:'20 APR',l:'PUSH A',v:'2.1T'},{d:'18 APR',l:'LEGS B',v:'3.4T'},{d:'16 APR',l:'PULL A',v:'1.9T'},{d:'14 APR',l:'PUSH A',v:'2.0T'},{d:'12 APR',l:'LEGS B',v:'3.1T'}].map((r,i)=>(
+            <div key={i} style={{ display:'flex', gap:5, alignItems:'center', padding:'4px 0', borderBottom:'1px solid rgba(255,255,255,.04)' }}>
+              <Mono size={8} c="#222" style={{ width:40 }}>{r.d}</Mono>
+              <div style={{ fontFamily:HEAD, fontSize:11, flex:1, textTransform:'uppercase', color:'#444' }}>{r.l}</div>
+              <Mono size={9} c={ACC} style={{ fontWeight:700 }}>{r.v}</Mono>
+            </div>
+          ))}
+        </GlassCard>
+        <GlassCard className="fade-up fade-up-5" style={{ padding:12 }}>
+          <Label>Recent PRs</Label>
+          {[{n:'Squat',w:'180×1'},{n:'Bench',w:'120×1'},{n:'Deadlift',w:'210×1'}].map((p,i)=>(
+            <div key={i} style={{ display:'flex', gap:6, padding:'5px 0', borderBottom:'1px solid rgba(255,255,255,.04)' }}>
+              <div style={{ fontFamily:HEAD, fontSize:12, fontWeight:600, flex:1, textTransform:'uppercase', color:'#555' }}>{p.n}</div>
+              <Mono size={11} c={ACC} style={{ fontWeight:700 }}>{p.w}</Mono>
+            </div>
+          ))}
+        </GlassCard>
+      </div>
+    </div>
+    {/* HUD strip */}
+    <div style={{ borderTop:`1px solid ${ACC}`, display:'flex', background:'rgba(0,0,0,.6)', backdropFilter:'blur(20px)' }}>
+      {['SYNC: LIVE','DEVICE: WEB','BUILD: STEEL v2'].map((t,i)=>(
+        <div key={i} style={{ flex:1, padding:'6px', textAlign:'center', borderRight:i<2?'1px solid rgba(255,255,255,.04)':undefined }}>
+          <Mono size={7} c="#1e1e1e" style={{ letterSpacing:'0.1em' }}>{t}</Mono>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+// ════════════════════════════════════════════════════════════════
+// SCREEN: WORKOUT
+// ════════════════════════════════════════════════════════════════
+const WorkoutScreen = () => {
+  const [activeSet, setActiveSet] = useState(3);
+  return (
+    <div style={{ flex:1, overflowY:'auto', padding:'12px 12px 70px', display:'flex', flexDirection:'column', gap:8 }} className="scroll">
+      {/* Title bar */}
+      <div className="fade-up" style={{ display:'flex', alignItems:'center', gap:10 }}>
+        <div style={{ flex:1 }}>
+          <div style={{ fontFamily:HEAD, fontSize:20, fontWeight:700, color:'#f0f0f0', textTransform:'uppercase', lineHeight:1 }}>Push Day A</div>
+          <Mono size={8} c="#333" style={{ marginTop:3 }}>SHEIKO HEAVY · WK 3 · 5 EXERCISES</Mono>
+        </div>
+        <div className="glass-acc" style={{ padding:'6px 12px', textAlign:'center' }}>
+          <Mono size={7} c="rgba(229,62,0,.6)" style={{ display:'block', letterSpacing:'0.1em' }}>REST</Mono>
+          <div style={{ fontFamily:MONO, fontSize:18, fontWeight:700, color:ACC, lineHeight:1 }}>01:23</div>
+        </div>
+      </div>
+      {/* 5-step progress */}
+      <div style={{ display:'flex', gap:4 }}>
+        {[true,false,false,false,false].map((done,i)=>(
+          <div key={i} className="prog-bar" style={{ flex:1 }}>
+            {done && <div className="prog-fill" style={{ width:'100%' }}/>}
+          </div>
+        ))}
+      </div>
+      {/* Exercise cards */}
+      {[
+        { n:'Back Squat', tags:'QUADS · GLUTES', done:true, expanded:false },
+        { n:'Bench Press', tags:'CHEST · SHOULDERS · TRICEPS', active:true, expanded:true,
+          sets:[{w:'80',r:'5',done:true},{w:'85',r:'5',done:true},{w:'87.5',r:'3',active:true},{w:'87.5',r:'3'}] },
+        { n:'Romanian DL', tags:'HAMSTRINGS', expanded:false },
+        { n:'OHP', tags:'SHOULDERS · TRICEPS', expanded:false },
+        { n:'Dips', tags:'TRICEPS · CHEST', expanded:false },
+      ].map((ex,i)=>(
+        <div key={i} className={`fade-up fade-up-${Math.min(i+1,5)}`} style={{ opacity:ex.done?.5:1 }}>
+          <div className={ex.active?'glass-acc':'glass'} style={{ borderRadius:0 }}>
+            <div style={{ padding:'10px 12px' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                <Mono size={8} c="#2a2a2a" style={{ width:20 }}>0{i+1}</Mono>
+                <div style={{ flex:1 }}>
+                  <div style={{ fontFamily:HEAD, fontSize:15, fontWeight:700, textTransform:'uppercase', color:ex.done?'#333':ex.active?'#f0f0f0':'#ccc' }}>{ex.n}</div>
+                  <Mono size={7} c="#333" style={{ marginTop:2 }}>{ex.tags}</Mono>
+                </div>
+                {ex.done && <div style={{ color:GRN, fontSize:16 }}>✓</div>}
+                {ex.active && <Tag acc>ACTIVE</Tag>}
+                {!ex.done && !ex.active && <Mono size={14} c="#222">›</Mono>}
+              </div>
+              {ex.expanded && (
+                <div style={{ marginTop:12 }}>
+                  {/* GIF placeholder */}
+                  <div style={{ height:100, background:'rgba(0,0,0,.4)', border:'1px dashed rgba(255,255,255,.06)', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:12, position:'relative', overflow:'hidden' }}>
+                    <div style={{ position:'absolute', inset:0, background:`repeating-linear-gradient(-45deg, rgba(229,62,0,.03) 0, rgba(229,62,0,.03) 2px, transparent 2px, transparent 12px)` }}/>
+                    <div style={{ textAlign:'center', position:'relative' }}>
+                      <div style={{ fontSize:28, opacity:.15 }}>▶</div>
+                      <Mono size={8} c="#2a2a2a" style={{ display:'block', marginTop:4, letterSpacing:'0.1em' }}>EXERCISE GIF / VIDEO</Mono>
+                    </div>
+                  </div>
+                  {/* Set headers */}
+                  <div style={{ display:'flex', gap:8, marginBottom:5, paddingLeft:24 }}>
+                    {['WEIGHT','REPS','RPE',''].map((h,j)=>(
+                      <Mono key={j} size={7} c="#222" style={{ flex:j<3?1:undefined, width:j===3?28:undefined, textAlign:'center', letterSpacing:'0.1em' }}>{h}</Mono>
+                    ))}
+                  </div>
+                  {/* Set rows */}
+                  {ex.sets.map((s,j)=>(
+                    <div key={j} className={`set-row${s.done?' done':s.active?' active':''}`} style={{ marginBottom:4 }}>
+                      <Mono size={9} c="#222" style={{ width:20 }}>{j+1}</Mono>
+                      <input className={`set-input${s.active?' active-in':''}`} defaultValue={s.w} style={{ flex:1 }}/>
+                      <Mono size={11} c="#222">×</Mono>
+                      <input className={`set-input${s.active?' active-in':''}`} defaultValue={s.r} style={{ flex:1 }}/>
+                      <input className="set-input" placeholder="—" style={{ flex:1, color:'#333' }}/>
+                      <div style={{ width:28, height:28, border:`1.5px solid ${s.done?GRN:s.active?ACC:'rgba(255,255,255,.08)'}`, display:'flex', alignItems:'center', justifyContent:'center', background:s.done?'rgba(34,197,94,.1)':'transparent', cursor:'pointer' }}>
+                        {s.done && <div style={{ color:GRN }}>✓</div>}
+                        {s.active && <div style={{ width:8,height:8,background:ACC,borderRadius:'50%' }}/>}
+                      </div>
+                    </div>
+                  ))}
+                  <div style={{ display:'flex', gap:8, marginTop:10 }}>
+                    <GhostBtn h={32} size={10} style={{ flex:1 }}>+ Add Set</GhostBtn>
+                    <ForgeBtn h={32} size={12} style={{ flex:2 }}>Log Set ✓</ForgeBtn>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// ════════════════════════════════════════════════════════════════
+// SCREEN: PROGRESS
+// ════════════════════════════════════════════════════════════════
+const ProgressScreen = () => (
+  <div style={{ flex:1, overflowY:'auto', padding:'14px 14px 24px', display:'flex', flexDirection:'column', gap:10 }} className="scroll">
+    <div className="fade-up" style={{ borderBottom:'1px solid rgba(255,255,255,.06)', paddingBottom:10 }}>
+      <div style={{ fontFamily:HEAD, fontSize:28, fontWeight:700, textTransform:'uppercase', color:'#f0f0f0' }}>Intel</div>
+      <Mono size={8} c="#222" style={{ display:'block', letterSpacing:'0.2em', marginTop:3 }}>PERFORMANCE ANALYTICS</Mono>
+      <div style={{ height:2, width:24, background:`linear-gradient(90deg,${ACC},transparent)`, marginTop:7 }}/>
+    </div>
+    {/* KPIs */}
+    <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:7 }}>
+      <KpiGlass label="Streak" value="12" unit="Days" type="grn" delay={0}/>
+      <KpiGlass label="Volume" value="42T" unit="This Month" delay={1}/>
+      <KpiGlass label="PRs" value="4" unit="This Month" type="blu" delay={2}/>
+    </div>
+    {/* Volume chart */}
+    <GlassCard className="fade-up fade-up-2" style={{ padding:12 }}>
+      <Label>Volume Trend — 8 Weeks</Label>
+      <div style={{ height:72, display:'flex', alignItems:'flex-end', gap:3, position:'relative' }}>
+        {[32,50,38,72,48,62,80,58,68,90].map((v,i)=>(
+          <div key={i} style={{ flex:1, height:`${v}%`, background:i===9?ACC:i===6?`${ACC}55`:'rgba(255,255,255,.06)', border:`1px solid ${i>=6?`${ACC}33`:'rgba(255,255,255,.04)'}`, transition:'all .3s', boxShadow:i===9?`0 0 12px ${ACC}`:undefined }}/>
+        ))}
+        <div style={{ position:'absolute', bottom:0, left:0, right:0, height:1, background:'rgba(255,255,255,.06)' }}/>
+      </div>
+      <Mono size={7} c="#1e1e1e" style={{ display:'block', textAlign:'center', marginTop:5, letterSpacing:'0.1em' }}>WEEKLY VOLUME (KG)</Mono>
+    </GlassCard>
+    {/* 2-col */}
+    <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+      <GlassCard className="fade-up fade-up-3" style={{ padding:12 }}>
+        <Label>Lift Progression</Label>
+        <svg width="100%" height="68" viewBox="0 0 200 68">
+          <polyline points="0,54 25,42 50,46 75,26 100,32 125,16 150,22 175,10 200,8" fill="none" stroke={ACC} strokeWidth="2" style={{ filter:`drop-shadow(0 0 4px ${ACC})` }}/>
+          <polyline points="0,58 25,50 50,54 75,42 100,48 125,38 150,44 175,34 200,30" fill="none" stroke={BLU} strokeWidth="1.5" strokeDasharray="4 2" opacity=".7"/>
+          <polyline points="0,60 25,56 50,58 75,52 100,54 125,48 150,50 175,44 200,42" fill="none" stroke={GRN} strokeWidth="1.5" strokeDasharray="4 2" opacity=".5"/>
+        </svg>
+        <div style={{ display:'flex', gap:10, marginTop:4 }}>
+          {[['SQ',ACC],['BP',BLU],['DL',GRN]].map(([l,c])=>(
+            <div key={l} style={{ display:'flex', alignItems:'center', gap:4 }}>
+              <div style={{ width:14, height:2, background:c }}/>
+              <Mono size={7} c="#333">{l}</Mono>
+            </div>
+          ))}
+        </div>
+      </GlassCard>
+      <GlassCard className="fade-up fade-up-3" style={{ padding:12 }}>
+        <Label>Muscle Radar</Label>
+        <div style={{ display:'flex', justifyContent:'center' }}>
+          <svg width="90" height="90" viewBox="0 0 90 90">
+            {[0,1,2,3].map(r=>(
+              <polygon key={r} points={`45,${6+r*8} ${75-r*6},${28+r*5} ${68-r*5},${70-r*7} ${22+r*5},${70-r*7} ${15+r*6},${28+r*5}`} fill="none" stroke="rgba(255,255,255,.04)" strokeWidth="1"/>
+            ))}
+            <polygon points="45,14 72,32 64,62 26,62 18,32" fill={`${ACC}18`} stroke={ACC} strokeWidth="1.5" style={{ filter:`drop-shadow(0 0 4px ${ACC}33)` }}/>
+            {[{label:'CHEST',x:45,y:8},{label:'BACK',x:80,y:28},{label:'LEGS',x:72,y:70},{label:'ARMS',x:18,y:70},{label:'SHOULDERS',x:8,y:28}].map((p)=>(
+              <text key={p.label} x={p.x} y={p.y} textAnchor="middle" fontSize="5" fill="#222" fontFamily={MONO}>{p.label}</text>
+            ))}
+          </svg>
+        </div>
+      </GlassCard>
+    </div>
+    {/* Heatmap */}
+    <GlassCard className="fade-up fade-up-4" style={{ padding:12 }}>
+      <Label>Calendar Heatmap — 12 Months</Label>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(13,1fr)', gap:3 }}>
+        {Array.from({length:52}).map((_,i)=>{ const v=Math.random(); return <div key={i} style={{ aspectRatio:'1', background:v>.72?ACC:v>.48?`${ACC}55`:v>.28?'rgba(229,62,0,.12)':'rgba(255,255,255,.04)', borderRadius:1, boxShadow:v>.72?`0 0 4px ${ACC}`:undefined }}/>; })}
+      </div>
+    </GlassCard>
+    {/* PR Board */}
+    <GlassCard className="fade-up fade-up-4" style={{ padding:12 }}>
+      <Label>PR Board — All-Time Bests</Label>
+      <div style={{ display:'grid', gridTemplateColumns:'1.4fr 1fr 1fr 1fr 1fr', gap:1 }}>
+        {['EXERCISE','1RM','3RM','5RM','DATE'].map((h,i)=>(
+          <div key={i} style={{ padding:'4px 7px', background:'rgba(0,0,0,.4)' }}>
+            <Mono size={7} c="#222" style={{ letterSpacing:'0.08em' }}>{h}</Mono>
+          </div>
+        ))}
+        {[['SQUAT','180','165','152','15 MAR'],['BENCH','120','108','100','08 APR'],['DEADLIFT','210','192','178','21 APR'],['OHP','80','72','67','02 MAR']].map((row,i)=>(
+          row.map((cell,j)=>(
+            <div key={`${i}-${j}`} style={{ padding:'5px 7px', background:i%2===0?'rgba(255,255,255,.03)':'rgba(0,0,0,.2)', borderBottom:'1px solid rgba(255,255,255,.03)' }}>
+              <Mono size={j===1?12:10} c={j===1?ACC:j===0?'#666':'#333'} style={{ fontWeight:j===1?700:400 }}>{cell}</Mono>
+            </div>
+          ))
+        ))}
+      </div>
+    </GlassCard>
+    {/* PR Wall */}
+    <div>
+      <Label>PR Wall — Recent Records</Label>
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8 }}>
+        {[{n:'SQUAT',w:'180KG',r:'1RM',d:'21APR',icon:'🏆'},{n:'DEADLIFT',w:'210KG',r:'1RM',d:'15MAR',icon:'⚡'},{n:'BENCH',w:'120KG',r:'1RM',d:'08APR',icon:'🔥'}].map((pr,i)=>(
+          <GlassCard key={i} acc className="glass-hover" style={{ padding:'14px 10px', textAlign:'center' }}>
+            <div style={{ fontSize:22, marginBottom:8 }}>{pr.icon}</div>
+            <div style={{ fontFamily:HEAD, fontSize:12, fontWeight:700, textTransform:'uppercase', color:'#aaa', marginBottom:4 }}>{pr.n}</div>
+            <div style={{ fontFamily:HEAD, fontSize:22, fontWeight:700, color:ACC, lineHeight:1, textShadow:`0 0 20px ${ACC}` }}>{pr.w}</div>
+            <Mono size={7} c="#333" style={{ display:'block', marginTop:5 }}>{pr.r} · {pr.d}</Mono>
+          </GlassCard>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+// ════════════════════════════════════════════════════════════════
+// SCREEN: EXERCISES
+// ════════════════════════════════════════════════════════════════
+const ExercisesScreen = () => (
+  <div style={{ flex:1, overflowY:'auto', padding:'12px 12px 70px', display:'flex', flexDirection:'column', gap:8 }} className="scroll">
+    <div className="fade-up">
+      <div style={{ fontFamily:HEAD, fontSize:22, fontWeight:700, textTransform:'uppercase', color:'#f0f0f0' }}>Exercises</div>
+      <Mono size={7} c="#222" style={{ display:'block', letterSpacing:'0.18em', marginTop:3 }}>EXERCISE LIBRARY · 312 MOVEMENTS</Mono>
+    </div>
+    {/* Search */}
+    <div className="glass-acc fade-up fade-up-1" style={{ display:'flex', alignItems:'center', gap:10, padding:'0 12px', height:40 }}>
+      <Mono size={16} c={`${ACC}88`}>⌕</Mono>
+      <div style={{ fontFamily:HEAD, fontSize:13, color:'#333', letterSpacing:'.04em' }}>Search exercises...</div>
+    </div>
+    {/* Filters */}
+    <div className="fade-up fade-up-2">
+      <Mono size={7} c="#1e1e1e" style={{ display:'block', letterSpacing:'0.15em', marginBottom:6, textTransform:'uppercase' }}>Muscle Group</Mono>
+      <div style={{ display:'flex', gap:4, flexWrap:'wrap' }}>
+        {['ALL','CHEST','BACK','SHOULDERS','LEGS','ARMS','CORE'].map((f,i)=>(
+          <div key={i} style={{ padding:'3px 10px', border:`1px solid ${i===0?`${ACC}66`:'rgba(255,255,255,.06)'}`, background:i===0?'rgba(229,62,0,.1)':'rgba(0,0,0,.4)', cursor:'pointer', marginBottom:4, transition:'all .2s' }}>
+            <Mono size={8} c={i===0?ACC:'#333'} style={{ letterSpacing:'0.07em' }}>{f}</Mono>
+          </div>
+        ))}
+      </div>
+    </div>
+    <div className="sep"/>
+    {/* List */}
+    {[
+      {n:'Back Squat',m:'QUADS · GLUTES · CORE',eq:'BARBELL',diff:'COMPOUND'},
+      {n:'Romanian Deadlift',m:'HAMSTRINGS · GLUTES',eq:'BARBELL',diff:'COMPOUND'},
+      {n:'Bench Press',m:'CHEST · SHOULDERS · TRICEPS',eq:'BARBELL',diff:'COMPOUND'},
+      {n:'Pull-Up',m:'LATS · BICEPS · RHOMBOIDS',eq:'BODYWEIGHT',diff:'COMPOUND'},
+      {n:'Overhead Press',m:'SHOULDERS · TRICEPS',eq:'BARBELL',diff:'COMPOUND'},
+      {n:'Barbell Row',m:'BACK · BICEPS · REAR DELT',eq:'BARBELL',diff:'COMPOUND'},
+      {n:'Incline DB Press',m:'UPPER CHEST · SHOULDERS',eq:'DUMBBELL',diff:'COMPOUND'},
+    ].map((ex,i)=>(
+      <GlassCard key={i} className={`glass-hover fade-up fade-up-${Math.min(i+1,5)}`} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', cursor:'pointer' }}>
+        <div style={{ width:44, height:44, background:'rgba(0,0,0,.5)', border:'1px dashed rgba(255,255,255,.06)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, position:'relative', overflow:'hidden' }}>
+          <div style={{ position:'absolute', inset:0, background:`repeating-linear-gradient(-45deg,rgba(229,62,0,.04) 0,rgba(229,62,0,.04) 1px,transparent 1px,transparent 7px)` }}/>
+          <Mono size={7} c="#1e1e1e" style={{ position:'relative', textAlign:'center', lineHeight:1.3 }}>gif</Mono>
+        </div>
+        <div style={{ flex:1, minWidth:0 }}>
+          <div style={{ fontFamily:HEAD, fontSize:14, fontWeight:700, textTransform:'uppercase', color:'#ddd', lineHeight:1, marginBottom:3 }}>{ex.n}</div>
+          <Mono size={7} c="#2a2a2a" style={{ display:'block', marginBottom:5 }}>{ex.m}</Mono>
+          <div style={{ display:'flex', gap:4 }}>
+            <Tag>{ex.eq}</Tag>
+            <Tag>{ex.diff}</Tag>
+          </div>
+        </div>
+        <Mono size={14} c="#222">›</Mono>
+      </GlassCard>
+    ))}
+  </div>
+);
+
+// ════════════════════════════════════════════════════════════════
+// SCREEN: PLANS
+// ════════════════════════════════════════════════════════════════
+const PlansScreen = () => {
+  const [tab,setTab] = useState('plans');
+  return (
+    <div style={{ flex:1, overflowY:'auto', padding:'12px 12px 70px', display:'flex', flexDirection:'column', gap:8 }} className="scroll">
+      {/* Tab strip */}
+      <div className="fade-up glass" style={{ display:'flex', overflow:'hidden' }}>
+        {[['plans','MY PLANS'],['sessions','SESSIONS'],['templates','TEMPLATES']].map(([id,label])=>(
+          <div key={id} onClick={()=>setTab(id)} style={{ flex:1, padding:'9px 0', textAlign:'center', borderBottom:`2px solid ${tab===id?ACC:'transparent'}`, cursor:'pointer', transition:'all .2s', background:tab===id?'rgba(229,62,0,.06)':'transparent' }}>
+            <Mono size={9} c={tab===id?ACC:'#2a2a2a'} style={{ letterSpacing:'0.08em' }}>{label}</Mono>
+          </div>
+        ))}
+      </div>
+      <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+        <div style={{ fontFamily:HEAD, fontSize:18, fontWeight:700, color:'#f0f0f0', flex:1, textTransform:'uppercase' }}>My Programs</div>
+        <ForgeBtn h={30} size={10}>+ Create</ForgeBtn>
+      </div>
+      {/* Active plan */}
+      <GlassCard acc className="pulse fade-up fade-up-2" style={{ padding:14 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:8 }}>
+          <Tag acc>ACTIVE</Tag>
+          <Mono size={7} c="#444" style={{ letterSpacing:'0.1em' }}>WEEK 3 / 12</Mono>
+        </div>
+        <div style={{ fontFamily:HEAD, fontSize:18, fontWeight:700, color:'#f0f0f0', textTransform:'uppercase' }}>Sheiko Heavy</div>
+        <Mono size={8} c="#444" style={{ display:'block', marginTop:3 }}>POWERLIFTING · 4 DAYS/WK · 12 WEEKS</Mono>
+        <div className="prog-bar" style={{ margin:'10px 0 4px' }}>
+          <div className="prog-fill" style={{ width:'25%' }}/>
+        </div>
+        <Mono size={7} c="#333">25% COMPLETE · 9 WEEKS REMAINING</Mono>
+        <div style={{ display:'flex', gap:8, marginTop:12 }}>
+          <ForgeBtn h={28} size={10} style={{ flex:2 }}>Continue</ForgeBtn>
+          <GhostBtn h={28} size={10} style={{ flex:1 }}>Details</GhostBtn>
+        </div>
+      </GlassCard>
+      {/* Other plans */}
+      {[{n:'GZCLP — Beginner',d:'Completed · 16 Weeks'},{n:'Texas Method',d:'Completed · 8 Weeks'}].map((p,i)=>(
+        <GlassCard key={i} className="glass-hover fade-up fade-up-3" style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', cursor:'pointer' }}>
+          <div style={{ flex:1 }}>
+            <div style={{ fontFamily:HEAD, fontSize:13, fontWeight:700, textTransform:'uppercase', color:'#555' }}>{p.n}</div>
+            <Mono size={8} c="#2a2a2a" style={{ display:'block', marginTop:2 }}>{p.d}</Mono>
+          </div>
+          <GhostBtn h={24} size={9}>View</GhostBtn>
+        </GlassCard>
+      ))}
+      <div className="sep" style={{ margin:'4px 0' }}/>
+      <Mono size={8} c="#1e1e1e" style={{ letterSpacing:'0.15em', textTransform:'uppercase' }}>Template Plans</Mono>
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:7 }}>
+        {[{n:'PHUL',s:'4×/WK'},{n:'NSUNS 5/3/1',s:'5×/WK'},{n:'531 BBB',s:'4×/WK'},{n:'PPL',s:'6×/WK'}].map((t,i)=>(
+          <GlassCard key={i} className="glass-hover fade-up fade-up-4" style={{ padding:'10px 12px', display:'flex', alignItems:'center', gap:8, cursor:'pointer' }}>
+            <div style={{ flex:1 }}>
+              <div style={{ fontFamily:HEAD, fontSize:13, fontWeight:700, textTransform:'uppercase', color:'#666' }}>{t.n}</div>
+              <Mono size={7} c="#222">{t.s}</Mono>
+            </div>
+            <Mono size={13} c="#1e1e1e">›</Mono>
+          </GlassCard>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ════════════════════════════════════════════════════════════════
+// DEV GUIDE
+// ════════════════════════════════════════════════════════════════
+const DevGuide = () => {
+  const [open, setOpen] = useState(false);
+  const sections = [
+    {
+      title:'1. Design Tokens → globals.css',
+      code:`/* Add to globals.css @theme block */
+--acc: #e53e00;           /* forge orange-red */
+--acc-glow: rgba(229,62,0,.3);
+--glass-bg: rgba(255,255,255,.05);
+--glass-border: rgba(255,255,255,.08);
+--glass-blur: 20px;
+--glass-shadow: 0 8px 32px rgba(0,0,0,.5);`
+    },
+    {
+      title:'2. Glassmorphism — globals.css utility classes',
+      code:`.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,.06);
+}
+.glass-acc {
+  background: rgba(229,62,0,.08);
+  border: 1px solid rgba(229,62,0,.25);
+  box-shadow: 0 8px 32px rgba(229,62,0,.15);
+}`
+    },
+    {
+      title:'3. Forge Background — AmbientGymLayer.tsx',
+      code:`// components/layout/AmbientGymLayer.tsx
+// 3 slow-moving radial blobs + tactical grid + noise overlay
+// Mouse parallax: useMouseParallax() hook shifts blob positions by ±20px
+// Scroll parallax: translateY by -scrollY * 0.03
+// All at will-change: transform for GPU compositing
+// Keep blob opacity < 0.2 — subtle is everything`
+    },
+    {
+      title:'4. Hover transitions — Tailwind classes to add',
+      code:`// tailwind.config — extend transition
+'transition': 'all 300ms cubic-bezier(0.23, 1, 0.32, 1)'
+
+// On every glass card:
+className="transition-all hover:-translate-y-0.5 hover:shadow-acc"
+
+// On forge button:
+className="hover:bg-[#ff4500] hover:shadow-[0_0_24px_rgba(229,62,0,.5)]"`
+    },
+    {
+      title:'5. Priority build order',
+      code:`Week 1: AmbientGymLayer (background), AppShell, Navbar, BottomNav
+Week 2: Dashboard KPI cards, Active Mission panel, WeekGrid
+Week 3: Workout screen — ExerciseCard, SetRow, RestTimer
+Week 4: Progress screen — Charts (recharts), PR Board, PR Wall
+Week 5: Programs, Exercises library, Plan detail
+Week 6: Onboarding wizard, Settings, polish + animations`
+    },
+    {
+      title:'6. Component → Tailwind mapping',
+      code:`GlassCard         → rounded-none bg-white/5 backdrop-blur-xl border border-white/[.08]
+KpiCard           → border-l-2 border-l-[#e53e00] bg-black/40 backdrop-blur-xl p-3
+ForgeBtn          → bg-[#e53e00] hover:bg-[#ff4500] font-oswald font-black uppercase tracking-widest
+Tag               → font-mono text-[9px] tracking-widest border border-white/10 px-1.5 py-0.5
+SectionLabel      → font-mono text-[8px] tracking-[.2em] text-[#333] + flex-1 h-px bg-white/[.06]
+BottomNav tab     → flex-col items-center text-[6px] font-mono tracking-widest`
+    }
+  ];
+  return (
+    <div className={`dev-guide glass-dark${open?' open':''}`}>
+      <div className="dev-guide-handle" onClick={()=>setOpen(o=>!o)}>
+        <div style={{ fontFamily:HEAD, fontSize:13, fontWeight:700, color:ACC, letterSpacing:'0.1em', textTransform:'uppercase' }}>
+          {open?'▼':'▲'} Developer Implementation Guide
+        </div>
+        <Mono size={8} c="#333">How to turn this into code</Mono>
+        <div style={{ flex:1 }}/>
+        <Mono size={8} c="#333">{open?'Click to close':'Click to open'}</Mono>
+      </div>
+      {open && (
+        <div className="dev-guide-body scroll" style={{ borderTop:'1px solid rgba(255,255,255,.06)' }}>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12 }}>
+            {sections.map((s,i)=>(
+              <div key={i} style={{ background:'rgba(0,0,0,.6)', border:'1px solid rgba(255,255,255,.06)', padding:14 }}>
+                <div style={{ fontFamily:HEAD, fontSize:12, fontWeight:700, color:ACC, marginBottom:8, textTransform:'uppercase', letterSpacing:'.04em' }}>{s.title}</div>
+                <pre style={{ fontFamily:MONO, fontSize:9, color:'#555', lineHeight:1.7, whiteSpace:'pre-wrap', wordBreak:'break-word' }}>{s.code}</pre>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ════════════════════════════════════════════════════════════════
+// TWEAKS
+// ════════════════════════════════════════════════════════════════
+const TweaksPanel = ({ visible }) => (
+  <div className={`tweaks-panel glass-dark${visible?' visible':''}`} style={{ borderRadius:0 }}>
+    <div style={{ fontFamily:HEAD, fontSize:12, fontWeight:700, color:ACC, letterSpacing:'.1em', textTransform:'uppercase', marginBottom:12 }}>Tweaks</div>
+    <div style={{ marginBottom:10 }}>
+      <Mono size={8} c="#333" style={{ display:'block', marginBottom:5, letterSpacing:'.12em' }}>ACCENT COLOR</Mono>
+      <div style={{ display:'flex', gap:6 }}>
+        {['#e53e00','#ff6600','#cc2200','#ff3300'].map(c=>(
+          <div key={c} onClick={()=>{}} style={{ width:24,height:24,background:c,cursor:'pointer',border:`2px solid ${c==='#e53e00'?'#fff':'transparent'}`,transition:'all .2s' }}/>
+        ))}
+      </div>
+    </div>
+    <div>
+      <Mono size={8} c="#333" style={{ display:'block', marginBottom:5, letterSpacing:'.12em' }}>BG INTENSITY</Mono>
+      <input type="range" min="0" max="100" defaultValue="60" style={{ width:'100%', accentColor:ACC }}/>
+    </div>
+  </div>
+);
+
+// ════════════════════════════════════════════════════════════════
+// ROOT APP
+// ════════════════════════════════════════════════════════════════
+function App() {
+  const [screen, setScreen] = useState('dashboard');
+  const [tweaksVisible, setTweaksVisible] = useState(false);
+  const isMobile = window.innerWidth < 700;
+
+  useEffect(()=>{
+    const saved = localStorage.getItem('st-screen');
+    if(saved) setScreen(saved);
+  },[]);
+
+  useEffect(()=>{
+    localStorage.setItem('st-screen', screen);
+  },[screen]);
+
+  // Tweaks protocol
+  useEffect(()=>{
+    const handler = (e) => {
+      if(e.data?.type==='__activate_edit_mode') setTweaksVisible(true);
+      if(e.data?.type==='__deactivate_edit_mode') setTweaksVisible(false);
+    };
+    window.addEventListener('message', handler);
+    window.parent.postMessage({type:'__edit_mode_available'},'*');
+    return ()=>window.removeEventListener('message', handler);
+  },[]);
+
+  const screens = { dashboard:<DashboardScreen/>, workout:<WorkoutScreen/>, progress:<ProgressScreen/>, exercises:<ExercisesScreen/>, plans:<PlansScreen/> };
+
+  return (
+    <div style={{ height:'100vh', display:'flex', flexDirection:'column', position:'relative', overflow:'hidden' }} data-screen-label={screen}>
+      <ForgeBg/>
+      <div style={{ position:'relative', zIndex:1, display:'flex', flexDirection:'column', height:'100%' }}>
+        <TopNav screen={screen} setScreen={setScreen}/>
+        {screens[screen]}
+        <BottomNavBar screen={screen} setScreen={setScreen}/>
+      </div>
+      <DevGuide/>
+      <TweaksPanel visible={tweaksVisible}/>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

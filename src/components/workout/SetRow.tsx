@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "@/lib/utils";
 import type { ActiveSetInput } from "@/types/session";
 import { Check } from "lucide-react";
 
@@ -12,6 +11,7 @@ interface SetRowProps {
   previousReps?: number;
   completed?: ActiveSetInput;
   onComplete: (data: ActiveSetInput) => void;
+  isActive?: boolean;
 }
 
 export function SetRow({
@@ -21,6 +21,7 @@ export function SetRow({
   previousReps,
   completed,
   onComplete,
+  isActive = false,
 }: SetRowProps) {
   const [weight, setWeight] = useState(completed?.weight ?? previousWeight ?? 0);
   const [reps, setReps] = useState(completed?.reps ?? previousReps ?? 0);
@@ -34,81 +35,110 @@ export function SetRow({
 
   if (isCompleted) {
     return (
-      <div className="grid grid-cols-[2rem_1fr_1fr_2.5rem] items-center gap-2 bg-[#16a34a]/5 px-4 py-3">
-        <span className="font-data text-sm font-bold tabular-nums text-[#16a34a]">
-          {setNumber}
+      <div
+        className="grid grid-cols-[2rem_1fr_1fr_2.5rem] items-center gap-2 px-3 py-2 mb-1"
+        style={{
+          border: "1px solid rgba(34,197,94,0.2)",
+          background: "rgba(34,197,94,0.04)",
+        }}
+      >
+        <span className="font-data text-[9px] text-[#222] tabular-nums">{setNumber}</span>
+        <span className="font-data text-sm font-bold tabular-nums text-[#e0e0e0] text-center">
+          {completed.weight > 0 ? completed.weight : "—"}
         </span>
-        <span className="font-data text-base font-bold tabular-nums text-foreground">
-          {completed.weight > 0 ? `${completed.weight}` : "—"}
-        </span>
-        <span className="font-data text-base font-bold tabular-nums text-foreground">
+        <span className="font-data text-sm font-bold tabular-nums text-[#e0e0e0] text-center">
           {completed.reps}
         </span>
-        <div className="flex h-9 w-9 items-center justify-center rounded-none bg-[#16a34a]">
-          <Check className="h-4 w-4 text-white" />
+        <div
+          className="flex h-7 w-7 items-center justify-center"
+          style={{ border: "1.5px solid rgba(34,197,94,0.4)", background: "rgba(34,197,94,0.1)" }}
+        >
+          <span style={{ color: "#22c55e", fontSize: 14 }}>✓</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-[2rem_1fr_1fr_2.5rem] items-center gap-2 px-4 py-3">
-      <span className="font-data text-sm font-bold tabular-nums text-muted-foreground">
-        {setNumber}
-      </span>
+    <div
+      className="grid grid-cols-[2rem_1fr_1fr_2.5rem] items-center gap-2 px-3 py-2 mb-1 transition-all"
+      style={
+        isActive
+          ? { border: "1px solid rgba(194,65,12,0.4)", background: "rgba(194,65,12,0.06)" }
+          : { border: "1px solid rgba(255,255,255,0.05)", background: "transparent" }
+      }
+    >
+      <span className="font-data text-[9px] text-[#222] tabular-nums">{setNumber}</span>
 
       {/* Weight input */}
-      <div className="relative">
-        <input
-          type="number"
-          inputMode="decimal"
-          min={0}
-          step={2.5}
-          value={weight || ""}
-          onChange={(e) => setWeight(Number(e.target.value))}
-          placeholder={previousWeight ? String(previousWeight) : "kg"}
-          className={cn(
-            "h-12 w-full border border-border bg-input px-3 text-center font-data text-base font-bold tabular-nums text-foreground",
-            "placeholder:text-muted-foreground/50",
-            "focus:border-[#e53e00] focus:outline-none",
-          )}
-          aria-label={`Set ${setNumber} weight`}
-        />
-      </div>
+      <input
+        type="number"
+        inputMode="decimal"
+        min={0}
+        step={2.5}
+        value={weight || ""}
+        onChange={(e) => setWeight(Number(e.target.value))}
+        placeholder={previousWeight ? String(previousWeight) : "kg"}
+        className="h-7 w-full text-center font-data text-sm font-bold tabular-nums focus:outline-none"
+        style={
+          isActive
+            ? {
+                border: "1px solid rgba(194,65,12,0.5)",
+                color: "#C2410C",
+                background: "rgba(194,65,12,0.08)",
+              }
+            : {
+                border: "1px solid rgba(255,255,255,0.08)",
+                color: "#e0e0e0",
+                background: "rgba(0,0,0,0.5)",
+              }
+        }
+        aria-label={`Set ${setNumber} weight`}
+      />
 
       {/* Reps input */}
-      <div className="relative">
-        <input
-          type="number"
-          inputMode="numeric"
-          min={0}
-          max={100}
-          value={reps || ""}
-          onChange={(e) => setReps(Number(e.target.value))}
-          placeholder={previousReps ? String(previousReps) : targetReps}
-          className={cn(
-            "h-12 w-full border border-border bg-input px-3 text-center font-data text-base font-bold tabular-nums text-foreground",
-            "placeholder:text-muted-foreground/50",
-            "focus:border-[#e53e00] focus:outline-none",
-          )}
-          aria-label={`Set ${setNumber} reps`}
-        />
-      </div>
+      <input
+        type="number"
+        inputMode="numeric"
+        min={0}
+        max={100}
+        value={reps || ""}
+        onChange={(e) => setReps(Number(e.target.value))}
+        placeholder={previousReps ? String(previousReps) : targetReps}
+        className="h-7 w-full text-center font-data text-sm font-bold tabular-nums focus:outline-none"
+        style={
+          isActive
+            ? {
+                border: "1px solid rgba(194,65,12,0.5)",
+                color: "#C2410C",
+                background: "rgba(194,65,12,0.08)",
+              }
+            : {
+                border: "1px solid rgba(255,255,255,0.08)",
+                color: "#e0e0e0",
+                background: "rgba(0,0,0,0.5)",
+              }
+        }
+        aria-label={`Set ${setNumber} reps`}
+      />
 
       {/* Done button */}
       <button
         type="button"
         onClick={handleComplete}
         disabled={reps === 0 && weight === 0}
-        className={cn(
-          "flex h-12 w-9 items-center justify-center transition-colors",
-          reps > 0 || weight > 0
-            ? "bg-[#e53e00] text-white hover:bg-[#ff4500]"
-            : "bg-border text-muted-foreground",
-        )}
+        className="flex h-7 w-7 items-center justify-center transition-colors disabled:opacity-30"
+        style={{
+          border: `1.5px solid ${(reps > 0 || weight > 0) ? "#C2410C" : "rgba(255,255,255,0.08)"}`,
+          background: (reps > 0 || weight > 0) ? "rgba(194,65,12,0.1)" : "transparent",
+        }}
         aria-label={`Log set ${setNumber}`}
       >
-        <Check className="h-4 w-4" />
+        {isActive && (reps > 0 || weight > 0) ? (
+          <span style={{ color: "#C2410C", fontSize: 14 }}>✓</span>
+        ) : (
+          <Check className="h-3.5 w-3.5" style={{ color: (reps > 0 || weight > 0) ? "#C2410C" : "#333" }} />
+        )}
       </button>
     </div>
   );
