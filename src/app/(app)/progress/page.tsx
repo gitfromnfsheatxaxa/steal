@@ -445,6 +445,17 @@ export default function ProgressPage() {
     return map;
   }, [personalRecords]);
 
+  // -- PR Wall data --
+  const prWallData = useMemo(() => {
+    return personalRecords.slice(0, 5).map((pr) => ({
+      exerciseName: pr.exerciseName,
+      weight: pr.weight,
+      reps: pr.reps,
+      date: pr.date,
+      estimated1RM: pr.estimated1RM
+    }));
+  }, [personalRecords]);
+
   // -- HUD bottom strip derivations --
   const hudStats = useMemo(() => {
     if (!allSets || allSets.length === 0)
@@ -710,7 +721,7 @@ export default function ProgressPage() {
           <span className="font-data text-[8px] text-[#333] tracking-[0.2em] uppercase">Recent Records</span>
           <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.06)" }} />
         </div>
-        <PRWall records={personalRecords.slice(0, 3)} />
+        <PRWall prs={prWallData} />
       </div>
 
         {/* ── ACHIEVEMENTS ────────────────────────────────────────────── */}

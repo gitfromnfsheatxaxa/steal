@@ -21,6 +21,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "**.vercel.app",
       },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
     ],
   },
   // Proxy /pb/* → PocketBase so the browser never makes cross-origin HTTP
