@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { LoginForm } from "@/components/auth/LoginForm";
-import { ConnectionDebug } from "@/components/auth/ConnectionDebug";
 import { useI18n } from "@/components/providers/I18nProvider";
 
 export default function LoginPage() {

@@ -13,7 +13,7 @@ export interface QueuedMutation {
   timestamp: number;
 }
 
-const DB_NAME = "steal-therapy-offline";
+const DB_NAME = "steel-therapy-offline";
 const STORE_NAME = "mutation-queue";
 const DB_VERSION = 1;
 

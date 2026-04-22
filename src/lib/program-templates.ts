@@ -1059,8 +1059,8 @@ export const MENTZER_PROGRAM: ProgramTemplateDefinition = {
 // STEAL HYBRID — Strength + Size
 // ─────────────────────────────────────────────────────────────────────────────
 export const STEAL_HYBRID_PROGRAM: ProgramTemplateDefinition = {
-  id: "steal-hybrid",
-  title: "STEAL HYBRID",
+  id: "steel-hybrid",
+  title: "STEEL HYBRID",
   subtitle: "Strength + Size",
   tagline: "Compound strength. Hypertrophy accessory. Progressive overload.",
   description:

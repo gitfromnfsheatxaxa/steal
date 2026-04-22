@@ -10,7 +10,7 @@
     "ONLINE": "ONLINE"
   },
   "dashboard": {
-    "STEAL_THERAPY": "STEAL THERAPY",
+    "STEEL_THERAPY": "STEEL THERAPY",
     "OPERATIONS_DASHBOARD": "OPERATIONS DASHBOARD",
     "OPERATOR": "OPERATOR",
     "CURRENT_STREAK": "CURRENT STREAK",
@@ -44,7 +44,7 @@
     "DEVICE": "DEVICE",
     "WEB": "WEB",
     "BUILD": "BUILD",
-    "STEAL_V2": "STEAL v2",
+    "STEEL_V2": "STEEL v2",
     "UPCOMING": "UPCOMING",
     "NEXT": "NEXT",
     "LOCKED": "LOCKED",
@@ -93,9 +93,9 @@
     "TRAIN_LIKE_DORIAN_YATES": "TRAIN LIKE DORIAN YATES",
     "YATES_SUBTITLE": "Blood & Guts",
     "YATES_DESC": "One all-out working set after warm-ups. Dorian's Blood & Guts method. Controlled negatives, brutal intensity.",
-    "STEAL_HYBRID": "STEAL HYBRID",
-    "STEAL_HYBRID_SUBTITLE": "Strength + Size",
-    "STEAL_HYBRID_DESC": "Compound strength work Monday/Thursday. Hypertrophy accessory work Wednesday/Saturday. Progressive overload built in.",
+    "STEEL_HYBRID": "STEEL HYBRID",
+    "STEEL_HYBRID_SUBTITLE": "Strength + Size",
+    "STEEL_HYBRID_DESC": "Compound strength work Monday/Thursday. Hypertrophy accessory work Wednesday/Saturday. Progressive overload built in.",
     "PUSH_PULL_LEGS": "PUSH / PULL / LEGS",
     "PPL_SUBTITLE": "Classic Split",
     "PPL_DESC": "The proven 6-day split. Push (chest/shoulders/triceps), Pull (back/biceps), Legs. Run twice per week.",
@@ -107,7 +107,7 @@
     "NSUNS_DESC": "Linear progression on the big four lifts with hypertrophy accessories. Wendler's 531 methodology, optimized."
   },
   "login": {
-    "TITLE": "STEAL STEEL",
+    "TITLE": "STEEL STEEL",
     "WELCOME": "WELCOME BACK",
     "EMAIL": "EMAIL",
     "PASSWORD": "PASSWORD",

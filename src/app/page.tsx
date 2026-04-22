@@ -19,7 +19,7 @@ export default function Home() {
               background: "rgba(194,65,12,0.08)",
             }}
           >
-            <span className="font-data text-[10px] font-semibold uppercase tracking-[0.2em] text-[#C2410C]">
+            <span className="font-data text-[11px] font-semibold uppercase tracking-[0.18em] text-[#EA580C]">
               {t("landing.TAGLINE")}
             </span>
           </div>
@@ -35,7 +35,7 @@ export default function Home() {
             <br />
             STEEL
           </h1>
-          <p className="mx-auto max-w-md font-data text-[11px] uppercase tracking-widest text-[#444]">
+          <p className="mx-auto max-w-md font-data text-[13px] uppercase tracking-[0.16em] text-ink-low">
             {t("landing.HERO_DESC")}
           </p>
         </div>
@@ -52,7 +52,7 @@ export default function Home() {
               <h3 className="font-heading text-[13px] font-bold uppercase tracking-widest text-[#f0f0f0]">
                 {t(titleKey)}
               </h3>
-              <p className="font-data text-[10px] text-[#444] leading-relaxed">
+              <p className="font-data text-[12px] text-ink-low leading-relaxed">
                 {t(descKey)}
               </p>
             </div>
@@ -71,7 +71,7 @@ export default function Home() {
         </div>
 
         {/* Footer */}
-        <p className="text-center font-data text-[9px] text-[#222] uppercase tracking-widest fade-up fade-up-3">
+        <p className="text-center font-data text-[10px] text-ink-dim uppercase tracking-[0.18em] fade-up fade-up-3">
           {t("landing.FOOTER")}
         </p>
       </div>

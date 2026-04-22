@@ -7,7 +7,6 @@ import {
   useSessions,
   useAllSets,
   useMuscleDistribution,
-  useProgressData,
 } from "@/hooks/useProgress";
 import { useAchievements } from "@/hooks/useAchievements";
 import { CalendarHeatmap } from "@/components/progress/CalendarHeatmap";
@@ -21,7 +20,6 @@ import { EnhancedVolumeChart } from "@/components/progress/EnhancedVolumeChart";
 import { ProgressTrendChart } from "@/components/progress/ProgressTrendChart";
 import { RepsDistributionChart } from "@/components/progress/RepsDistributionChart";
 import { PRBoard } from "@/components/progress/PRBoard";
-import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { useI18n } from "@/components/providers/I18nProvider";
 
 // ============================================================================
@@ -29,12 +27,12 @@ import { useI18n } from "@/components/providers/I18nProvider";
 // ============================================================================
 function LiveClock() {
   const [time, setTime] = useState<string>(() =>
-    new Date().toLocaleTimeString("en-GB", { hour12: false })
+    new Date().toLocaleTimeString("en-GB", { hour12: false, hour: "2-digit", minute: "2-digit" })
   );
   useEffect(() => {
     const id = setInterval(() => {
-      setTime(new Date().toLocaleTimeString("en-GB", { hour12: false }));
-    }, 1000);
+      setTime(new Date().toLocaleTimeString("en-GB", { hour12: false, hour: "2-digit", minute: "2-digit" }));
+    }, 60_000);
     return () => clearInterval(id);
   }, []);
   return (
@@ -42,9 +40,9 @@ function LiveClock() {
       className="stamp"
       style={{
         fontVariantNumeric: "tabular-nums",
-        fontSize: 11,
+        fontSize: 12,
         letterSpacing: "0.15em",
-        color: "#525252",
+        color: "var(--ink-mid)",
       }}
     >
       {time}
@@ -69,7 +67,7 @@ function PanelHeader({ label, sub, panelNum }: PanelHeaderProps) {
           style={{ 
             color: "#e5e5e5", 
             letterSpacing: "0.15em", 
-            fontSize: 10,
+            fontSize: 11,
             fontWeight: 700,
           }}
         >
@@ -79,8 +77,8 @@ function PanelHeader({ label, sub, panelNum }: PanelHeaderProps) {
           <div
             className="stamp mt-0.5"
             style={{ 
-              color: "#71717A", 
-              fontSize: 8, 
+              color: "var(--ink-low)", 
+              fontSize: 10, 
               letterSpacing: "0.12em" 
             }}
           >
@@ -92,8 +90,8 @@ function PanelHeader({ label, sub, panelNum }: PanelHeaderProps) {
         <span
           className="stamp"
           style={{ 
-            color: "#525252", 
-            fontSize: 8, 
+            color: "var(--ink-low)", 
+            fontSize: 10, 
             letterSpacing: "0.08em" 
           }}
         >
@@ -123,12 +121,10 @@ function KPIPanel({ label, value, subValue, trend, panelNum, accent = "orange" }
   };
   const colors = accentColors[accent];
 
-  const TrendIcon = trend === "up" ? TrendingUp : trend === "down" ? TrendingDown : Minus;
-
   const kpiType = accent === "green" ? "kpi-grn" : accent === "blue" ? "kpi-blu" : "kpi-acc";
   return (
     <div className={`glass kpi ${kpiType} glass-hover fade-up`}>
-      <span className="font-data block text-[8px] tracking-[0.2em] text-[#333] uppercase mb-1.5">{label}</span>
+      <span className="font-data mb-1.5 block text-[10px] tracking-[0.18em] text-ink-low uppercase">{label}</span>
       <div
         className="font-heading leading-none"
         style={{ fontSize: 26, fontWeight: 700, color: colors.text }}
@@ -136,7 +132,7 @@ function KPIPanel({ label, value, subValue, trend, panelNum, accent = "orange" }
         <CounterFX value={typeof value === "number" ? value : parseInt(value.toString()) || 0} />
       </div>
       {subValue && (
-        <span className="font-data block text-[8px] text-[#444] mt-1">{subValue}</span>
+        <span className="font-data mt-1 block text-[10px] text-ink-mid">{subValue}</span>
       )}
     </div>
   );
@@ -252,53 +248,66 @@ export default function ProgressPage() {
   const achievements = useAchievements();
   const { t } = useI18n();
 
+  const sessionMetrics = useMemo(() => {
+    const metrics = new Map<
+      string,
+      { volume: number; rpeSum: number; rpeCount: number; totalSets: number; maxE1RM: number }
+    >();
+
+    for (const set of allSets ?? []) {
+      const current = metrics.get(set.session) ?? {
+        volume: 0,
+        rpeSum: 0,
+        rpeCount: 0,
+        totalSets: 0,
+        maxE1RM: 0,
+      };
+      const volume = calculateVolume(1, set.reps, set.weight);
+      const e1rm = estimate1RM(set.weight, set.reps);
+
+      current.volume += volume;
+      current.totalSets += 1;
+      if (set.rpe > 0) {
+        current.rpeSum += set.rpe;
+        current.rpeCount += 1;
+      }
+      if (e1rm > current.maxE1RM) {
+        current.maxE1RM = e1rm;
+      }
+
+      metrics.set(set.session, current);
+    }
+
+    return metrics;
+  }, [allSets]);
+
   // -- Volume data for enhanced chart --
   const enhancedVolumeData = useMemo(() => {
-    if (!sessions || !allSets || sessions.length === 0) return [];
-
-    const sessionVolMap = new Map<string, { volume: number; sessions: number; rpeSum: number; rpeCount: number }>();
-    
-    for (const session of sessions) {
-      sessionVolMap.set(session.id, { volume: 0, sessions: 1, rpeSum: 0, rpeCount: 0 });
-    }
-    
-    for (const set of allSets) {
-      const vol = calculateVolume(1, set.reps, set.weight);
-      const existing = sessionVolMap.get(set.session);
-      if (existing) {
-        existing.volume += vol;
-        if (set.rpe > 0) {
-          existing.rpeSum += set.rpe;
-          existing.rpeCount++;
-        }
-      }
-    }
+    if (!sessions || sessions.length === 0) return [];
 
     // Group by week
     const weekMap = new Map<string, { ts: number; volume: number; sessions: number; rpeSum: number; rpeCount: number }>();
-    for (const [sessionId, data] of sessionVolMap.entries()) {
-      const session = sessions.find(s => s.id === sessionId);
-      if (!session) continue;
-      
+    for (const session of sessions) {
+      const metrics = sessionMetrics.get(session.id);
       const d = new Date(session.completedAt ?? session.startedAt);
       const weekStart = new Date(d);
       weekStart.setDate(d.getDate() - d.getDay());
       weekStart.setHours(0, 0, 0, 0);
       const key = weekStart.toISOString().slice(0, 10);
-      
+
       const existing = weekMap.get(key);
       if (existing) {
-        existing.volume += data.volume;
-        existing.sessions += data.sessions;
-        existing.rpeSum += data.rpeSum;
-        existing.rpeCount += data.rpeCount;
+        existing.volume += metrics?.volume ?? 0;
+        existing.sessions += 1;
+        existing.rpeSum += metrics?.rpeSum ?? 0;
+        existing.rpeCount += metrics?.rpeCount ?? 0;
       } else {
         weekMap.set(key, {
           ts: weekStart.getTime(),
-          volume: data.volume,
-          sessions: data.sessions,
-          rpeSum: data.rpeSum,
-          rpeCount: data.rpeCount,
+          volume: metrics?.volume ?? 0,
+          sessions: 1,
+          rpeSum: metrics?.rpeSum ?? 0,
+          rpeCount: metrics?.rpeCount ?? 0,
         });
       }
     }
@@ -313,31 +322,29 @@ export default function ProgressPage() {
       }))
       .sort((a, b) => a.ts - b.ts)
       .slice(-8);
-  }, [sessions, allSets]);
+  }, [sessionMetrics, sessions]);
 
   // -- Progress trend data --
   const progressTrendData = useMemo(() => {
-    if (!sessions || !allSets || sessions.length === 0) return [];
+    if (!sessions || sessions.length === 0) return [];
 
     const weekMap = new Map<string, { maxE1RM: number; rpeSum: number; rpeCount: number; totalSets: number }>();
 
-    const sessionWeek = new Map<string, string>();
     for (const session of sessions) {
+      const metrics = sessionMetrics.get(session.id);
+      if (!metrics) continue;
+
       const d = new Date(session.completedAt ?? session.startedAt);
       const weekStart = new Date(d);
       weekStart.setDate(d.getDate() - d.getDay());
       weekStart.setHours(0, 0, 0, 0);
-      sessionWeek.set(session.id, weekStart.toISOString().slice(0, 10));
-    }
+      const weekKey = weekStart.toISOString().slice(0, 10);
 
-    for (const set of allSets) {
-      const weekKey = sessionWeek.get(set.session);
-      if (!weekKey) continue;
-      const e1rm = estimate1RM(set.weight, set.reps);
       const entry = weekMap.get(weekKey) ?? { maxE1RM: 0, rpeSum: 0, rpeCount: 0, totalSets: 0 };
-      if (e1rm > entry.maxE1RM) entry.maxE1RM = e1rm;
-      if (set.rpe > 0) { entry.rpeSum += set.rpe; entry.rpeCount++; }
-      entry.totalSets++;
+      if (metrics.maxE1RM > entry.maxE1RM) entry.maxE1RM = metrics.maxE1RM;
+      entry.rpeSum += metrics.rpeSum;
+      entry.rpeCount += metrics.rpeCount;
+      entry.totalSets += metrics.totalSets;
       weekMap.set(weekKey, entry);
     }
 
@@ -350,7 +357,7 @@ export default function ProgressPage() {
         totalSets: data.totalSets,
       }))
       .slice(-8);
-  }, [sessions, allSets]);
+  }, [sessionMetrics, sessions]);
 
   // -- Reps distribution data --
   const repsDistributionData = useMemo(() => {
@@ -375,18 +382,13 @@ export default function ProgressPage() {
   const heatmapSessions = useMemo(() => {
     if (!sessions) return [];
     return sessions.map((s) => {
-      // Calculate volume for this session
-      const sessionVolume = allSets
-        .filter((set) => set.session === s.id)
-        .reduce((acc, set) => acc + (set.weight * set.reps), 0);
-      
       return {
         completedAt: s.completedAt ?? s.startedAt,
         startedAt: s.startedAt,
-        volume: sessionVolume,
+        volume: sessionMetrics.get(s.id)?.volume ?? 0,
       };
     });
-  }, [sessions, allSets]);
+  }, [sessionMetrics, sessions]);
 
   // -- Pentagon radar: 5-axis muscle groups --
   const muscleRadarData = useMemo(() => {
@@ -601,7 +603,7 @@ export default function ProgressPage() {
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <span className="stamp" style={{ color: "#71717A", fontSize: 10, letterSpacing: "0.15em" }}>
+              <span className="stamp" style={{ color: "var(--ink-low)", fontSize: 11, letterSpacing: "0.15em" }}>
                 {t("progress.LAST_SYNC")}
               </span>
               <LiveClock />
@@ -739,7 +741,7 @@ export default function ProgressPage() {
       {/* ── PR WALL CARDS ────────────────────────────────────────────── */}
       <div className="fade-up fade-up-5">
         <div className="flex items-center gap-2 mb-3">
-          <span className="font-data text-[8px] text-[#333] tracking-[0.2em] uppercase">Recent Records</span>
+          <span className="font-data text-[10px] text-ink-low tracking-[0.18em] uppercase">Recent Records</span>
           <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.06)" }} />
         </div>
         <PRWall prs={prWallData} />

@@ -118,7 +118,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: true,
       });
     } catch (error: unknown) {
-      console.error("[LOGIN ERROR]", error);
       throw parseAuthError(error, "login");
     }
   }, []);
@@ -144,7 +143,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           isAuthenticated: true,
         });
       } catch (error: unknown) {
-        console.error("[REGISTER ERROR]", error);
         throw parseAuthError(error, "register");
       }
     },

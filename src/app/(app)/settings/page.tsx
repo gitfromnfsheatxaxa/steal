@@ -82,7 +82,7 @@ export default function SettingsPage() {
           className="mt-2"
           style={{ height: 2, width: 32, background: "linear-gradient(90deg,#C2410C,transparent)", boxShadow: "0 0 8px #C2410C" }}
         />
-        <p className="font-data text-[10px] text-[#444] mt-2 uppercase tracking-widest">{user?.email}</p>
+        <p className="mt-2 font-data text-[12px] text-ink-low uppercase tracking-widest">{user?.email}</p>
       </div>
 
       {/* Profile */}
@@ -107,7 +107,7 @@ export default function SettingsPage() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-data text-[9px] uppercase tracking-widest text-[#444]">
+                    <FormLabel className="font-data text-[11px] uppercase tracking-widest text-ink-low">
                       {t("settings.DISPLAY_NAME")}
                     </FormLabel>
                     <FormControl>
@@ -126,7 +126,7 @@ export default function SettingsPage() {
                   name="weight"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="font-data text-[9px] uppercase tracking-widest text-[#444]">
+                      <FormLabel className="font-data text-[11px] uppercase tracking-widest text-ink-low">
                         {t("settings.WEIGHT_KG")}
                       </FormLabel>
                       <FormControl>
@@ -135,7 +135,11 @@ export default function SettingsPage() {
                           step={0.1}
                           className="rounded-none border-[rgba(255,255,255,0.08)] bg-[rgba(0,0,0,0.4)] font-data text-sm text-[#f0f0f0] focus:border-[#C2410C] focus-visible:ring-0"
                           {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === "" ? undefined : Number(e.target.value),
+                            )
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -147,7 +151,7 @@ export default function SettingsPage() {
                   name="height"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="font-data text-[9px] uppercase tracking-widest text-[#444]">
+                      <FormLabel className="font-data text-[11px] uppercase tracking-widest text-ink-low">
                         {t("settings.HEIGHT_CM")}
                       </FormLabel>
                       <FormControl>
@@ -155,7 +159,11 @@ export default function SettingsPage() {
                           type="number"
                           className="rounded-none border-[rgba(255,255,255,0.08)] bg-[rgba(0,0,0,0.4)] font-data text-sm text-[#f0f0f0] focus:border-[#C2410C] focus-visible:ring-0"
                           {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === "" ? undefined : Number(e.target.value),
+                            )
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -177,7 +185,7 @@ export default function SettingsPage() {
 
       {/* Language */}
       <div className="glass p-4 fade-up fade-up-2">
-        <span className="font-data text-[9px] uppercase tracking-widest text-[#444] block mb-3">
+        <span className="mb-3 block font-data text-[11px] uppercase tracking-widest text-ink-low">
           Language
         </span>
         <div className="flex gap-2">
@@ -219,10 +227,10 @@ function LanguageBtn({ lang }: { lang: "en" | "ru" | "uz" }) {
   return (
     <button
       onClick={() => setLanguage(lang)}
-      className="font-data text-[10px] uppercase tracking-widest px-3 py-1.5 border transition-all"
+      className="font-data text-[11px] uppercase tracking-widest px-3 py-1.5 border transition-all"
       style={{
         border: active ? "1px solid #C2410C" : "1px solid rgba(255,255,255,0.08)",
-        color: active ? "#C2410C" : "#444",
+        color: active ? "#C2410C" : "var(--ink-low)",
         background: active ? "rgba(194,65,12,0.08)" : "transparent",
       }}
     >

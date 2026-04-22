@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
   const ex = await findExerciseBySlug(slug);
   if (!ex) return {};
-  return { title: `${ex.name} | Exercise Library | Steal Therapy` };
+  return { title: `${ex.name} | Exercise Library | Steel Therapy` };
 }
 
 export default async function ExerciseDetailPage({ params }: Props) {

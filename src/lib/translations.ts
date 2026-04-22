@@ -31,7 +31,7 @@ const en: TranslationData = {
   },
   // ── Landing page ──
   landing: {
-    TAGLINE: "STEAL Forges Steel",
+    TAGLINE: "STEEL Forges Steel",
     HERO_DESC: "No excuses. No hand-holding. Build something real.",
     FEATURE_1_TITLE: "Progressive Overload",
     FEATURE_1_DESC: "Every session harder than the last. That's the only rule.",
@@ -46,8 +46,8 @@ const en: TranslationData = {
   // ── Auth layout ──
   authLayout: {
     ACCESS_PORTAL: "OPERATOR ACCESS PORTAL",
-    STEAL: "STEAL",
-    FORGES_STEEL: "STEAL FORGES STEEL",
+    STEEL: "STEEL",
+    FORGES_STEEL: "STEEL FORGES STEEL",
     FOOTER: "OPERATOR ACCESS  /  v1.0  /  CLEARANCE REQUIRED",
   },
   // ── Login ──
@@ -57,7 +57,7 @@ const en: TranslationData = {
     SUBTITLE: "Get back to work.",
     NO_ACCOUNT: "No account?",
     REGISTER: "REGISTER",
-    FOOTER: "Steal Forges Steel",
+    FOOTER: "Steel Forges Steel",
     EMAIL: "Email",
     EMAIL_PLACEHOLDER: "your@email.com",
     PASSWORD: "Password",
@@ -90,7 +90,7 @@ const en: TranslationData = {
   },
   // ── Dashboard ──
   dashboard: {
-    STEAL_THERAPY: "STEAL THERAPY",
+    STEEL_THERAPY: "STEEL THERAPY",
     OPERATIONS_DASHBOARD: "OPERATIONS DASHBOARD",
     OPERATOR: "OPERATOR",
     CURRENT_STREAK: "CURRENT STREAK",
@@ -504,7 +504,7 @@ const ru: TranslationData = {
     GEAR: "ПРОФИЛЬ",
   },
   landing: {
-    TAGLINE: "Steal — ковка стали",
+    TAGLINE: "Steel — ковка стали",
     HERO_DESC: "Без оправданий. Без поблажек. Построй что-то настоящее.",
     FEATURE_1_TITLE: "Прогрессивная нагрузка",
     FEATURE_1_DESC: "Каждая тренировка тяжелее предыдущей. Единственное правило.",
@@ -518,7 +518,7 @@ const ru: TranslationData = {
   },
   authLayout: {
     ACCESS_PORTAL: "ПОРТАЛ ДОСТУПА ОПЕРАТОРА",
-    STEAL: "STEAL",
+    STEEL: "STEEL",
     FORGES_STEEL: "СТАЛЬ ЗАКАЛЯЕТСЯ",
     FOOTER: "ДОСТУП ОПЕРАТОРА  /  v1.0  /  ТРЕБУЕТСЯ ДОПУСК",
   },
@@ -559,7 +559,7 @@ const ru: TranslationData = {
     SUBMIT: "СОЗДАТЬ АККАУНТ",
   },
   dashboard: {
-    STEAL_THERAPY: "STEAL THERAPY",
+    STEEL_THERAPY: "STEEL THERAPY",
     OPERATIONS_DASHBOARD: "ПАНЕЛЬ УПРАВЛЕНИЯ",
     OPERATOR: "ОПЕРАТОР",
     CURRENT_STREAK: "ТЕКУЩАЯ СЕРИЯ",
@@ -960,7 +960,7 @@ const uz: TranslationData = {
     GEAR: "PROFIL",
   },
   landing: {
-    TAGLINE: "Steal — Po'lat yasaydi",
+    TAGLINE: "Steel — Po'lat yasaydi",
     HERO_DESC: "Bahona yo'q. Qo'ldan tutish yo'q. Haqiqiy narsa qur.",
     FEATURE_1_TITLE: "Progressiv yuklama",
     FEATURE_1_DESC: "Har bir mashg'ulot avvalgisidan og'irroq. Yagona qoida.",
@@ -974,7 +974,7 @@ const uz: TranslationData = {
   },
   authLayout: {
     ACCESS_PORTAL: "OPERATOR KIRISH PORTALI",
-    STEAL: "STEAL",
+    STEEL: "STEEL",
     FORGES_STEEL: "PO'LAT TOBLAYDI",
     FOOTER: "OPERATOR KIRISH  /  v1.0  /  RUXSAT TALAB QILINADI",
   },
@@ -1015,7 +1015,7 @@ const uz: TranslationData = {
     SUBMIT: "HISOB YARATISH",
   },
   dashboard: {
-    STEAL_THERAPY: "STEAL THERAPY",
+    STEEL_THERAPY: "STEEL THERAPY",
     OPERATIONS_DASHBOARD: "BOSHQARUV PANELI",
     OPERATOR: "OPERATOR",
     CURRENT_STREAK: "JORIY SERIYA",

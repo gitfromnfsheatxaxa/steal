@@ -3,10 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useI18n } from "@/components/providers/I18nProvider";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut, Settings, LayoutDashboard, Globe } from "lucide-react";
+import { LogOut, Settings, LayoutDashboard, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -25,7 +23,6 @@ const navLinks = [
   { href: "/exercises", label: "navbar.LIBRARY" },
 ] as const;
 
-/** UTC clock — updates every second, tabular-nums mono */
 function LiveClock() {
   const [time, setTime] = useState<string>("");
 
@@ -34,11 +31,11 @@ function LiveClock() {
       const now = new Date();
       const hh = now.getUTCHours().toString().padStart(2, "0");
       const mm = now.getUTCMinutes().toString().padStart(2, "0");
-      const ss = now.getUTCSeconds().toString().padStart(2, "0");
-      setTime(`${hh}:${mm}:${ss}`);
+      setTime(`${hh}:${mm}`);
     }
+
     tick();
-    const id = setInterval(tick, 1000);
+    const id = setInterval(tick, 60_000);
     return () => clearInterval(id);
   }, []);
 
@@ -46,7 +43,7 @@ function LiveClock() {
 
   return (
     <span
-      className="font-data text-[11px] tabular-nums text-ink-mid select-none"
+      className="font-data text-[12px] tabular-nums text-ink-mid select-none"
       aria-label="Current time in UTC"
     >
       {time}
@@ -55,15 +52,11 @@ function LiveClock() {
   );
 }
 
-/** Tactical-green status dot with slow pulse */
 function StatusIndicator({ t }: { t: (path: string) => string }) {
   return (
     <span className="flex items-center gap-1.5" aria-label="System online">
       <span className="relative flex h-2 w-2">
-        <span
-          className="absolute inline-flex h-full w-full rounded-full bg-tactical opacity-75"
-          style={{ animation: "st-pulse 2s ease-in-out infinite" }}
-        />
+        <span className="status-dot-pulse absolute inline-flex h-full w-full rounded-full bg-tactical opacity-75" />
         <span className="relative inline-flex h-2 w-2 rounded-full bg-tactical" />
       </span>
       <span className="stamp text-tactical hidden lg:inline">{t("navbar.ONLINE")}</span>
@@ -76,7 +69,7 @@ export function Navbar() {
   const { user, logout } = useAuth();
   const { language, setLanguage, t } = useI18n();
 
-  const displayName: string =
+  const displayName =
     (typeof user?.name === "string" && user.name.length > 0
       ? user.name
       : typeof user?.email === "string" && user.email.length > 0
@@ -89,33 +82,30 @@ export function Navbar() {
       style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
     >
       <div className="container-app flex h-full items-center justify-between">
-
-        {/* ── LEFT: wordmark ── */}
         <div className="flex items-center gap-8">
           <Link
             href="/dashboard"
             className="flex items-center gap-2 select-none"
-            aria-label="Steal Therapy — go to dashboard"
+            aria-label="Steel Therapy - go to dashboard"
           >
             <span
               className="font-heading font-black leading-none text-[#C2410C]"
               style={{ fontSize: "15px", letterSpacing: "0.2em" }}
             >
-              STEAL
+              STEEL
             </span>
             <span
               aria-hidden="true"
               style={{ width: 1, height: 16, background: "rgba(255,255,255,0.08)" }}
             />
             <span
-              className="font-data text-[#333]"
-              style={{ fontSize: "9px", letterSpacing: "0.1em" }}
+              className="font-data text-ink-mid"
+              style={{ fontSize: "10px", letterSpacing: "0.12em" }}
             >
               THERAPY
             </span>
           </Link>
 
-          {/* ── CENTER: nav links with animated underline ── */}
           <nav
             className="hidden items-center md:flex"
             role="navigation"
@@ -124,26 +114,20 @@ export function Navbar() {
             {navLinks.map((link) => {
               const active =
                 pathname === link.href || pathname.startsWith(link.href + "/");
+
               return (
                 <Link
                   key={link.href}
                   href={link.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "relative flex items-center px-4 py-4 font-data text-[11px] font-semibold uppercase tracking-widest transition-colors duration-100",
-                    active
-                      ? "text-rust"
-                      : "text-ink-mid hover:text-ink-high",
+                    "relative flex items-center px-4 py-4 font-data text-[12px] font-semibold uppercase tracking-widest transition-colors duration-100",
+                    active ? "text-rust" : "text-ink-mid hover:text-ink-high",
                   )}
                 >
                   {t(link.label)}
                   {active && (
-                    <motion.span
-                      layoutId="nav-underline"
-                      className="absolute bottom-0 left-0 right-0 h-[2px] bg-rust"
-                      style={{ originX: 0 }}
-                      transition={{ type: "spring", stiffness: 500, damping: 35 }}
-                    />
+                    <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-rust" />
                   )}
                 </Link>
               );
@@ -151,36 +135,31 @@ export function Navbar() {
           </nav>
         </div>
 
-        {/* ── RIGHT: clock / status / theme / avatar ── */}
         <div className="flex items-center gap-3">
-          {/* Clock */}
           <div className="hidden items-center gap-2 lg:flex">
             <LiveClock />
           </div>
 
-          {/* Status dot */}
           <div className="hidden items-center sm:flex">
             <StatusIndicator t={t} />
           </div>
 
-          {/* Hairline divider */}
           <span
             className="hidden h-5 w-px bg-surface-4 sm:block"
             aria-hidden="true"
           />
 
-          {/* User avatar dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
                 aria-label="User menu"
-                className="h-[30px] w-[30px] rounded-full flex items-center justify-center transition-all"
+                className="flex h-[30px] w-[30px] items-center justify-center rounded-full transition-all"
                 style={{
                   background: "rgba(255,255,255,0.06)",
                   border: "1px solid rgba(255,255,255,0.1)",
                 }}
               >
-                <span className="font-data text-[11px] text-[#888]">
+                <span className="font-data text-[12px] text-ink-high">
                   {displayName.charAt(0).toUpperCase()}
                 </span>
               </button>
@@ -190,54 +169,33 @@ export function Navbar() {
               className="w-52 rounded-none border-surface-3 bg-surface-1 p-0"
               style={{ borderColor: "rgba(185,28,28,0.3)" }}
             >
-              {/* User identity header */}
-              {/* Language Selector */}
               <div className="border-b border-surface-3 px-3 py-2.5">
-                <div className="flex items-center gap-2 mb-2">
+                <div className="mb-2 flex items-center gap-2">
                   <Globe className="h-3.5 w-3.5 text-ink-mid" />
                   <p className="stamp text-ink-low">{t("navbar.OPERATOR")}</p>
                 </div>
-                <p className="font-data mt-0.5 truncate text-[11px] font-semibold uppercase tracking-wider text-ink-high">
+                <p className="mt-0.5 truncate font-data text-[11px] font-semibold uppercase tracking-wider text-ink-high">
                   {displayName}
                 </p>
               </div>
 
               <div className="border-b border-surface-3 px-3 py-2">
-                <p className="stamp text-[9px] text-ink-mid mb-2">LANGUAGE</p>
+                <p className="stamp mb-2 text-[10px] text-ink-mid">LANGUAGE</p>
                 <div className="flex gap-1">
-                  <button
-                    onClick={() => setLanguage("en")}
-                    className={cn(
-                      "px-2 py-1 text-[10px] font-data uppercase tracking-widest border transition-colors",
-                      language === "en"
-                        ? "border-rust text-rust bg-surface-3"
-                        : "border-surface-4 text-ink-mid hover:border-rust hover:text-ink-high"
-                    )}
-                  >
-                    EN
-                  </button>
-                  <button
-                    onClick={() => setLanguage("ru")}
-                    className={cn(
-                      "px-2 py-1 text-[10px] font-data uppercase tracking-widest border transition-colors",
-                      language === "ru"
-                        ? "border-rust text-rust bg-surface-3"
-                        : "border-surface-4 text-ink-mid hover:border-rust hover:text-ink-high"
-                    )}
-                  >
-                    RU
-                  </button>
-                  <button
-                    onClick={() => setLanguage("uz")}
-                    className={cn(
-                      "px-2 py-1 text-[10px] font-data uppercase tracking-widest border transition-colors",
-                      language === "uz"
-                        ? "border-rust text-rust bg-surface-3"
-                        : "border-surface-4 text-ink-mid hover:border-rust hover:text-ink-high"
-                    )}
-                  >
-                    UZ
-                  </button>
+                  {(["en", "ru", "uz"] as const).map((lang) => (
+                    <button
+                      key={lang}
+                      onClick={() => setLanguage(lang)}
+                      className={cn(
+                        "px-2 py-1 font-data text-[11px] uppercase tracking-widest border transition-colors",
+                        language === lang
+                          ? "border-rust text-rust bg-surface-3"
+                          : "border-surface-4 text-ink-mid hover:border-rust hover:text-ink-high",
+                      )}
+                    >
+                      {lang.toUpperCase()}
+                    </button>
+                  ))}
                 </div>
               </div>
 
@@ -261,7 +219,7 @@ export function Navbar() {
               <div className="py-1">
                 <DropdownMenuItem
                   onClick={logout}
-                  className="rounded-none px-3 py-2 font-data text-[11px] uppercase tracking-widest text-rust focus:bg-surface-3 focus:text-rust cursor-pointer"
+                  className="cursor-pointer rounded-none px-3 py-2 font-data text-[11px] uppercase tracking-widest text-rust focus:bg-surface-3 focus:text-rust"
                 >
                   <LogOut className="mr-2 h-3.5 w-3.5" />
                   {t("navbar.SIGN_OUT")}
@@ -271,20 +229,6 @@ export function Navbar() {
           </DropdownMenu>
         </div>
       </div>
-
-      {/* Tactical pulse keyframe — injected inline to avoid globals.css modification */}
-      <style>{`
-        @keyframes st-pulse {
-          0%, 100% { transform: scale(1); opacity: 0.75; }
-          50%       { transform: scale(2); opacity: 0;    }
-        }
-      `}</style>
-      <style>{`
-        .stamp {
-          font-family: 'JetBrains Mono', monospace;
-          letter-spacing: 0.15em;
-        }
-      `}</style>
     </header>
   );
 }

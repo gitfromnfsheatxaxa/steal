@@ -30,21 +30,14 @@ export function useProgressData() {
       }
 
       try {
-        console.log("[useProgressData] Fetching data for user:", userId);
-
         // Fetch all sessions (no filter to avoid PocketBase filter issues)
         const sessionsResponse = await pb
           .collection("workout_sessions")
           .getList<WorkoutSession>(1, 200, { expand: "planDay" });
 
-        console.log("[useProgressData] Total sessions in DB:", sessionsResponse.totalItems);
-
         // Filter by current user and completed status in JS
         const userSessions = sessionsResponse.items.filter((s) => s.user === userId);
         const completedSessions = userSessions.filter((s) => s.status === "completed");
-
-        console.log("[useProgressData] User sessions:", userSessions.length);
-        console.log("[useProgressData] Completed sessions:", completedSessions.length);
 
         // Fetch sets for completed sessions
         let allSets: SessionSet[] = [];
@@ -57,16 +50,16 @@ export function useProgressData() {
             .getList<SessionSet>(1, 5000, { filter, expand: "exercise" });
 
           allSets = setsResponse.items;
-          console.log("[useProgressData] Sets fetched:", allSets.length);
         }
 
         return {
           sessions: completedSessions,
           allSets,
         };
-      } catch (error: any) {
-        console.error("[useProgressData] Error:", error.message);
-        return { sessions: [], allSets: [] };
+      } catch (error: unknown) {
+        throw error instanceof Error
+          ? error
+          : new Error("Failed to load progress data");
       }
     },
     enabled: !!userId,
@@ -253,12 +246,10 @@ export function useStreakData(): StreakData {
 
 export function useMuscleDistribution() {
   const { data } = useProgressData();
-  const sessions = data?.sessions ?? [];
   const allSets = data?.allSets ?? [];
 
   return useMemo(() => {
-    if (!sessions || sessions.length === 0) return [];
-    if (!allSets || allSets.length === 0) return [];
+    if (allSets.length === 0) return [];
 
     // Muscle group mapping based on exercise names - using broader keywords
     const MUSCLE_MAPPING: Record<string, string[]> = {
@@ -338,10 +329,8 @@ export function useMuscleDistribution() {
       })
       .sort((a, b) => b.volume - a.volume); // Sort by volume instead of count
 
-    console.log('[useMuscleDistribution] Muscle data:', result);
-    console.log('[useMuscleDistribution] All sets count:', allSets.length);
     return result;
-  }, [sessions, allSets]);
+  }, [allSets]);
 }
 
 export function useWeightLog() {

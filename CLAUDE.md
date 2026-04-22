@@ -143,7 +143,7 @@ Browser requests go to `/pb/*` which Next.js (`next.config.mjs`) proxies to `POC
 - Every API call must handle **loading, error, and empty** states explicitly. An unhandled empty state counts as a bug.
 - Accessibility and Core Web Vitals are first-class requirements, not polish.
 - All data operations go through PocketBase SDK via custom hooks.
-- Follow the brutal gym aesthetic and brand guidelines ("Steal Forges Steel" tone).
+- Follow the brutal gym aesthetic and brand guidelines ("Steel Forges Steel" tone).
 - Image carousels must auto-slide, pause on hover, and support keyboard navigation.
 
 ## Commands

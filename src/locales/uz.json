@@ -10,7 +10,7 @@
     "ONLINE": "ONLAYN"
   },
   "dashboard": {
-    "STEAL_THERAPY": "STEAL TERAPIYA",
+    "STEEL_THERAPY": "STEEL TERAPIYA",
     "OPERATIONS_DASHBOARD": "OPERATSIYA PANELI",
     "OPERATOR": "OPERATOR",
     "CURRENT_STREAK": "JORIY SERIYA",
@@ -44,7 +44,7 @@
     "DEVICE": "QURILMA",
     "WEB": "WEB",
     "BUILD": "VERSİYA",
-    "STEAL_V2": "STEAL v2",
+    "STEEL_V2": "STEEL v2",
     "UPCOMING": "KELECEK",
     "NEXT": "KEYINGI",
     "LOCKED": "QULFLANGAN",
@@ -93,9 +93,9 @@
     "TRAIN_LIKE_DORIAN_YATES": "DORIAN YEITS KABI MASHQ QILING",
     "YATES_SUBTITLE": "Qon va Jigar",
     "YATES_DESC": "Isinishdan keyin bitta maksimal ishchi set. Yeits 'Qon va Jigar' usuli. Nazorat qilingan negativlar, qattiq intensivlik.",
-    "STEAL_HYBRID": "STEAL GIBRID",
-    "STEAL_HYBRID_SUBTITLE": "Kuch + Hajm",
-    "STEAL_HYBRID_DESC": "Dushanba/Chorshanba asosiy mashqlar. Seshanba/Shanba gipertrofiya ishlar. Qurilgan progressiv oshirish.",
+    "STEEL_HYBRID": "STEEL GIBRID",
+    "STEEL_HYBRID_SUBTITLE": "Kuch + Hajm",
+    "STEEL_HYBRID_DESC": "Dushanba/Chorshanba asosiy mashqlar. Seshanba/Shanba gipertrofiya ishlar. Qurilgan progressiv oshirish.",
     "PUSH_PULL_LEGS": "SUZISH / TORTISH / OYOQLAR",
     "PPL_SUBTITLE": "Klassik split",
     "PPL_DESC": "Sinxon 6 kunlik split. Suzish (ko'krak/yelka/triceps), Tortish (orqa/biceps), Oyoqlar. Haftada ikki marta.",
@@ -107,7 +107,7 @@
     "NSUNS_DESC": "To'rtta asosiy ko'tarishda chiziqli progressiya gipertrofiya aksessuarlari bilan. Vendler 5/3/1 metodologiyasi, optimallashtirilgan."
   },
   "login": {
-    "TITLE": "STEAL STEEL",
+    "TITLE": "STEEL STEEL",
     "WELCOME": "XUSH KELIBSIZ",
     "EMAIL": "E-POCTA",
     "PASSWORD": "PAROL",

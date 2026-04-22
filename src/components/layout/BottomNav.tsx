@@ -41,8 +41,8 @@ export function BottomNav() {
               key={tab.href}
               href={tab.href}
               className={cn(
-                "flex flex-col items-center gap-0.5 px-3 py-1 font-data text-[10px] font-semibold uppercase tracking-widest transition-all",
-                active ? "text-[#C2410C]" : "text-[#71717A] hover:text-[#E5E5E5]",
+                "flex flex-col items-center gap-0.5 px-3 py-1 font-data text-[11px] font-semibold uppercase tracking-widest transition-all",
+                active ? "text-[#C2410C]" : "text-ink-mid hover:text-ink-high",
               )}
               aria-current={active ? "page" : undefined}
             >

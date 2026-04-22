@@ -11,7 +11,7 @@
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-if (!BASE_URL) {
+if (!BASE_URL && process.env.NODE_ENV !== "production") {
   // Fail loud at module load rather than letting every request 404 silently.
   // eslint-disable-next-line no-console
   console.warn("[api] NEXT_PUBLIC_API_URL is not set — check .env.local");

@@ -22,7 +22,7 @@ function TacticalClock() {
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000);
+    const id = setInterval(() => setNow(new Date()), 60_000);
     return () => clearInterval(id);
   }, []);
 
@@ -34,7 +34,7 @@ function TacticalClock() {
   const mm = String(now.getMinutes()).padStart(2, "0");
 
   return (
-    <span className="font-data text-[11px] tracking-widest text-[#525252] tabular-nums">
+    <span className="font-data text-[12px] tracking-widest text-ink-mid tabular-nums">
       {dd}{mon}{yy} {hh}:{mm}
     </span>
   );
@@ -65,7 +65,7 @@ function KpiPanel({ label, value, unit, subValue, icon, accent = "orange", tag =
 
   return (
     <div className={`glass kpi ${kpiType} glass-hover fade-up`}>
-      <span className="font-data block text-[8px] tracking-[0.2em] text-[#333] uppercase mb-1.5">{label}</span>
+      <span className="font-data mb-1.5 block text-[10px] tracking-[0.18em] text-ink-low uppercase">{label}</span>
       <div
         className="font-heading tabular-nums leading-none"
         style={{ fontSize: 26, fontWeight: 700, color: textColor }}
@@ -73,10 +73,10 @@ function KpiPanel({ label, value, unit, subValue, icon, accent = "orange", tag =
         <CounterFX value={value} />
       </div>
       {unit && (
-        <span className="font-data block text-[8px] text-[#444] uppercase mt-1">{unit}</span>
+        <span className="font-data mt-1 block text-[10px] text-ink-mid uppercase">{unit}</span>
       )}
       {subValue && (
-        <span className="font-data block text-[8px] text-[#333] mt-0.5">{subValue}</span>
+        <span className="font-data mt-0.5 block text-[10px] text-ink-low">{subValue}</span>
       )}
     </div>
   );
@@ -133,20 +133,20 @@ function SessionHistoryItem({ dayLabel, muscleTags, isCompleted, isUpcoming, isL
               {dayLabel}
             </span>
             {isCompleted && (
-              <span className="stamp text-[8px] text-[#10b981]">{t("dashboard.DONE")}</span>
+              <span className="stamp text-[10px] text-[#10b981]">{t("dashboard.DONE")}</span>
             )}
             {isUpcoming && !isLocked && (
-              <span className="stamp text-[8px] text-[#e53e00]">{t("dashboard.NEXT")}</span>
+              <span className="stamp text-[10px] text-[#e53e00]">{t("dashboard.NEXT")}</span>
             )}
             {isLocked && (
-              <span className="stamp text-[8px] text-[#525252]">{t("dashboard.LOCKED")}</span>
+              <span className="stamp text-[10px] text-ink-low">{t("dashboard.LOCKED")}</span>
             )}
           </div>
           {muscleTags.length > 0 && (
             <div className="flex gap-1 mt-0.5">
               {muscleTags.slice(0, 3).map((tag) => (
                 <span key={tag} className={cn(
-                  "px-1 py-0.5 border font-data text-[8px] uppercase tracking-widest",
+                  "px-1 py-0.5 border font-data text-[10px] uppercase tracking-widest",
                   isLocked 
                     ? "border-[#2a2a2a] text-[#3a3a3a]" 
                     : "border-[#2a2a2a] text-[#525252]"
@@ -159,10 +159,10 @@ function SessionHistoryItem({ dayLabel, muscleTags, isCompleted, isUpcoming, isL
         </div>
         
         {dateStr && !isLocked && (
-          <span className="font-data text-[9px] text-[#525252]">{dateStr}</span>
+          <span className="font-data text-[11px] text-ink-low">{dateStr}</span>
         )}
         {isLocked && (
-          <span className="font-data text-[9px] text-[#3a3a3a]">--</span>
+          <span className="font-data text-[11px] text-ink-dim">--</span>
         )}
       </div>
     </div>
@@ -275,7 +275,7 @@ function ActiveMissionPanel({ planId, t }: { planId: string; t: (path: string) =
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3 flex-wrap">
-        <span className="stamp text-[9px] tracking-[0.2em] text-[#525252]">{t("dashboard.DAY")}</span>
+        <span className="stamp text-[11px] tracking-[0.18em] text-ink-low">{t("dashboard.DAY")}</span>
         <span className="font-data text-sm font-bold text-[#e5e5e5] uppercase tracking-widest">
           {nextSessionDay.label}
         </span>
@@ -284,7 +284,7 @@ function ActiveMissionPanel({ planId, t }: { planId: string; t: (path: string) =
             {nextSessionDay.focus.map((f: string) => (
               <span
                 key={f}
-                className="px-2 py-0.5 border border-[#2a2a2a] font-data text-[9px] uppercase tracking-widest text-[#71717A]"
+                className="px-2 py-0.5 border border-[#2a2a2a] font-data text-[10px] uppercase tracking-widest text-ink-low"
               >
                 {f}
               </span>
@@ -294,7 +294,7 @@ function ActiveMissionPanel({ planId, t }: { planId: string; t: (path: string) =
         {completedSession && (
           <div className="flex items-center gap-1.5 text-[#10b981]">
             <CheckCircle2 className="h-3.5 w-3.5" />
-            <span className="font-data text-[9px] uppercase tracking-widest">{t("dashboard.COMPLETED")}</span>
+            <span className="font-data text-[10px] uppercase tracking-widest">{t("dashboard.COMPLETED")}</span>
           </div>
         )}
       </div>
@@ -309,13 +309,13 @@ function ActiveMissionPanel({ planId, t }: { planId: string; t: (path: string) =
                 key={ex.id}
                 className="flex items-center gap-3 py-1.5 px-2 hover:bg-[#1a1a1a] transition-colors group"
               >
-                <span className="stamp text-[8px] text-[#525252] w-5 shrink-0">
+                <span className="stamp text-[10px] text-ink-low w-5 shrink-0">
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <span className="font-data text-xs text-[#e5e5e5] flex-1 uppercase tracking-wide group-hover:text-[#e53e00] transition-colors truncate">
                   {exName}
                 </span>
-                <span className="stamp text-[9px] text-[#71717A] shrink-0">
+                <span className="stamp text-[10px] text-ink-low shrink-0">
                   {ex.sets}×{ex.repsMin}
                   {ex.repsMin !== ex.repsMax ? `-${ex.repsMax}` : ""}
                 </span>
@@ -323,7 +323,7 @@ function ActiveMissionPanel({ planId, t }: { planId: string; t: (path: string) =
             );
           })}
           {exercises.length > 6 && (
-            <p className="stamp text-[9px] text-[#525252] pl-2">
+            <p className="stamp text-[10px] text-ink-low pl-2">
               +{exercises.length - 6} {t("dashboard.MORE")}
             </p>
           )}
@@ -332,7 +332,7 @@ function ActiveMissionPanel({ planId, t }: { planId: string; t: (path: string) =
 
       {estMinutes > 0 && (
         <div className="flex items-center gap-2 pt-1">
-          <span className="stamp text-[9px] text-[#525252]">{t("dashboard.EST_MIN").replace("MIN", `${estMinutes} MIN`)}</span>
+          <span className="stamp text-[10px] text-ink-low">{t("dashboard.EST_MIN").replace("MIN", `${estMinutes} MIN`)}</span>
         </div>
       )}
 
@@ -489,7 +489,7 @@ function SessionHistoryPanel({ planId, t }: { planId: string; t: (path: string) 
       {/* Upcoming section */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <span className="stamp text-[9px] tracking-[0.2em] text-[#e53e00]">{t("dashboard.UPCOMING")}</span>
+          <span className="stamp text-[10px] tracking-[0.18em] text-[#e53e00]">{t("dashboard.UPCOMING")}</span>
           <div className="h-px flex-1 bg-[#2a2a2a]" />
         </div>
         <div className="space-y-1.5">
@@ -498,7 +498,7 @@ function SessionHistoryPanel({ planId, t }: { planId: string; t: (path: string) 
               <SessionHistoryItem key={i} {...item} t={t} />
             ))
           ) : (
-            <p className="stamp text-[9px] text-[#525252] py-2">{t("dashboard.ALL_SESSIONS_COMPLETED")}</p>
+            <p className="stamp text-[10px] text-ink-low py-2">{t("dashboard.ALL_SESSIONS_COMPLETED")}</p>
           )}
         </div>
       </div>
@@ -506,7 +506,7 @@ function SessionHistoryPanel({ planId, t }: { planId: string; t: (path: string) 
       {/* Completed section */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <span className="stamp text-[9px] tracking-[0.2em] text-[#10b981]">{t("dashboard.COMPLETED")}</span>
+          <span className="stamp text-[10px] tracking-[0.18em] text-[#10b981]">{t("dashboard.COMPLETED")}</span>
           <div className="h-px flex-1 bg-[#2a2a2a]" />
         </div>
         <div className="space-y-1.5">
@@ -515,7 +515,7 @@ function SessionHistoryPanel({ planId, t }: { planId: string; t: (path: string) 
               <SessionHistoryItem key={i} {...item} t={t} />
             ))
           ) : (
-            <p className="stamp text-[9px] text-[#525252] py-2">{t("dashboard.NO_COMPLETED_SESSIONS_YET")}</p>
+            <p className="stamp text-[10px] text-ink-low py-2">{t("dashboard.NO_COMPLETED_SESSIONS_YET")}</p>
           )}
         </div>
       </div>
@@ -545,6 +545,19 @@ function RecentFeed({ t }: { t: (path: string) => string }) {
       .slice(0, 5);
   }, [sessions]);
 
+  const sessionStats = useMemo(() => {
+    const stats = new Map<string, { volume: number; setCount: number }>();
+
+    for (const set of allSets ?? []) {
+      const current = stats.get(set.session) ?? { volume: 0, setCount: 0 };
+      current.volume += set.weight * set.reps;
+      current.setCount += 1;
+      stats.set(set.session, current);
+    }
+
+    return stats;
+  }, [allSets]);
+
   function formatTacticalDate(dateStr: string) {
     const d = new Date(dateStr);
     const dd = String(d.getDate()).padStart(2, "0");
@@ -556,18 +569,13 @@ function RecentFeed({ t }: { t: (path: string) => string }) {
   }
 
   function getSessionVolume(sessionId: string): string {
-    if (!allSets || allSets.length === 0) return "—";
-    const sets = allSets.filter((s) => s.session === sessionId);
-    if (sets.length === 0) return "—";
-    const total = sets.reduce((acc, s) => acc + (s.weight * s.reps), 0);
+    const total = sessionStats.get(sessionId)?.volume ?? 0;
     if (total === 0) return "—";
     return (total / 1000).toFixed(1) + "T";
   }
 
   function getSessionSetCount(sessionId: string): number {
-    if (!allSets || allSets.length === 0) return 0;
-    const count = allSets.filter((s) => s.session === sessionId).length;
-    return count;
+    return sessionStats.get(sessionId)?.setCount ?? 0;
   }
 
   function getPlanDayLabel(session: any): string {
@@ -595,7 +603,7 @@ function RecentFeed({ t }: { t: (path: string) => string }) {
   if (!recentSessions.length) {
     return (
       <div className="border border-dashed border-[#2a2a2a] p-6 text-center">
-        <span className="stamp text-[9px] text-[#525252]">{t("dashboard.NO_SESSION_HISTORY")}</span>
+        <span className="stamp text-[10px] text-ink-low">{t("dashboard.NO_SESSION_HISTORY")}</span>
       </div>
     );
   }
@@ -651,7 +659,7 @@ function RecentPRs({ t }: { t: (path: string) => string }) {
   if (!top3.length) {
     return (
       <div className="border border-dashed border-[#2a2a2a] p-6 text-center">
-        <span className="stamp text-[9px] text-[#525252]">{t("dashboard.NO_PRS_YET")}</span>
+        <span className="stamp text-[10px] text-ink-low">{t("dashboard.NO_PRS_YET")}</span>
       </div>
     );
   }
@@ -664,14 +672,14 @@ function RecentPRs({ t }: { t: (path: string) => string }) {
           className="flex items-center gap-3 py-1.5"
           style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
         >
-          <span className="stamp text-[8px] text-[#525252] w-5 shrink-0">
+          <span className="stamp text-[10px] text-ink-low w-5 shrink-0">
             {String(i + 1).padStart(2, "0")}
           </span>
           <div className="flex-1 min-w-0">
             <p className="font-data text-[10px] text-[#e5e5e5] uppercase tracking-wide truncate">
               {pr.exerciseName}
             </p>
-            <p className="stamp text-[9px] text-[#525252] mt-0.5">
+            <p className="stamp text-[10px] text-ink-low mt-0.5">
               {formatShortDate(pr.date)}
             </p>
           </div>
@@ -726,16 +734,6 @@ export default function DashboardPage() {
     return nextDay?.week ?? activePlan.currentWeek;
   }, [planDays, sessions, activePlan]);
 
-  // Debug: log sessions data
-  useEffect(() => {
-    if (sessions) {
-      console.log("[DASHBOARD] Sessions loaded:", sessions.length);
-      sessions.forEach((s, i) => {
-        console.log(`  Session ${i + 1}:`, s.id, s.status, s.completedAt);
-      });
-    }
-  }, [sessions]);
-
   if (planLoading) {
     return <SkeletonGrid />;
   }
@@ -748,7 +746,7 @@ export default function DashboardPage() {
         style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
       >
         <div>
-          <span className="font-data block text-[8px] tracking-[0.3em] text-[#2a2a2a] uppercase mb-1.5">
+          <span className="font-data mb-1.5 block text-[10px] tracking-[0.24em] text-ink-low uppercase">
             {t("dashboard.STEAL_THERAPY")}
           </span>
           <h1
@@ -768,7 +766,7 @@ export default function DashboardPage() {
           />
         </div>
         <div className="text-right">
-          <span className="font-data block text-[9px] text-[#2a2a2a]">{t("dashboard.OPERATOR")}: {firstName}</span>
+          <span className="font-data block text-[11px] text-ink-low">{t("dashboard.OPERATOR")}: {firstName}</span>
           <TacticalClock />
         </div>
       </div>
@@ -776,32 +774,32 @@ export default function DashboardPage() {
       {/* ── KPI row ────────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
         <div className="glass kpi kpi-grn glass-hover fade-up fade-up-1">
-          <span className="font-data block text-[8px] tracking-[0.2em] text-[#333] uppercase mb-1.5">{t("dashboard.CURRENT_STREAK")}</span>
+          <span className="font-data mb-1.5 block text-[10px] tracking-[0.18em] text-ink-low uppercase">{t("dashboard.CURRENT_STREAK")}</span>
           <div className="font-heading leading-none" style={{ fontSize: 26, fontWeight: 700, color: "#22c55e" }}>
             <CounterFX value={streakData.currentStreak} />
           </div>
-          <span className="font-data block text-[8px] text-[#444] uppercase mt-1">{t("dashboard.DAYS")}</span>
+          <span className="font-data mt-1 block text-[10px] text-ink-mid uppercase">{t("dashboard.DAYS")}</span>
         </div>
         <div className="glass kpi kpi-acc glass-hover fade-up fade-up-2">
-          <span className="font-data block text-[8px] tracking-[0.2em] text-[#333] uppercase mb-1.5">{t("dashboard.THIS_WEEK")}</span>
+          <span className="font-data mb-1.5 block text-[10px] tracking-[0.18em] text-ink-low uppercase">{t("dashboard.THIS_WEEK")}</span>
           <div className="font-heading leading-none" style={{ fontSize: 26, fontWeight: 700, color: "#C2410C" }}>
             <CounterFX value={streakData.thisWeekSessions} />
           </div>
-          <span className="font-data block text-[8px] text-[#444] uppercase mt-1">{t("dashboard.SESSIONS")}</span>
+          <span className="font-data mt-1 block text-[10px] text-ink-mid uppercase">{t("dashboard.SESSIONS")}</span>
         </div>
         <div className="glass kpi kpi-acc glass-hover fade-up fade-up-3">
-          <span className="font-data block text-[8px] tracking-[0.2em] text-[#333] uppercase mb-1.5">{t("dashboard.TOTAL_VOLUME")}</span>
+          <span className="font-data mb-1.5 block text-[10px] tracking-[0.18em] text-ink-low uppercase">{t("dashboard.TOTAL_VOLUME")}</span>
           <div className="font-heading leading-none" style={{ fontSize: 26, fontWeight: 700, color: "#C2410C" }}>
             <CounterFX value={totalVolumeTons} />
           </div>
-          <span className="font-data block text-[8px] text-[#444] uppercase mt-1">{t("dashboard.TONNES_LIFTED")}</span>
+          <span className="font-data mt-1 block text-[10px] text-ink-mid uppercase">{t("dashboard.TONNES_LIFTED")}</span>
         </div>
         <div className="glass kpi kpi-blu glass-hover fade-up fade-up-4">
-          <span className="font-data block text-[8px] tracking-[0.2em] text-[#333] uppercase mb-1.5">{t("dashboard.PRS_THIS_MONTH")}</span>
+          <span className="font-data mb-1.5 block text-[10px] tracking-[0.18em] text-ink-low uppercase">{t("dashboard.PRS_THIS_MONTH")}</span>
           <div className="font-heading leading-none" style={{ fontSize: 26, fontWeight: 700, color: "#3b82f6" }}>
             <CounterFX value={prsThisMonth} />
           </div>
-          <span className="font-data block text-[8px] text-[#444] uppercase mt-1">{t("dashboard.RECORDS_SET")}</span>
+          <span className="font-data mt-1 block text-[10px] text-ink-mid uppercase">{t("dashboard.RECORDS_SET")}</span>
         </div>
       </div>
 
@@ -810,10 +808,10 @@ export default function DashboardPage() {
         {/* Active Mission */}
         <div className="glass-acc forge-pulse fade-up fade-up-2 p-4 space-y-3 min-h-[320px]">
           <div className="flex items-center gap-2 mb-1">
-            <span className="font-data text-[8px] tracking-[0.2em] text-[#444] uppercase">{t("dashboard.MISSION_BRIEFING")}</span>
+            <span className="font-data text-[10px] tracking-[0.18em] text-ink-low uppercase">{t("dashboard.MISSION_BRIEFING")}</span>
             <div className="h-px flex-1" style={{ background: "rgba(255,255,255,0.06)" }} />
             {activePlan && (
-              <span className="font-data text-[9px] text-[#22c55e] tracking-widest">{t("dashboard.ACTIVE")}</span>
+              <span className="font-data text-[10px] text-[#22c55e] tracking-widest">{t("dashboard.ACTIVE")}</span>
             )}
           </div>
 
@@ -823,7 +821,7 @@ export default function DashboardPage() {
                 <h2 className="font-heading text-2xl font-black uppercase text-[#f0f0f0] leading-tight">
                   {activePlan.title}
                 </h2>
-                <span className="font-data text-[8px] text-[#444] block mt-1">
+                <span className="mt-1 block font-data text-[10px] text-ink-low">
                   WK {displayWeek} / {activePlan.durationWeeks} · {activePlan.goalType?.replace(/_/g, " ")}
                 </span>
               </div>
@@ -857,7 +855,7 @@ export default function DashboardPage() {
         {/* Week Schedule + Upcoming */}
         <div className="glass fade-up fade-up-3 p-4 min-h-[320px]">
           <div className="flex items-center gap-2 mb-3">
-            <span className="font-data text-[8px] tracking-[0.2em] text-[#333] uppercase">Week {displayWeek}</span>
+            <span className="font-data text-[10px] tracking-[0.18em] text-ink-low uppercase">Week {displayWeek}</span>
             <div className="h-px flex-1" style={{ background: "rgba(255,255,255,0.06)" }} />
           </div>
           {activePlan ? (
@@ -871,9 +869,9 @@ export default function DashboardPage() {
         <div className="flex flex-col gap-[8px] min-h-[320px]">
           <div className="glass fade-up fade-up-4 p-4 flex-1">
             <div className="flex items-center gap-2 mb-3">
-              <span className="font-data text-[8px] tracking-[0.2em] text-[#333] uppercase">{t("dashboard.ACTIVITY_LOG")}</span>
+              <span className="font-data text-[10px] tracking-[0.18em] text-ink-low uppercase">{t("dashboard.ACTIVITY_LOG")}</span>
               <div className="h-px flex-1" style={{ background: "rgba(255,255,255,0.06)" }} />
-              <Link href="/progress" className="font-data text-[8px] text-[#333] hover:text-[#C2410C] transition-colors">
+              <Link href="/progress" className="font-data text-[10px] text-ink-low hover:text-[#C2410C] transition-colors">
                 {t("dashboard.VIEW_ALL")}
               </Link>
             </div>
@@ -881,7 +879,7 @@ export default function DashboardPage() {
           </div>
           <div className="glass fade-up fade-up-5 p-4">
             <div className="flex items-center gap-2 mb-3">
-              <span className="font-data text-[8px] tracking-[0.2em] text-[#333] uppercase">{t("dashboard.RECENT_PRS")}</span>
+              <span className="font-data text-[10px] tracking-[0.18em] text-ink-low uppercase">{t("dashboard.RECENT_PRS")}</span>
               <div className="h-px flex-1" style={{ background: "rgba(255,255,255,0.06)" }} />
               <Trophy className="h-3 w-3 text-[#444]" />
             </div>
@@ -909,8 +907,8 @@ export default function DashboardPage() {
             className="flex-1 px-2 py-1.5 text-center"
             style={{ borderRight: i < 2 ? "1px solid rgba(255,255,255,0.04)" : undefined }}
           >
-            <span className="font-data block text-[7px] tracking-[0.1em] text-[#1e1e1e] uppercase">{label}</span>
-            <span className="font-data block text-[8px] text-[#2a2a2a] uppercase mt-0.5">{val}</span>
+            <span className="font-data block text-[10px] tracking-[0.12em] text-ink-low uppercase">{label}</span>
+            <span className="font-data mt-0.5 block text-[11px] text-ink-mid uppercase">{val}</span>
           </div>
         ))}
       </div>

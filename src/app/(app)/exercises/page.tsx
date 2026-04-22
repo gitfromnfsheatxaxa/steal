@@ -4,7 +4,7 @@ import { ExercisePageHeader } from "./ExercisePageHeader";
 import { ExerciseLibrary } from "./ExerciseLibrary";
 
 export const metadata = {
-  title: "Exercise Library | Steal Therapy",
+  title: "Exercise Library | Steel Therapy",
 };
 
 export default async function ExercisesPage() {

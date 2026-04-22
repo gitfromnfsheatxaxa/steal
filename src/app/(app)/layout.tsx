@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { AppShell } from "@/components/layout/AppShell";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,12 +13,15 @@ export default function AppLayout({
 }) {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+  const allowGuestWorkout =
+    pathname === "/workout" || pathname.startsWith("/workout/");
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (!isLoading && !isAuthenticated && !allowGuestWorkout) {
       router.replace("/login");
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [allowGuestWorkout, isLoading, isAuthenticated, router]);
 
   if (isLoading) {
     return (
@@ -31,7 +34,7 @@ export default function AppLayout({
     );
   }
 
-  if (!isAuthenticated) return null;
+  if (!isAuthenticated && !allowGuestWorkout) return null;
 
   return <AppShell>{children}</AppShell>;
 }

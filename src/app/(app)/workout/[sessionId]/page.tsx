@@ -20,7 +20,8 @@ import type { MoodLevel, ActiveSetInput } from "@/types/session";
 import { useGuestPlanDays } from "@/hooks/useGuestWorkouts";
 import { useGuestWorkoutSessions } from "@/hooks/useGuestWorkouts";
 import { useIsGuestUser } from "@/hooks/useGuestWorkouts";
-import type { GuestPlanDay, GuestPlanExercise, GuestSession } from "@/hooks/useGuestWorkouts";
+import { useGuestActivePlan } from "@/hooks/useGuestWorkouts";
+import type { GuestSession } from "@/hooks/useGuestWorkouts";
 
 export default function WorkoutSessionPage({
   params,
@@ -45,7 +46,8 @@ export default function WorkoutSessionPage({
   const queryClient = useQueryClient();
 
   // Guest mode state
-  const { planDays } = useGuestPlanDays(undefined); // Get all guest plan days
+  const { activePlan: guestActivePlan } = useGuestActivePlan();
+  const { planDays } = useGuestPlanDays(guestActivePlan?.id);
   const { saveSession: saveGuestSession } = useGuestWorkoutSessions();
 
   // Find guest plan day by sessionId
@@ -160,8 +162,6 @@ export default function WorkoutSessionPage({
     try {
       const currentUserId = pb.authStore.record?.id;
 
-      console.log("[FINISH SESSION] Starting save - exercises:", store.exercises.length, "total sets:", store.exercises.reduce((sum, ex) => sum + ex.completedSets.length, 0));
-
       if (isGuest) {
         // Guest mode - save to localStorage
         const guestSession: GuestSession = {
@@ -212,8 +212,6 @@ export default function WorkoutSessionPage({
           sessionNotes: notes,
         });
 
-        console.log("[FINISH SESSION] Session created:", session.id);
-
         // Save all sets
         let totalSetsSaved = 0;
         for (let i = 0; i < store.exercises.length; i++) {
@@ -236,8 +234,6 @@ export default function WorkoutSessionPage({
             totalSetsSaved++;
           }
         }
-
-        console.log("[FINISH SESSION] Sets saved:", totalSetsSaved);
 
         // Save summary data BEFORE clearing the store
         const exercisesSummary = store.exercises.map((ex, i) => ({
@@ -289,17 +285,15 @@ export default function WorkoutSessionPage({
                 toast.success(`Week ${planRecord.currentWeek + 1} unlocked!`);
               }
             }
-          } catch (err) {
-            console.warn("[WEEK ADVANCE]", err);
+          } catch {
+            toast.error(t("workout.SAVE_FAILED"));
           }
         }
 
         setShowSummary(true);
         toast.success(t("workout.SESSION_SAVED"));
       }
-    } catch (err) {
-      const pbErr = err as { status?: number; response?: unknown; data?: unknown; message?: string };
-      console.error("[FINISH SESSION] Error:", pbErr.status, pbErr.message, JSON.stringify(pbErr.response ?? pbErr.data));
+    } catch {
       toast.error(t("workout.SAVE_FAILED"));
     } finally {
       setIsFinishing(false);
@@ -350,13 +344,13 @@ export default function WorkoutSessionPage({
           <h1 className="font-heading text-xl font-bold uppercase text-[#f0f0f0] leading-none">
             {currentPlanDay?.label || "WORKOUT"}
           </h1>
-          <span className="font-data text-[8px] text-[#333] tracking-widest uppercase mt-0.5 block">
+          <span className="font-data mt-0.5 block text-[10px] text-ink-low tracking-widest uppercase">
             {isGuest ? t("workout.GUEST_MODE") : `${totalSets} / ${targetSets} ${t("workout.SETS")} · ${formatDuration(elapsedSeconds)}`}
           </span>
         </div>
         {/* Rest timer display */}
         <div className="glass-acc px-3 py-1.5 text-center shrink-0">
-          <span className="font-data block text-[7px] text-[rgba(194,65,12,0.6)] tracking-widest uppercase">REST</span>
+          <span className="font-data block text-[10px] text-[#EA580C] tracking-widest uppercase">REST</span>
           <span className="font-data font-bold text-[#C2410C] tabular-nums" style={{ fontSize: 18, lineHeight: 1 }}>
             {timer.isRunning ? String(Math.floor(timer.secondsLeft / 60)).padStart(2, "0") + ":" + String(timer.secondsLeft % 60).padStart(2, "0") : "--:--"}
           </span>

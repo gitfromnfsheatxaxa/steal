@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit --incremental false",
     "fetch:exercises": "node scripts/fetch-exercises.mjs",
     "seed:translations": "node --env-file=.env.local scripts/seed-exercise-translations.mjs",
     "apply:translation-schema": "node --env-file=.env.local scripts/apply-translation-schema.mjs"
